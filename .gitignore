@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# SQLite — локальная БД / ingest-артефакты
+*.db
+*.sqlite
+*.sqlite3
+
+# Node / web build (фронт из claude design)
+node_modules/
+.next/
+.vite/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Секреты — НИКОГДА не коммитим
+.env
+.env.*
+*.local
