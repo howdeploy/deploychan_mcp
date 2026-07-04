@@ -1,0 +1,19 @@
+services:
+  mcp:
+    build: .
+    image: deploychan-mcp
+    container_name: deploychan-mcp
+    restart: unless-stopped
+    # Loopback only — a reverse proxy (TLS + rate-limit) sits in front. Never publish 0.0.0.0.
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./content:/app/content:ro   # content is read-only to the container; ingest only reads it
+      - ./web:/app/web              # catalog.json is written here so the static site can read it
+      - dbdata:/app/data            # SQLite lives on a named volume
+    environment:
+      DEPLOYCHAN_ALLOWED_HOSTS: "mcp.deploychan.webcam,localhost,127.0.0.1"
+      WEB_CONCURRENCY: "4"
+
+volumes:
+  dbdata:

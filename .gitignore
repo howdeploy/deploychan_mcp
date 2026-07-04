@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# SQLite — локальная БД / ingest-артефакты
+*.db
+*.sqlite
+*.sqlite3
+data/
+web/catalog.json
+
+# Node / web build (фронт из claude design)
+node_modules/
+.next/
+.vite/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Секреты и локальное — НИКОГДА не коммитим
+.env
+.env.*
+*.local
+.claude/
+
+# Дизайн-архив из claude design (распаковывается локально, в репо не тащим)
+*.zip
+
+# Внутреннее — не для публичного репо (только код + контент БД)
+CLAUDE.md
+docs/
+.gstack/

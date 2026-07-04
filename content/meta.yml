@@ -1,0 +1,33 @@
+# Site/catalog metadata consumed by ingest to build web/catalog.json (connect + profile).
+# Public by definition — no secrets, no private paths.
+
+connect:
+  url: https://mcp.deploychan.webcam/mcp
+  transport: http
+
+clients:
+  claude-code: "claude mcp add --transport http deploychan https://mcp.deploychan.webcam/mcp"
+  codex: |
+    [mcp_servers.deploychan]
+    url = "https://mcp.deploychan.webcam/mcp"
+    transport = "http"
+  hermes: |
+    {
+      "mcpServers": {
+        "deploychan": {
+          "type": "http",
+          "url": "https://mcp.deploychan.webcam/mcp"
+        }
+      }
+    }
+
+profile:
+  name: KISA
+  bio: >-
+    Вайбкодер, экс-главред, телеграм микро-селебрити. 6 лет в крипте, 1 год в вайбкоде.
+    Этот сервер и есть упакованный опыт, который твой агент может «съесть».
+  links:
+    telegram: https://t.me/deployladeploy
+    github: https://github.com/howdeploy
+    youtube: https://youtube.com/@DeploylaDeploy
+    teletype: https://teletype.in/@deployladeploy
