@@ -230,20 +230,38 @@ def _load_meta(content_dir: Path) -> dict:
     return yaml.safe_load(meta_file.read_text(encoding="utf-8")) or {}
 
 
+def _load_i18n_ru(content_dir: Path) -> dict:
+    """Russian display strings for the site catalog (name/summary), keyed by item id.
+
+    Agent-facing bodies stay English; this only localizes the catalog cards when RU is picked.
+    """
+    f = content_dir / "i18n.ru.yml"
+    if not f.exists():
+        return {}
+    return yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+
+
 def _build_catalog(built: list[dict], content_dir: Path, web_dir: Path) -> dict:
     meta = _load_meta(content_dir)
+    i18n_ru = _load_i18n_ru(content_dir)
     # Showcase catalog: exclude base skills (step-0 infrastructure, not browsable content).
     items = []
     for b in built:
         r = b["row"]
         if r["is_base"]:
             continue
-        items.append({
+        item = {
             "id": r["id"], "name": r["name"], "summary": r["summary"],
             "type": r["type"], "author": r["author"],
             "recommended": bool(r["recommended"]), "base": False,
             "added": r["added"], "tags": json.loads(r["tags"]),
-        })
+        }
+        ru = i18n_ru.get(r["id"]) or {}
+        if ru.get("name"):
+            item["name_ru"] = ru["name"]
+        if ru.get("summary"):
+            item["summary_ru"] = ru["summary"]
+        items.append(item)
     items.sort(key=lambda x: (x["added"] or "", x["name"]), reverse=True)
 
     connect = dict(meta.get("connect", {}))

@@ -1,0 +1,140 @@
+# Russian display strings for the site CATALOG (name/summary), keyed by item id.
+# Agent-facing bodies stay English; this only localizes the site catalog cards when RU is selected.
+# Generated from the pre-translation content; edit here to tune the Russian catalog copy.
+
+agent-harness:
+  name: Собрать свой harness
+  summary: 'Прокачка «строишь всё вокруг модели»: хуки (контроль над циклом + кэш + RTK), промпты и правила
+    как стабильный префикс, память как состояние между сессиями. Модель дают готовой и могут урезать —
+    harness ты настраиваешь сам и держишь под контролем.'
+agent-internet:
+  name: Выход в интернет — ресерч и браузер
+  summary: 'Агент обязан выходить в сеть — и в первую очередь. Research API (Tavily, Brave) как основной
+    канал + браузер для подстраховки и скрапинга: gbrowser, chrome с computer use или browser-MCP. Плюс
+    машинное зрение и обход блокировок.'
+agent-memory:
+  name: Система памяти и эволюция агента
+  summary: 'Лестница памяти: LLM Wiki → FTS5 → RAG → Holographic → Curator → GEPA. Что выбрать под человека,
+    кто как ставит (Hermes из коробки vs Claude Code / Codex собирают сами), где это жрёт ресурсы. Плюс
+    хуки против галлюцинаций.'
+agent-onboarding:
+  name: Правильные вводные для агента
+  summary: 'Стартовая прокачка агента с нуля по опыту KISA: сначала интернет и ресерч, затем личность
+    и правила, голос, система памяти и эволюция. Маршрут из 4 шагов — агент подбирает стек под человека
+    и настраивает.'
+agent-personality:
+  name: Личность, правила и стиль ответов агента
+  summary: 'С чего начинается настройка агента: роль, правила ответов и манера текста. Куда это писать
+    в Claude Code, Hermes и Codex, и как агент задаёт себе лицо.'
+agent-voice:
+  name: Голос агента — чтобы он отвечал голосом
+  summary: Как дать агенту голосовой вывод. Hermes настраивает у себя через профили и TTS-провайдеров
+    (Groq, ElevenLabs); Claude Code и Codex — вайбкодят своё решение на хуке.
+agentation:
+  name: 'Agentation: визуальный фидбэк агенту'
+  summary: 'Agentation — agent-agnostic инструмент визуального фидбэка: кликаешь элемент на странице,
+    пишешь замечание, получаешь точный селектор/позицию/дерево компонентов и отдаёшь любому агенту (Claude
+    Code, Codex, Cursor…) или через MCP. Требует только React ≥ 18. Убивает игру «угадай, о каком элементе
+    речь».'
+comfyui-prompt-craft:
+  name: Промпт-крафт для генерации в ComfyUI
+  summary: 'Как писать промпты для генеративных моделей (Flux и Anima-подобные) в ComfyUI: два формата
+    (Danbooru-теги vs литературный текст), принципы композиции, анти-паттерны и их фиксы, семплеры под
+    LoRA, промпты для анимации. Подход, выверенный практикой.'
+comfyui-remote:
+  name: 'ComfyUI на арендованном GPU: сетап, API, Telegram'
+  summary: 'Как агенту гонять генерацию в ComfyUI на арендованном GPU-сервере: арендовать инстанс, поднять
+    стек скриптом (install + models.manifest), дать агенту SSH-доступ, запускать воркфлоу через REST/WebSocket
+    API, батчить и слать картинки в Telegram. Плюс анатомия воркфлоу — переключатели, развилки, ползунки.'
+elevenlabs-living-voice:
+  name: ElevenLabs — живой голос
+  summary: 'Система живого голоса для ElevenLabs: как писать текст под TTS (дыхательные блоки, слышимые
+    паузы, audio tags), развилка Eleven v2 vs v3 и feedback-loop через API (voice settings под жалобы
+    пользователя). Плюс детерминированный preflight-препроцессор.'
+flipper-zero:
+  name: 'FlipperZero: управление агентом'
+  summary: 'Как агент управляет FlipperZero с компьютера: через UART Bridge — WiFi-плата, модули и самодельные
+    устройства по UART; с выключенным Bridge — нативный CLI (ставить/удалять апки, смотреть файлы). Три
+    метода (native 230400 / Marauder 115200 / pyflipper 9600), подводные камни и доступ к serial на NixOS.'
+gstack:
+  name: 'gstack: рабочий контур для Claude Code (+ gbrowser)'
+  summary: 'gstack — опенсорс-набор Гарри Тана: скиллы-режимы для Claude Code (планирование, ревью, QA,
+    шип) поверх персистентного headless-браузера gbrowser (/browse). Что это, как ставится, ключевые команды.
+    Честно: это Claude-Code-набор, не мультиагент.'
+hooks:
+  name: 'Хуки, кэш и harness: контроль над агентом'
+  summary: 'Как влезть в чёрный ящик автономного агента: хуки (перехватчики цикла — по клиентам Claude
+    Code / Codex / Hermes), кэширование контекста по префиксу (cache_control, TTL, env-переменные), RTK
+    для ужатия вывода команд, и harness как рамка, что всё объединяет.'
+mcp-connection:
+  name: Как подключить deploychan MCP к своему агенту
+  summary: 'Подключение deploychan MCP по Streamable HTTP: endpoint, команды для Claude Code, Codex, Hermes
+    и generic-клиента, проверка подключения.'
+memory-management:
+  name: 'Прокачка памяти: что где хранить'
+  summary: 'Управление актуальными данными: матрица «какой тип данных → в какой вид памяти» и правило
+    свежести. Живое тянешь ресерчем, не помнишь; правила — в вики; большие доки — в вектор (RAG); факты
+    о человеке — в Curator; рабочее состояние — в контекст.'
+niri-hotkeys:
+  name: 'Niri: горячие клавиши и конфиг'
+  summary: 'Референс горячих клавиш niri + практика: встроенный overlay всех биндов (Mod+Shift+/), как
+    агенту менять бинды в config.kdl с live-reload, и критичный конфликт Super/WIN при стриминге на ПК
+    (Wayland не отдаёт Win клиенту) с фиксом через Sunshine.'
+nixos-administration:
+  name: 'NixOS: администрирование системы'
+  summary: 'Практический гайд по администрированию NixOS: декларативный config-workflow и rebuild, nix-ld
+    для непропатченных бинарников, LD_LIBRARY_PATH для Python ctypes, desktop-стек (waybar/niri/fuzzel/dunst/swayosd/GTK),
+    EFI, serial, монтаж HDD, скриншоты, fastfetch и NOPASSWD-rebuild для автономного агента.'
+nixos-agent:
+  name: Поднять агента на NixOS
+  summary: 'Маршрут для тех, кто держит кодинг-агента на NixOS: пережить декларативное окружение (нет
+    coreutils → Python-фолбэк), включить nix-ld для бинарников и Electron, настроить систему и рабочий
+    стол. Собрано из реального daily-driving опыта KISA.'
+nixos-agent-environment:
+  name: 'Агент на NixOS: окружение и рабочие паттерны'
+  summary: 'Как агент выживает и работает на NixOS: coreutils нет в PATH → Python-фолбэк, реальные бинарники
+    в /run/current-system/sw/bin, симлинк /bin/bash, и управление Hermes (подключение MCP через mcp_servers,
+    pty для интерактива, рестарт gateway).'
+nixos-nix-ld-electron:
+  name: 'NixOS: nix-ld и Electron-приложения'
+  summary: 'Как заставить Electron/Chromium-приложения работать на NixOS через nix-ld: полный список рантайм-зависимостей,
+    NIXOS_OZONE_WL для Wayland, запуск Hermes Desktop с голосом, и SOCKS5-прокси по каждому инструменту
+    (включая Zen Browser).'
+nixos-streaming:
+  name: 'NixOS: стриминг рабочего стола (Sunshine/Moonlight)'
+  summary: 'Реально настроенный стриминг рабочего стола на NixOS: Sunshine как хост, Moonlight как клиент.
+    PC↔PC, второй монитор, и сайдлоад Moonlight на Samsung TV (Tizen) через Docker + sdb. Плюс почему
+    Sunshine+Moonlight лучше RDP/VNC.'
+obsidian-dataweave:
+  name: 'ObsidianDataWeave: NotebookLM, атомизация и LLM Wiki'
+  summary: 'Скилл KISA: превращает Claude Code / Codex в пульт NotebookLM + импорт .docx с Zettelkasten-атомизацией
+    + скомпилированный LLM Wiki-слой + FTS5-память по всему Obsidian vault. Всё программно, всё в твой
+    vault, без внешних зависимостей поиска.'
+remotion:
+  name: 'Remotion: видео на React руками агента'
+  summary: Remotion — React-фреймворк для программного создания видео. Любой кодинг-агент (Claude Code,
+    Codex, OpenCode, Cursor) пишет motion-графику по текстовому промпту. Установка Node 22 LTS, create-video,
+    скилл под выбранного агента, workflow в Studio, рендер и референс-пайплайны.
+rlm:
+  name: RLM — Recursive Language Models против context rot
+  summary: 'Когда контекст пухнет, агент тупеет (context rot). RLM (MIT CSAIL, 2025) — не больше окно,
+    а другой инференс: длинный ввод лежит в Python-REPL как переменная, модель пишет код чтобы его резать/грепать
+    и рекурсивно звать под-LLM. До 100× за окно, 10M+ токенов.'
+tailored-install:
+  name: Tailored Install
+  summary: 'Install skills, settings, hooks and memory tailored to THIS user''s environment: detect context,
+    respect existing files, ask before overwriting.'
+tavily:
+  name: Tavily — ресерч-API для агентов
+  summary: 'Личная рекомендация KISA: Tavily как основной research-API для агента. Что это, эндпоинты,
+    свой MCP-сервер, актуальные цены и лимиты (кредитная модель), как подключить и на чём экономить.'
+voice-transcription:
+  name: 'Расшифровка голоса (STT): начни бесплатно с Groq'
+  summary: 'Голос в текст для агента (Telegram-голосовухи → текст). Старт бесплатный: Groq Whisper, free
+    tier 2000 запросов/день. Апгрейд качества за деньги — gpt-4o-mini-transcribe через Nous (~$0.19/час),
+    без отдельного OpenAI-ключа. Кому что и как включить.'
+xrayebator:
+  name: 'Xrayebator: свой VPN на VPS (Xray Reality)'
+  summary: 'Скилл KISA: интерактивный менеджер Xray Reality VPN на своём VPS. VLESS + REALITY — трафик
+    неотличим от обычного HTTPS, без домена и сертификата, обходит DPI. Профили транспорта, добавление
+    клиентов, HAPP-подписка. Чтобы агент ходил ресерчем и браузером через свой чистый выход мимо блокировок.'

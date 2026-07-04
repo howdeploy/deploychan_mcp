@@ -288,7 +288,7 @@ const DEFAULT_CLIENTS = {
 
 const state = {
   theme: localStorage.getItem('dc_theme') || 'dawn',
-  lang: localStorage.getItem('dc_lang') || 'ru',
+  lang: localStorage.getItem('dc_lang') || ((navigator.language || navigator.userLanguage || '').toLowerCase().slice(0, 2) === 'ru' ? 'ru' : 'en'),
   tab: 'home', clientTab: null,
   catFlt: 'all', catSort: 'rec', catPage: 1
 };
@@ -400,6 +400,8 @@ function renderCatalog(t) {
     return;
   }
   const e = state.lang === 'en';
+  const nm = (r) => (!e && r.name_ru) ? r.name_ru : r.name;
+  const sm = (r) => (!e && r.summary_ru) ? r.summary_ru : r.summary;
   const typeLabel = { skill: e ? 'skill' : 'скилл', knowledge: e ? 'knowledge' : 'знание', route: e ? 'route' : 'прокачка', tool: e ? 'tool' : 'тулза' };
   const typeOrder = { skill: 0, knowledge: 1, route: 2, tool: 3 };
 
@@ -409,7 +411,7 @@ function renderCatalog(t) {
   else if (flt !== 'all') rows = rows.filter(r => r.type === flt);
 
   const s = state.catSort || 'rec';
-  const byName = (a, b) => String(a.name).localeCompare(String(b.name), e ? 'en' : 'ru');
+  const byName = (a, b) => String(nm(a)).localeCompare(String(nm(b)), e ? 'en' : 'ru');
   rows.sort((a, b) => {
     if (s === 'rec') return ((b.recommended ? 1 : 0) - (a.recommended ? 1 : 0)) || String(b.added).localeCompare(String(a.added)) || byName(a, b);
     if (s === 'new') return String(b.added).localeCompare(String(a.added)) || byName(a, b);
@@ -452,8 +454,8 @@ function renderCatalog(t) {
         <div style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;align-items:center;border-top:1px solid var(--cardd)">
           <div class="mono" style="padding:8px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
           <div style="padding:8px 12px;border-left:1px solid var(--cardd)">
-            <div style="font:700 14px 'Space Grotesk'">${esc(r.name)}</div>
-            <div style="font:500 14px/1.4 'Space Grotesk';color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(r.summary)}</div>
+            <div style="font:700 14px 'Space Grotesk'">${esc(nm(r))}</div>
+            <div style="font:500 14px/1.4 'Space Grotesk';color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(sm(r))}</div>
           </div>
           <div style="padding:8px 10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
             <span class="tag" style="background:var(--accent);color:var(--bg)">${esc(typeLabel[r.type] || r.type)}</span>

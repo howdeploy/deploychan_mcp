@@ -170,7 +170,7 @@ const STR = {
 
 const state = {
   theme: localStorage.getItem('dc_theme') || 'dawn',
-  lang: localStorage.getItem('dc_lang') || 'ru',
+  lang: localStorage.getItem('dc_lang') || ((navigator.language || navigator.userLanguage || '').toLowerCase().slice(0, 2) === 'ru' ? 'ru' : 'en'),
   active: 'intro', q: ''
 };
 const $ = (s) => document.querySelector(s);
