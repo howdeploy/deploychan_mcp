@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.routing import Mount
+from starlette.staticfiles import StaticFiles
 
 from . import config, tools
 
@@ -62,6 +64,12 @@ mcp = build_server()
 
 def create_app():
     asgi = mcp.streamable_http_app()
+    # Serve the static site (landing, docs, catalog.json) at / — the /mcp route is
+    # already registered, so it matches first; everything else falls through to static.
+    if config.WEB_DIR.is_dir():
+        asgi.router.routes.append(
+            Mount("/", app=StaticFiles(directory=str(config.WEB_DIR), html=True))
+        )
     asgi.add_middleware(TrustedHostMiddleware, allowed_hosts=config.allowed_hosts())
     return asgi
 
