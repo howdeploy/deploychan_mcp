@@ -408,11 +408,12 @@ function renderCatalog(t) {
   else if (flt !== 'all') rows = rows.filter(r => r.type === flt);
 
   const s = state.catSort || 'rec';
+  const byName = (a, b) => String(a.name).localeCompare(String(b.name), e ? 'en' : 'ru');
   rows.sort((a, b) => {
-    if (s === 'rec') return ((b.recommended ? 1 : 0) - (a.recommended ? 1 : 0)) || String(b.added).localeCompare(String(a.added));
-    if (s === 'new') return String(b.added).localeCompare(String(a.added));
-    if (s === 'name') return String(a.name).localeCompare(String(b.name), e ? 'en' : 'ru');
-    if (s === 'type') return ((typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9)) || String(b.added).localeCompare(String(a.added));
+    if (s === 'rec') return ((b.recommended ? 1 : 0) - (a.recommended ? 1 : 0)) || String(b.added).localeCompare(String(a.added)) || byName(a, b);
+    if (s === 'new') return String(b.added).localeCompare(String(a.added)) || byName(a, b);
+    if (s === 'name') return byName(a, b);
+    if (s === 'type') return ((typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9)) || String(b.added).localeCompare(String(a.added)) || byName(a, b);
     return 0;
   });
 
