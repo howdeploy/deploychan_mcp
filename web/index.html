@@ -288,12 +288,14 @@ const DEFAULT_CLIENTS = {
 const state = {
   theme: localStorage.getItem('dc_theme') || 'dawn',
   lang: localStorage.getItem('dc_lang') || 'ru',
-  tab: 'home', clientTab: null
+  tab: 'home', clientTab: null,
+  catFlt: 'all', catSort: 'rec', catPage: 1
 };
 let DATA = { items: [], connect: { url: DEFAULT_URL, clients: DEFAULT_CLIENTS }, profile: null };
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtAdded = (iso) => { const m = String(iso == null ? '' : iso).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '·' + m[2] : String(iso == null ? '' : iso); };
 
 function copyText(text, btn, okLabel, backLabel) {
   try { navigator.clipboard.writeText(text); } catch (e) {}
@@ -396,31 +398,85 @@ function renderCatalog(t) {
       </div>`;
     return;
   }
-  const typeLabel = { skill: state.lang === 'en' ? 'skill' : 'скилл', knowledge: state.lang === 'en' ? 'knowledge' : 'знание', route: state.lang === 'en' ? 'route' : 'прокачка', tool: state.lang === 'en' ? 'tool' : 'тулза' };
-  const rows = items.slice().sort((a, b) => (b.recommended ? 1 : 0) - (a.recommended ? 1 : 0) || String(b.added).localeCompare(String(a.added)));
-  $('#countLabel').textContent = rows.length + (state.lang === 'en' ? ' items' : ' позиций');
-  body.innerHTML = `<div class="card">
-    <div class="mono" style="display:grid;grid-template-columns:34px 1fr 1.3fr 90px;background:var(--fg);color:var(--bg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.07em">
-      <div style="padding:9px 6px;text-align:center">★</div>
-      <div style="padding:9px 12px;border-left:1px solid var(--bg)">${esc(t.thName)}</div>
-      <div style="padding:9px 10px;border-left:1px solid var(--bg)">${esc(t.thType)}</div>
-      <div style="padding:9px 10px;border-left:1px solid var(--bg);text-align:right">${esc(t.thAdded)}</div>
+  const e = state.lang === 'en';
+  const typeLabel = { skill: e ? 'skill' : 'скилл', knowledge: e ? 'knowledge' : 'знание', route: e ? 'route' : 'прокачка', tool: e ? 'tool' : 'тулза' };
+  const typeOrder = { skill: 0, knowledge: 1, route: 2, tool: 3 };
+
+  let rows = items.slice();
+  const flt = state.catFlt || 'all';
+  if (flt === 'third') rows = rows.filter(r => r.author === 'third_party');
+  else if (flt !== 'all') rows = rows.filter(r => r.type === flt);
+
+  const s = state.catSort || 'rec';
+  rows.sort((a, b) => {
+    if (s === 'rec') return ((b.recommended ? 1 : 0) - (a.recommended ? 1 : 0)) || String(b.added).localeCompare(String(a.added));
+    if (s === 'new') return String(b.added).localeCompare(String(a.added));
+    if (s === 'name') return String(a.name).localeCompare(String(b.name), e ? 'en' : 'ru');
+    if (s === 'type') return ((typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9)) || String(b.added).localeCompare(String(a.added));
+    return 0;
+  });
+
+  const pageSize = 5;
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+  const page = Math.min(state.catPage || 1, pageCount);
+  state.catPage = page;
+  const pageRows = rows.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize);
+
+  $('#countLabel').textContent = rows.length + (e ? ' items · preview' : ' позиций · превью');
+
+  const typeChips = [['all', e ? 'all' : 'всё'], ['skill', e ? 'skills' : 'скиллы'], ['knowledge', e ? 'knowledge' : 'знания'], ['route', e ? 'leveling' : 'прокачка'], ['tool', e ? 'tools' : 'тулзы'], ['third', e ? '3rd-party' : 'сторонние']];
+  const sortChips = [['rec', e ? 'Recommended' : 'Рекомендованные'], ['new', e ? 'New' : 'Новые'], ['type', e ? 'By type' : 'По типу'], ['name', e ? 'Name' : 'Название']];
+  const chip = (on, label, attr) => `<button ${attr} style="font:700 12px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.05em;border:2px solid var(--fg);background:${on ? 'var(--fg)' : 'transparent'};color:${on ? 'var(--bg)' : 'var(--fg)'};padding:6px 11px;cursor:pointer">${esc(label)}</button>`;
+
+  body.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+      <div>
+        <div class="mono" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">${e ? 'type' : 'тип'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${typeChips.map(c => chip(flt === c[0], c[1], `data-flt="${c[0]}"`)).join('')}</div>
+      </div>
+      <div>
+        <div class="mono" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">${e ? 'sort' : 'сортировка'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${sortChips.map(c => chip(s === c[0], c[1], `data-sort="${c[0]}"`)).join('')}</div>
+      </div>
     </div>
-    ${rows.map(r => `
-      <div style="display:grid;grid-template-columns:34px 1fr 1.3fr 90px;align-items:center;border-top:1px solid var(--cardd)">
-        <div class="mono" style="padding:11px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
-        <div style="padding:10px 12px;border-left:1px solid var(--cardd)">
-          <div style="font:700 14px 'Space Grotesk'">${esc(r.name)}</div>
-          <div style="font:500 14px/1.45 'Space Grotesk';color:var(--muted);margin-top:2px">${esc(r.summary)}</div>
-        </div>
-        <div style="padding:10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-          <span class="tag" style="background:var(--accent);color:var(--bg)">${esc(typeLabel[r.type] || r.type)}</span>
-          ${r.author === 'third_party' ? `<span class="tag" style="background:var(--accent2);color:var(--bg)">${esc(t.thirdTag)}</span>` : ''}
-          ${(r.tags || []).map(tg => `<span class="tag" style="border:1px solid var(--fg)">${esc(tg)}</span>`).join('')}
-        </div>
-        <div class="mono" style="padding:10px;border-left:1px solid var(--cardd);text-align:right;font-weight:700;font-size:12px;color:var(--muted)">${esc(r.added || '')}</div>
-      </div>`).join('')}
-  </div>`;
+    <div class="card" style="box-shadow:4px 4px 0 var(--fg)">
+      <div class="mono" style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;background:var(--fg);color:var(--bg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.07em">
+        <div data-sort="rec" title="${e ? 'recommended' : 'рекомендованные'}" style="padding:9px 6px;text-align:center;cursor:pointer">★</div>
+        <div data-sort="name" style="padding:9px 12px;border-left:1px solid var(--bg);cursor:pointer">${esc(t.thName)} ↕</div>
+        <div style="padding:9px 10px;border-left:1px solid var(--bg)">${esc(t.thType)}</div>
+        <div data-sort="new" style="padding:9px 10px;border-left:1px solid var(--bg);text-align:right;cursor:pointer">${esc(t.thAdded)} ↕</div>
+      </div>
+      ${pageRows.map(r => `
+        <div style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;align-items:center;border-top:1px solid var(--cardd)">
+          <div class="mono" style="padding:11px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
+          <div style="padding:10px 12px;border-left:1px solid var(--cardd)">
+            <div style="font:700 14px 'Space Grotesk'">${esc(r.name)}</div>
+            <div style="font:500 14px/1.45 'Space Grotesk';color:var(--muted);margin-top:2px">${esc(r.summary)}</div>
+          </div>
+          <div style="padding:10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+            <span class="tag" style="background:var(--accent);color:var(--bg)">${esc(typeLabel[r.type] || r.type)}</span>
+            ${r.author === 'third_party' ? `<span class="tag" style="background:var(--accent2);color:var(--bg)">${esc(t.thirdTag)}</span>` : ''}
+            ${(r.tags || []).map(tg => `<span class="tag" style="border:1px solid var(--fg)">${esc(tg)}</span>`).join('')}
+          </div>
+          <div class="mono" style="padding:10px;border-left:1px solid var(--cardd);text-align:right;font-weight:700;font-size:12px;color:var(--muted)">${esc(fmtAdded(r.added))}</div>
+        </div>`).join('')}
+    </div>
+    ${pageCount > 1 ? `
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px">
+      <button data-page="prev" style="font:700 14px 'Space Mono',monospace;border:2px solid var(--fg);background:var(--card);color:var(--fg);width:32px;height:32px;cursor:pointer">‹</button>
+      ${Array.from({ length: pageCount }, (_, i) => { const n = i + 1, on = n === page; return `<button data-page="${n}" style="font:700 12px 'Space Mono',monospace;border:2px solid var(--fg);background:${on ? 'var(--fg)' : 'transparent'};color:${on ? 'var(--bg)' : 'var(--fg)'};width:32px;height:32px;cursor:pointer">${n}</button>`; }).join('')}
+      <button data-page="next" style="font:700 14px 'Space Mono',monospace;border:2px solid var(--fg);background:var(--card);color:var(--fg);width:32px;height:32px;cursor:pointer">›</button>
+    </div>` : ''}`;
+
+  body.querySelectorAll('[data-flt]').forEach(b => b.onclick = () => { state.catFlt = b.getAttribute('data-flt'); state.catPage = 1; renderCatalog(t); });
+  body.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { state.catSort = b.getAttribute('data-sort'); state.catPage = 1; renderCatalog(t); });
+  body.querySelectorAll('[data-page]').forEach(b => b.onclick = () => {
+    const v = b.getAttribute('data-page');
+    if (v === 'prev') state.catPage = Math.max(1, page - 1);
+    else if (v === 'next') state.catPage = Math.min(pageCount, page + 1);
+    else state.catPage = parseInt(v, 10);
+    renderCatalog(t);
+  });
 }
 
 /* ---- events ---- */
