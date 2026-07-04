@@ -41,7 +41,7 @@
 
   /* stage + panels: window never scrolls, the active panel scrolls internally */
   .stage{flex:1 1 auto;position:relative;overflow:hidden}
-  .panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:34px 28px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease}
+  .panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:20px 28px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease}
   .panel.on{opacity:1;visibility:visible;pointer-events:auto}
   .panel-inner{min-height:100%;display:flex;flex-direction:column;justify-content:center}
 
@@ -448,21 +448,21 @@ function renderCatalog(t) {
       </div>
       ${pageRows.map(r => `
         <div style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;align-items:center;border-top:1px solid var(--cardd)">
-          <div class="mono" style="padding:11px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
-          <div style="padding:10px 12px;border-left:1px solid var(--cardd)">
+          <div class="mono" style="padding:8px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
+          <div style="padding:8px 12px;border-left:1px solid var(--cardd)">
             <div style="font:700 14px 'Space Grotesk'">${esc(r.name)}</div>
-            <div style="font:500 14px/1.45 'Space Grotesk';color:var(--muted);margin-top:2px">${esc(r.summary)}</div>
+            <div style="font:500 14px/1.4 'Space Grotesk';color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(r.summary)}</div>
           </div>
-          <div style="padding:10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <div style="padding:8px 10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
             <span class="tag" style="background:var(--accent);color:var(--bg)">${esc(typeLabel[r.type] || r.type)}</span>
             ${r.author === 'third_party' ? `<span class="tag" style="background:var(--accent2);color:var(--bg)">${esc(t.thirdTag)}</span>` : ''}
             ${(r.tags || []).map(tg => `<span class="tag" style="border:1px solid var(--fg)">${esc(tg)}</span>`).join('')}
           </div>
-          <div class="mono" style="padding:10px;border-left:1px solid var(--cardd);text-align:right;font-weight:700;font-size:12px;color:var(--muted)">${esc(fmtAdded(r.added))}</div>
+          <div class="mono" style="padding:8px 10px;border-left:1px solid var(--cardd);text-align:right;font-weight:700;font-size:12px;color:var(--muted)">${esc(fmtAdded(r.added))}</div>
         </div>`).join('')}
     </div>
     ${pageCount > 1 ? `
-    <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:18px">
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:14px">
       <button data-page="prev" style="font:700 14px 'Space Mono',monospace;border:2px solid var(--fg);background:var(--card);color:var(--fg);width:32px;height:32px;cursor:pointer">‹</button>
       ${Array.from({ length: pageCount }, (_, i) => { const n = i + 1, on = n === page; return `<button data-page="${n}" style="font:700 12px 'Space Mono',monospace;border:2px solid var(--fg);background:${on ? 'var(--fg)' : 'transparent'};color:${on ? 'var(--bg)' : 'var(--fg)'};width:32px;height:32px;cursor:pointer">${n}</button>`; }).join('')}
       <button data-page="next" style="font:700 14px 'Space Mono',monospace;border:2px solid var(--fg);background:var(--card);color:var(--fg);width:32px;height:32px;cursor:pointer">›</button>
