@@ -10,53 +10,50 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
-  body{margin:0}
+  html,body{margin:0;height:100%}
   .site{--page:#efe6db;--bg:#faf4ed;--fg:#575279;--accent:#b4637a;--accent2:#907aa9;--card:#fffaf3;--cardd:#f2e9e1;--muted:#797593;--ok:#56949f}
   .site[data-theme=mocha]{--page:#11111b;--bg:#1e1e2e;--fg:#cdd6f4;--accent:#cba6f7;--accent2:#f5c2e7;--card:#181825;--cardd:#313244;--muted:#a6adc8;--ok:#a6e3a1}
-  .site{background:var(--page);min-height:100vh;font-family:'Space Grotesk',system-ui,sans-serif;color:var(--fg);padding:34px 24px 60px;transition:background .25s ease}
-  .wrap{max-width:1180px;margin:0 auto;background:var(--bg);border:2px solid var(--fg);box-shadow:10px 10px 0 var(--fg);overflow:hidden}
+  .site{background:var(--page);font-family:'Space Grotesk',system-ui,sans-serif;color:var(--fg);min-height:100vh;min-height:100dvh;display:flex;padding:18px;transition:background .3s ease}
+  .wrap{width:100%;max-width:1180px;margin:auto;height:calc(100dvh - 36px);max-height:calc(100dvh - 36px);display:flex;flex-direction:column;background:var(--bg);border:2px solid var(--fg);box-shadow:8px 8px 0 var(--fg);overflow:hidden}
   .mono{font-family:'Space Mono',monospace}
   a{color:inherit}
   .card{border:2px solid var(--fg);background:var(--card);box-shadow:4px 4px 0 var(--fg)}
   .btn{font:700 12px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.05em;border:2px solid var(--fg);cursor:pointer;padding:7px 12px;background:transparent;color:var(--fg)}
-  .btn--on{background:var(--fg);color:var(--bg)}
   .btn--acc{background:var(--accent);color:var(--bg)}
   .tag{font:700 11px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px}
-  .h2{font:700 34px 'Space Grotesk';letter-spacing:-.03em;margin:0}
+  .h2{font:700 32px 'Space Grotesk';letter-spacing:-.03em;margin:0}
   .kicker{font:500 12px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
   pre{margin:0;white-space:pre-wrap;overflow:auto}
 
   /* header + tab nav */
-  .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:11px 20px;border-bottom:3px solid var(--fg);background:var(--bg)}
+  .topbar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:11px 20px;border-bottom:3px solid var(--fg);background:var(--bg);z-index:5}
   .brand{font:700 20px 'Space Grotesk';letter-spacing:-.03em;flex:0 0 auto}
   .brand span{background:var(--accent);color:var(--bg);padding:0 5px;margin:0 2px}
-  .tabnav{flex:1 1 auto;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+  .tabnav{flex:1 1 auto;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
   .tabnav::-webkit-scrollbar{display:none}
-  .tabnav button{white-space:nowrap;font:700 11px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.04em;border:2px solid var(--fg);background:transparent;color:var(--fg);padding:6px 10px;cursor:pointer}
+  .tabnav button{white-space:nowrap;font:700 11px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.04em;border:2px solid var(--fg);background:transparent;color:var(--fg);padding:6px 11px;cursor:pointer;transition:background .18s ease,color .18s ease}
   .tabnav button.on{background:var(--accent);color:var(--bg)}
   .controls{flex:0 0 auto;display:flex;align-items:center;gap:6px}
   .langtog{display:flex;border:2px solid var(--fg)}
-  .langtog button{font:700 11px 'Space Mono',monospace;border:0;padding:0 9px;height:34px;cursor:pointer}
+  .langtog button{font:700 11px 'Space Mono',monospace;border:0;padding:0 9px;height:34px;cursor:pointer;transition:background .18s ease,color .18s ease}
   .langtog button+button{border-left:2px solid var(--fg)}
   .themebtn{width:34px;height:34px;border:2px solid var(--fg);border-radius:50%;display:grid;place-items:center;background:var(--card);cursor:pointer;padding:0}
 
-  /* panels: one section per screen */
-  .stage{position:relative}
-  .panel{display:none;min-height:calc(100vh - 150px);flex-direction:column;padding:34px 28px 20px;animation:fade .32s ease}
-  .panel.on{display:flex}
-  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  .panel-body{flex:1 1 auto;min-height:0}
-  .cue{align-self:center;margin:14px 0 2px;flex:0 0 auto;width:44px;height:44px;border:2px solid var(--fg);border-radius:50%;background:var(--card);color:var(--accent);display:grid;place-items:center;cursor:pointer;box-shadow:3px 3px 0 var(--fg);animation:bob 1.8s ease-in-out infinite}
-  .cue-label{align-self:center;font:500 11px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:6px}
-  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  /* stage + panels: window never scrolls, the active panel scrolls internally */
+  .stage{flex:1 1 auto;position:relative;overflow:hidden}
+  .panel{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:34px 28px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .5s ease}
+  .panel.on{opacity:1;visibility:visible;pointer-events:auto}
+  .panel-inner{min-height:100%;display:flex;flex-direction:column;justify-content:center}
 
-  .footer{padding:13px 28px;background:var(--fg);color:var(--bg);display:flex;justify-content:space-between;font:500 12px 'Space Mono',monospace;letter-spacing:.04em}
+  .footer{flex:0 0 auto;padding:12px 28px;background:var(--fg);color:var(--bg);display:flex;justify-content:space-between;font:500 12px 'Space Mono',monospace;letter-spacing:.04em}
 
   @media(max-width:820px){
-    .site{padding:14px 10px 30px}
+    .site{padding:8px}
+    .wrap{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);box-shadow:5px 5px 0 var(--fg)}
+    .panel{padding:22px 16px}
     .hero{grid-template-columns:1fr!important}
     .facets,.faq-grid,.profile{grid-template-columns:1fr!important}
-    .h1{font-size:40px!important}
+    .h1{font-size:38px!important}
   }
 </style>
 </head>
@@ -79,53 +76,50 @@
 
     <main class="stage" id="stage">
 
-      <!-- home / hero -->
+      <!-- home: hero + what's inside -->
       <section class="panel" data-panel="home">
-        <div class="panel-body">
-          <div class="hero" style="display:grid;grid-template-columns:1.42fr 1fr;gap:38px;align-items:center;min-height:100%">
+        <div class="panel-inner">
+          <div class="hero" style="display:grid;grid-template-columns:1.42fr 1fr;gap:36px;align-items:center">
             <div>
               <div class="kicker" style="letter-spacing:.16em">// remote mcp · streamable http</div>
-              <h1 class="h1" style="font:700 56px/0.98 'Space Grotesk';letter-spacing:-.045em;margin:22px 0 0;text-wrap:balance">
+              <h1 class="h1" style="font:700 54px/0.98 'Space Grotesk';letter-spacing:-.045em;margin:20px 0 0;text-wrap:balance">
                 <span data-i18n="heroPre">ПРОКАЧАЙ СВОЕГО </span><span style="display:inline-block;background:var(--accent);color:var(--bg);padding:0 9px 4px;transform:rotate(-1.2deg)" data-i18n="heroWord1">АГЕНТА</span><span data-i18n="heroMid"> ОПЫТОМ </span><span style="display:inline-block;background:var(--fg);color:var(--bg);padding:0 9px 4px;transform:rotate(1deg)">KISA</span><span data-i18n="heroSuffix"></span>
               </h1>
-              <p style="font:600 16px/1.5 'Space Grotesk';max-width:500px;margin:26px 0 0"><span data-i18n="heroLeadPre">Внутри одного endpoint — курированные знания, готовые скиллы и маршруты прокачки от KISA. </span><b data-i18n="heroLeadBold">Бесплатно, без логина, без ключей.</b></p>
-              <div class="card" style="margin-top:28px;display:flex;align-items:stretch;box-shadow:4px 4px 0 var(--fg);max-width:520px">
+              <p style="font:600 16px/1.5 'Space Grotesk';max-width:500px;margin:24px 0 0"><span data-i18n="heroLeadPre">Внутри одного endpoint — курированные знания, готовые скиллы и маршруты прокачки от KISA. </span><b data-i18n="heroLeadBold">Бесплатно, без логина, без ключей.</b></p>
+              <div class="card" style="margin-top:26px;display:flex;align-items:stretch;box-shadow:4px 4px 0 var(--fg);max-width:520px">
                 <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 14px;min-width:0">
                   <div class="kicker" style="letter-spacing:.14em">mcp endpoint</div>
                   <div class="mono" id="endpoint" style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">https://mcp.deploychan.webcam/mcp</div>
                 </div>
                 <button id="copyEndpoint" class="mono" style="border:0;border-left:2px solid var(--fg);background:var(--accent);color:var(--bg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em;padding:0 18px;cursor:pointer;min-width:72px">COPY</button>
               </div>
-              <div style="margin-top:16px;display:flex;gap:11px;align-items:flex-start;border:2px solid var(--fg);background:var(--accent);color:var(--bg);box-shadow:4px 4px 0 var(--fg);padding:12px 15px;max-width:520px">
+              <div style="margin-top:14px;display:flex;gap:11px;align-items:flex-start;border:2px solid var(--fg);background:var(--accent);color:var(--bg);box-shadow:4px 4px 0 var(--fg);padding:12px 15px;max-width:520px">
                 <span class="mono" style="font-weight:700;font-size:20px;line-height:1">↳</span>
                 <div style="font:700 13px/1.45 'Space Grotesk'"><span data-i18n="calloutPre">Просто отдай эту ссылку своему агенту — он подключится по MCP и </span><span style="text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px" data-i18n="calloutUnderline">настроит всё сам</span><span data-i18n="calloutPost">. Конфигурировать руками ничего не нужно.</span></div>
               </div>
             </div>
-            <div style="position:relative;padding-top:14px">
-              <div class="mono" style="position:absolute;right:-6px;top:2px;z-index:3;background:var(--accent);color:var(--bg);border:2px solid var(--fg);box-shadow:3px 3px 0 var(--fg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:5px 9px;transform:rotate(4deg)" data-i18n="mascotBadge">деплой-тян</div>
+            <div style="position:relative;padding-top:8px">
+              <div class="mono" style="position:absolute;right:-6px;top:-4px;z-index:3;background:var(--accent);color:var(--bg);border:2px solid var(--fg);box-shadow:3px 3px 0 var(--fg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:5px 9px;transform:rotate(4deg)" data-i18n="mascotBadge">деплой-тян</div>
               <div style="aspect-ratio:1/1;border:3px solid var(--fg);transform:rotate(-2deg);overflow:hidden">
                 <img src="deploy-tan.png" alt="деплой-тян — маскот deploychan" style="width:100%;height:100%;object-fit:cover;display:block">
               </div>
-              <div style="font:600 20px 'Caveat',cursive;color:var(--accent);transform:rotate(-3deg);margin-top:12px;text-align:center" data-i18n="mascotCaption">Твой агент тоже будет таким же умным</div>
+              <div style="font:600 20px 'Caveat',cursive;color:var(--accent);transform:rotate(-3deg);margin-top:10px;text-align:center" data-i18n="mascotCaption">Твой агент тоже будет таким же умным</div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- inside / facets -->
-      <section class="panel" data-panel="inside">
-        <div class="panel-body">
-          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
-            <h2 class="h2" data-i18n="facetsH2">ЧТО ВНУТРИ</h2>
-            <span class="mono" style="font-size:12px;color:var(--muted)" data-i18n="facetsSub">// 4 инструмента, которые дёргает агент</span>
+          <div style="margin-top:40px">
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:14px">
+              <h2 class="h2" data-i18n="facetsH2">ЧТО ВНУТРИ</h2>
+              <span class="mono" style="font-size:12px;color:var(--muted)" data-i18n="facetsSub">// 4 инструмента, которые дёргает агент</span>
+            </div>
+            <div class="facets" id="facets" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
           </div>
-          <div class="facets" id="facets" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
         </div>
       </section>
 
       <!-- connect -->
       <section class="panel" data-panel="connect">
-        <div class="panel-body">
+        <div class="panel-inner">
           <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px">
             <h2 class="h2" data-i18n="connectH2">КАК ПОДКЛЮЧИТЬ</h2>
             <span class="mono" style="font-size:12px;background:var(--fg);color:var(--bg);padding:3px 8px" data-i18n="connectBadge">~30 сек</span>
@@ -150,7 +144,7 @@
 
       <!-- catalog -->
       <section class="panel" data-panel="catalog">
-        <div class="panel-body">
+        <div class="panel-inner">
           <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px">
             <h2 class="h2" data-i18n="catalogH2">КАТАЛОГ</h2>
             <span class="mono" id="countLabel" style="font-size:12px;color:var(--muted)"></span>
@@ -160,28 +154,25 @@
         </div>
       </section>
 
-      <!-- faq -->
-      <section class="panel" data-panel="faq">
-        <div class="panel-body">
+      <!-- faq + contact -->
+      <section class="panel" data-panel="more">
+        <div class="panel-inner">
           <h2 class="h2" style="margin-bottom:16px">FAQ</h2>
           <div class="faq-grid" id="faqGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
           <div style="margin-top:14px;display:flex;gap:11px;align-items:flex-start;border:2px solid var(--fg);background:var(--accent);color:var(--bg);box-shadow:5px 5px 0 var(--fg);padding:14px 16px">
             <span class="mono" style="font-weight:700;font-size:18px;line-height:1.1;flex:none">{ }</span>
             <div style="font:700 13px/1.5 'Space Grotesk'"><span data-i18n="faqCalloutPre">Весь код — сайт, MCP-сервер и база — открыт и лежит на </span><a href="https://github.com/howdeploy/deploychan_mcp" target="_blank" rel="noopener" style="color:var(--bg);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px">github.com/howdeploy/deploychan_mcp</a><span data-i18n="faqCalloutPost">. Зайди, посмотри, как всё устроено, и подними сервер у себя локально.</span></div>
           </div>
-        </div>
-      </section>
 
-      <!-- contact / profile -->
-      <section class="panel" data-panel="contact">
-        <div class="panel-body" style="display:flex;flex-direction:column;justify-content:center">
-          <div class="profile" style="display:grid;grid-template-columns:170px 1fr;gap:22px;align-items:center">
-            <div style="aspect-ratio:1/1;border:3px solid var(--fg);box-shadow:6px 6px 0 var(--fg);transform:rotate(-2deg);background:var(--fg)"><img src="contact-art.png" alt="KISA · deploychan" style="display:block;width:100%;height:100%;object-fit:cover"></div>
-            <div>
-              <div class="kicker" style="letter-spacing:.16em" data-i18n="profKicker">// автор сервера</div>
-              <h3 style="font:700 28px 'Space Grotesk';letter-spacing:-.03em;margin:6px 0"><span id="profName">KISA</span> · <span style="background:var(--accent);color:var(--bg);padding:0 6px">deploychan</span></h3>
-              <p id="profBio" style="font:500 15px/1.55 'Space Grotesk';max-width:560px;margin:0 0 12px"></p>
-              <div id="links" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+          <div style="margin-top:30px;border-top:2px solid var(--fg);padding-top:24px">
+            <div class="profile" style="display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center">
+              <div style="aspect-ratio:1/1;border:3px solid var(--fg);box-shadow:6px 6px 0 var(--fg);transform:rotate(-2deg);background:var(--fg)"><img src="contact-art.png" alt="KISA · deploychan" style="display:block;width:100%;height:100%;object-fit:cover"></div>
+              <div>
+                <div class="kicker" style="letter-spacing:.16em" data-i18n="profKicker">// автор сервера</div>
+                <h3 style="font:700 26px 'Space Grotesk';letter-spacing:-.03em;margin:6px 0"><span id="profName">KISA</span> · <span style="background:var(--accent);color:var(--bg);padding:0 6px">deploychan</span></h3>
+                <p id="profBio" style="font:500 15px/1.55 'Space Grotesk';max-width:560px;margin:0 0 12px"></p>
+                <div id="links" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -200,15 +191,12 @@
 const DEFAULT_URL = "https://mcp.deploychan.webcam/mcp";
 const SUN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
 const MOON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--fg)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-const CHEV = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 
 const TABS = [
   {id:'home',    ru:'Главная',        en:'Home'},
-  {id:'inside',  ru:'Что внутри',     en:'Inside'},
   {id:'connect', ru:'Как подключить', en:'Connect'},
   {id:'catalog', ru:'Каталог',        en:'Catalog'},
-  {id:'faq',     ru:'FAQ',            en:'FAQ'},
-  {id:'contact', ru:'Связь',          en:'Contact'}
+  {id:'more',    ru:'FAQ',            en:'FAQ'}
 ];
 
 const STR = {
@@ -228,7 +216,7 @@ const STR = {
     faqCalloutPre:'Весь код — сайт, MCP-сервер и база — открыт и лежит на ', faqCalloutPost:'. Зайди, посмотри, как всё устроено, и подними сервер у себя локально.',
     thirdTag:'сторонний', profKicker:'// автор сервера', footerR:'опенсорс · MIT · сделано на вайбкоде',
     emptyTitle:'Каталог пока пуст', emptyBody:'Наполняем по факту. Скоро тут появятся знания, скиллы и маршруты KISA.',
-    countEmpty:'0 позиций', copyOk:'✓ OK', copyLabel:'COPY', cueNext:'дальше',
+    countEmpty:'0 позиций', copyOk:'✓ OK', copyLabel:'COPY',
     facets:[
       {n:'01',name:'Знания',tool:'search_knowledge',desc:'Поиск по базе заметок и гайдов KISA. Агент тянет нужный кусок в контекст.'},
       {n:'02',name:'Скиллы',tool:'list_skills · get_skill',desc:'Готовые скиллы и настройки. Агент ставит себе одной командой.'},
@@ -266,7 +254,7 @@ const STR = {
     faqCalloutPre:'All the code — the site, the MCP server and the database — is open and lives on ', faqCalloutPost:'. Read how it works and spin up the server locally yourself.',
     thirdTag:'3rd-party', profKicker:'// server author', footerR:'open source · MIT · made by vibe-coding',
     emptyTitle:'The catalog is empty', emptyBody:'Filling it as we go. KISA’s knowledge, skills and routes land here soon.',
-    countEmpty:'0 items', copyOk:'✓ OK', copyLabel:'COPY', cueNext:'next',
+    countEmpty:'0 items', copyOk:'✓ OK', copyLabel:'COPY',
     facets:[
       {n:'01',name:'Knowledge',tool:'search_knowledge',desc:'Search across KISA’s notes and guides. The agent pulls the right piece into context.'},
       {n:'02',name:'Skills',tool:'list_skills · get_skill',desc:'Ready-made skills and configs. The agent installs them in one command.'},
@@ -323,14 +311,14 @@ function clients() {
   return out;
 }
 
-/* ---- tab navigation ---- */
-function setTab(id, scroll) {
-  if (!TABS.some(t => t.id === id)) return;
+function tabIndex() { return TABS.findIndex(t => t.id === state.tab); }
+function setTab(id) {
+  if (!TABS.some(t => t.id === id) || id === state.tab) return;
   state.tab = id;
   render();
-  if (scroll !== false) window.scrollTo({ top: 0, behavior: 'smooth' });
+  const p = $('.panel.on');
+  if (p) p.scrollTop = 0;
 }
-function tabIndex() { return TABS.findIndex(t => t.id === state.tab); }
 function nextTab() { const i = tabIndex(); if (i < TABS.length - 1) setTab(TABS[i + 1].id); }
 function prevTab() { const i = tabIndex(); if (i > 0) setTab(TABS[i - 1].id); }
 
@@ -346,25 +334,10 @@ function render() {
   $('#langRu').style.background = state.lang === 'ru' ? acc : card; $('#langRu').style.color = state.lang === 'ru' ? bg : fg;
   $('#langEn').style.background = state.lang === 'en' ? acc : card; $('#langEn').style.color = state.lang === 'en' ? bg : fg;
 
-  // tab nav
   $('#tabnav').innerHTML = TABS.map(tb => `<button data-tab="${tb.id}" class="${tb.id === state.tab ? 'on' : ''}">${esc(state.lang === 'en' ? tb.en : tb.ru)}</button>`).join('');
   $('#tabnav').querySelectorAll('[data-tab]').forEach(b => b.onclick = () => setTab(b.getAttribute('data-tab')));
 
-  // show active panel, append scroll-cue (not on the last tab)
-  const idx = tabIndex();
-  document.querySelectorAll('.panel').forEach((p, i) => {
-    const on = p.getAttribute('data-panel') === state.tab;
-    p.classList.toggle('on', on);
-    const old = p.querySelector('.cue-wrap'); if (old) old.remove();
-    if (on && idx < TABS.length - 1) {
-      const wrap = document.createElement('div');
-      wrap.className = 'cue-wrap';
-      wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;flex:0 0 auto';
-      wrap.innerHTML = `<button class="cue" title="${esc(t.cueNext)}">${CHEV}</button><div class="cue-label">${esc(t.cueNext)} ↓</div>`;
-      wrap.querySelector('.cue').onclick = () => nextTab();
-      p.appendChild(wrap);
-    }
-  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.getAttribute('data-panel') === state.tab));
 
   $('#endpoint').textContent = (DATA.connect && DATA.connect.url) || DEFAULT_URL;
 
@@ -456,43 +429,48 @@ $('#langEn').onclick = () => { state.lang = 'en'; localStorage.setItem('dc_lang'
 $('#copyEndpoint').onclick = (e) => copyText($('#endpoint').textContent, e.target, STR[state.lang].copyOk, STR[state.lang].copyLabel);
 $('#copyCode').onclick = (e) => copyText($('#snipCode').textContent, e.target, '✓', 'copy');
 
-/* ---- swipe / wheel / keys: navigate tabs at scroll edges (v3-zine pattern) ---- */
+/* ---- section navigation: swipe / wheel / keys on the active panel's own scroll ----
+   The window never scrolls; the active panel is the scroll container, so an edge is an
+   exact edge (no page-padding slop) and a gesture fires on the FIRST try. */
 (function () {
-  let startY = null, startT = 0, lock = false;
-  const armLock = () => { lock = true; setTimeout(() => { lock = false; }, 700); };
-  const atTop = () => window.scrollY < 60;
-  const atBottom = () => (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 60);
-  const fwd = () => { armLock(); nextTab(); };
-  const back = () => { armLock(); prevTab(); };
+  const stage = $('#stage');
+  let lock = false, startY = null, startTop = false, startBottom = false;
+  const cool = () => { lock = true; setTimeout(() => { lock = false; }, 550); };
+  const active = () => $('.panel.on');
+  const atTop = (p) => p.scrollTop <= 2;
+  const atBottom = (p) => p.scrollTop + p.clientHeight >= p.scrollHeight - 2;
 
-  window.addEventListener('touchstart', (e) => {
-    if (!atTop() && !atBottom()) { startY = null; return; }
-    startY = e.touches[0] ? e.touches[0].clientY : null; startT = Date.now();
+  stage.addEventListener('touchstart', (e) => {
+    const p = active(); if (!p) { startY = null; return; }
+    startY = e.touches[0] ? e.touches[0].clientY : null;
+    startTop = atTop(p); startBottom = atBottom(p);
   }, { passive: true });
-  window.addEventListener('touchend', (e) => {
-    if (startY == null) return;
+
+  stage.addEventListener('touchend', (e) => {
+    if (startY == null || lock) { startY = null; return; }
     const endY = e.changedTouches[0] ? e.changedTouches[0].clientY : startY;
-    const dy = startY - endY, dt = Date.now() - startT; startY = null;
-    if (lock || dt >= 700) return;
-    if (dy > 45 && atBottom()) fwd();          // swipe up at bottom edge -> next section
-    else if (dy < -45 && atTop()) back();      // swipe down at top edge -> prev section
+    const dy = startY - endY; startY = null;
+    if (dy > 50 && startBottom) { cool(); nextTab(); }
+    else if (dy < -50 && startTop) { cool(); prevTab(); }
   }, { passive: true });
-  window.addEventListener('wheel', (e) => {
+
+  stage.addEventListener('wheel', (e) => {
     if (e.ctrlKey || e.metaKey) return;
-    const top = atTop(), bottom = atBottom();
-    if (!top && !bottom && !lock) return;
-    if (lock) { e.preventDefault(); return; }
-    if (bottom && e.deltaY > 6) { e.preventDefault(); fwd(); }
-    else if (top && e.deltaY < -6) { e.preventDefault(); back(); }
+    const p = active(); if (!p) return;
+    const bottom = atBottom(p), top = atTop(p);
+    if (lock) { if ((bottom && e.deltaY > 0) || (top && e.deltaY < 0)) e.preventDefault(); return; }
+    if (bottom && e.deltaY > 8) { e.preventDefault(); cool(); nextTab(); }
+    else if (top && e.deltaY < -8) { e.preventDefault(); cool(); prevTab(); }
   }, { passive: false });
+
   window.addEventListener('keydown', (e) => {
     if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
-    if (e.key === 'ArrowRight') { e.preventDefault(); nextTab(); }
-    else if (e.key === 'ArrowLeft') { e.preventDefault(); prevTab(); }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); nextTab(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevTab(); }
   });
 })();
 
-/* ---- boot: paint with defaults, then hydrate from catalog.json ---- */
+/* ---- boot ---- */
 render();
 fetch('catalog.json', { cache: 'no-store' })
   .then(r => r.ok ? r.json() : null)
