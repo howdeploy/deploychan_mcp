@@ -1,0 +1,1329 @@
+{
+ "id": "ultrareal-flux-main-prompt-builder-v6-1-danrisi-settings",
+ "revision": 1,
+ "last_node_id": 41,
+ "last_link_id": 61,
+ "nodes": [
+  {
+   "id": 8,
+   "type": "CLIPTextEncode",
+   "pos": [
+    -802.258703448276,
+    171.12935172413793
+   ],
+   "size": [
+    560,
+    160
+   ],
+   "flags": {},
+   "order": 17,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 5
+    },
+    {
+     "name": "text",
+     "type": "STRING",
+     "widget": {
+      "name": "text"
+     },
+     "link": 4
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "slot_index": 0,
+     "links": [
+      6
+     ]
+    }
+   ],
+   "title": "Encode built prompt",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    ""
+   ]
+  },
+  {
+   "id": 9,
+   "type": "FluxGuidance",
+   "pos": [
+    -152.25870344827595,
+    171.12935172413793
+   ],
+   "size": [
+    260,
+    58
+   ],
+   "flags": {},
+   "order": 19,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "conditioning",
+     "type": "CONDITIONING",
+     "link": 6
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "slot_index": 0,
+     "links": [
+      7
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "FluxGuidance"
+   },
+   "widgets_values": [
+    2.5
+   ]
+  },
+  {
+   "id": 10,
+   "type": "CFGGuider",
+   "pos": [
+    297.741296551724,
+    201.12935172413793
+   ],
+   "size": [
+    260,
+    98
+   ],
+   "flags": {},
+   "order": 22,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 30
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 7
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 19
+    }
+   ],
+   "outputs": [
+    {
+     "name": "GUIDER",
+     "type": "GUIDER",
+     "slot_index": 0,
+     "links": [
+      8
+     ]
+    }
+   ],
+   "title": "CFGGuider cfg=1, author-style",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "CFGGuider"
+   },
+   "widgets_values": [
+    1
+   ]
+  },
+  {
+   "id": 11,
+   "type": "BasicScheduler",
+   "pos": [
+    -152.25870344827595,
+    411.129351724138
+   ],
+   "size": [
+    260,
+    106
+   ],
+   "flags": {},
+   "order": 21,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 31
+    }
+   ],
+   "outputs": [
+    {
+     "name": "SIGMAS",
+     "type": "SIGMAS",
+     "slot_index": 0,
+     "links": [
+      10
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "BasicScheduler"
+   },
+   "widgets_values": [
+    "beta",
+    30,
+    1
+   ]
+  },
+  {
+   "id": 12,
+   "type": "KSamplerSelect",
+   "pos": [
+    -152.25870344827595,
+    591.1293517241381
+   ],
+   "size": [
+    260,
+    58
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "SAMPLER",
+     "type": "SAMPLER",
+     "slot_index": 0,
+     "links": [
+      11
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "KSamplerSelect"
+   },
+   "widgets_values": [
+    "dpmpp_2m"
+   ]
+  },
+  {
+   "id": 13,
+   "type": "RandomNoise",
+   "pos": [
+    -152.25870344827595,
+    771.1293517241381
+   ],
+   "size": [
+    260,
+    82
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "NOISE",
+     "type": "NOISE",
+     "slot_index": 0,
+     "links": [
+      12
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "RandomNoise"
+   },
+   "widgets_values": [
+    42,
+    "randomize"
+   ]
+  },
+  {
+   "id": 14,
+   "type": "EmptyLatentImage",
+   "pos": [
+    -802.258703448276,
+    671.1293517241381
+   ],
+   "size": [
+    300,
+    106
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "slot_index": 0,
+     "links": [
+      13
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "EmptyLatentImage"
+   },
+   "widgets_values": [
+    1024,
+    1024,
+    1
+   ]
+  },
+  {
+   "id": 18,
+   "type": "CLIPTextEncode",
+   "pos": [
+    -802.258703448276,
+    421.129351724138
+   ],
+   "size": [
+    560,
+    260
+   ],
+   "flags": {
+    "collapsed": true
+   },
+   "order": 26,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "clip",
+     "type": "CLIP",
+     "link": 17
+    }
+   ],
+   "outputs": [
+    {
+     "name": "CONDITIONING",
+     "type": "CONDITIONING",
+     "slot_index": 0,
+     "links": [
+      19
+     ]
+    }
+   ],
+   "title": "NEGATIVE_ANATOMY_PROMPT",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "CLIPTextEncode"
+   },
+   "widgets_values": [
+    "malformed hands, extra fingers, fused fingers, missing fingers, broken finger joints, distorted face, twisted limbs, disconnected arms or legs, duplicate body parts, floating objects, unwanted extra clothing, censor bars, mosaic censorship, watermark, signature, readable text, cartoon, anime, 3d render, cgi, plastic skin, over-smoothed skin"
+   ]
+  },
+  {
+   "id": 25,
+   "type": "MarkdownNote",
+   "pos": [
+    661.4681799827591,
+    -1303.7309135344829
+   ],
+   "size": [
+    840,
+    860
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "INPAINT FIX — как пользоваться",
+   "properties": {
+    "Node name for S&R": "MarkdownNote"
+   },
+   "widgets_values": [
+    "## Inpaint FIX — правая колонка\n\nПравая колонка **отключена по умолчанию** (muted, серые ноды). Queue Prompt считает только t2i. Заглушка `example.png` в Load Image в генерацию не идёт.\n\n### Включить правую колонку\n\n**Через группу:** ПКМ по заголовку группы **RIGHT — INPAINT FIX** (фиолетовая рамка) → **Set Group Nodes to Always**.\n\n**Через выделение:** обведи ноды правой колонки рамкой → **`Ctrl+M`** (mute снимется).\n\n### Выключить обратно\n\n**Через группу:** ПКМ по заголовку группы → **Set Group Nodes to Never**.\n\n**Через выделение:** обведи ноды → **`Ctrl+M`** (тот же шорткат переключает).\n\n### Три состояния ноды\n\n- **Always (обычный цвет)** — нода исполняется.\n- **Never / Mute (серая, `Ctrl+M`)** — нода пропускается целиком.\n- **Bypass (светло-серая, пунктир, `Ctrl+B`)** — input передаётся дальше без обработки. Не применяй к CLIPTextEncode и сэмплерам — ломает пайплайн. Используется для временного отключения fine-tune нод (LoRA, RescaleCFG).\n\n### Процесс inpaint-фикса\n\n1. Сначала сгенерируй картинку в t2i (средняя колонка).\n2. В **Load Image (to fix)** загрузи свежий файл из `output/ultrareal_flux/`.\n3. Правый клик по превью → **Open in MaskEditor** → закрась кистью проблемную зону (пальцы, складки одежды, грудь) → **Save to node**.\n4. В **Inpaint FIX — что нужно получить в маске** впиши 1-3 строки: что должно появиться под маской.\n5. Включи правую колонку (ПКМ по группе → Set Group Nodes to Always).\n6. **(Опционально)** ПКМ по группе **MIDDLE — T2I SETTINGS** → **Set Group Nodes to Never** — t2i не пересчитается заново, inpaint запустится сразу.\n7. `Ctrl+Enter`. Результат: `output/ultrareal_flux_fix/`.\n8. После прогона верни всё как было: MIDDLE → Always, RIGHT → Never.\n\n### Как сохраняется только зона маски\n\nНода **Composite: keep outside of mask from original** берёт оригинал и накладывает результат inpaint только внутри маски. Лицо, фон и всё вне маски остаётся пиксель-в-пиксель. Плюс `noise_mask=True` в InpaintModelConditioning ограничивает шум сэмплинга только областью маски.\n\n### Параметры\n\n- **BasicScheduler `denoise`** — сила переделки под маской. `0.45` мягко (тень/текстура), `0.65` средне, `0.75` дефолт, `0.85` почти перерисует.\n- **FluxGuidance (inpaint)** — сила следования тексту. `2.5` дефолт, `3.5` жёстче, `1.5` мягче.\n- **RandomNoise (inpaint)** — `randomize` новый вариант каждый запуск."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 38,
+   "type": "MarkdownNote",
+   "pos": [
+    -2127.7823379310344,
+    -1337.5307810344827
+   ],
+   "size": [
+    1180,
+    760
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "Как писать USER_SCENE — Flux guide",
+   "properties": {
+    "Node name for S&R": "MarkdownNote"
+   },
+   "widgets_values": [
+    "## Как писать USER_SCENE для Flux\n\nFlux лучше понимает подробное описание сцены обычным языком, а не SD-набор тегов через запятую. Пиши так, будто объясняешь фотографу, что должно быть в кадре.\n\n### Структура\n\nОдин абзац из 4-7 предложений:\n\n1. Кто в кадре: возрастной диапазон, внешность, телосложение, волосы, выражение лица.\n2. Что происходит: поза, действие, жесты, направление взгляда.\n3. Одежда: описывай один понятный комплект — только то, что реально должно быть видно в кадре.\n4. Где это происходит: комната, улица, интерьер, предметы вокруг.\n5. Свет и камера: телефонное фото, вспышка, лампа, дневной свет, крупность кадра, ракурс.\n6. Настроение и реализм: candid, private snapshot, ordinary real-life atmosphere.\n\n### Хороший формат\n\n```\nA young adult woman is photographed in a small private apartment bedroom at night. She has natural skin texture, slightly messy hair, and a relaxed expression while looking toward the phone camera. She is sitting on the edge of the bed in the pose described here. Warm light from a bedside lamp creates soft shadows on the wall and realistic low-light phone-camera noise. The framing is a casual vertical snapshot from chest height, with an ordinary lived-in room visible behind her.\n```\n\n### Правила\n\n- Не пиши SD-теги вроде `masterpiece, best quality, ultra detailed, 8k`.\n- Не делай длинную простыню из коротких слов через запятую.\n- Не смешивай противоречия: `dark room` и `bright daylight`, `close-up` и `full body` одновременно.\n- Опиши один понятный комплект одежды. Если что-то не нужно в кадре — просто не упоминай.\n- Руки и позы описывай физически простыми действиями: `one hand resting on the bed`, `arms relaxed at her sides`, `looking over her shoulder`.\n\n### Короткий чеклист\n\n- [ ] USER_SCENE написан предложениями, не тегами.\n- [ ] Есть человек, действие, место, свет, камера.\n- [ ] Нет лишних quality-тегов.\n- [ ] Нет противоречий в кадре.\n- [ ] Сцена описана достаточно подробно, чтобы Flux не додумывал её сам."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 16,
+   "type": "VAEDecode",
+   "pos": [
+    681.5144512966665,
+    578.5950891784764
+   ],
+   "size": [
+    210,
+    46
+   ],
+   "flags": {},
+   "order": 24,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 14
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 15
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "slot_index": 0,
+     "links": [
+      16
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "VAEDecode"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 2,
+   "type": "UNETLoader",
+   "pos": [
+    -2119.6922200056993,
+    -246.97064690795088
+   ],
+   "size": [
+    360,
+    82
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      20
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "ultrarealFineTune_v4.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "DualCLIPLoader",
+   "pos": [
+    -2102.593331433457,
+    -91.14277571957801
+   ],
+   "size": [
+    400,
+    130
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "CLIP",
+     "type": "CLIP",
+     "slot_index": 0,
+     "links": [
+      5
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "DualCLIPLoader"
+   },
+   "widgets_values": [
+    "clip_l.safetensors",
+    "t5xxl_fp16.safetensors",
+    "flux",
+    "default"
+   ]
+  },
+  {
+   "id": 4,
+   "type": "VAELoader",
+   "pos": [
+    -2082.6446280991713,
+    108.80592761470521
+   ],
+   "size": [
+    350,
+    60
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "slot_index": 0,
+     "links": [
+      15
+     ]
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "ae.safetensors"
+   ]
+  },
+  {
+   "id": 6,
+   "type": "StringConcatenate",
+   "pos": [
+    -1915.8259171353423,
+    642.9196927416576
+   ],
+   "size": [
+    680,
+    190
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "string_a",
+     "type": "STRING",
+     "widget": {
+      "name": "string_a"
+     },
+     "link": 24
+    }
+   ],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "slot_index": 0,
+     "links": [
+      3
+     ]
+    }
+   ],
+   "title": "Add FLUX_CAMERA_LIGHT_RULES",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "StringConcatenate"
+   },
+   "widgets_values": [
+    "",
+    "Use the camera and lighting described in the user scene. If they are not specified, default to believable casual phone-camera realism with natural exposure, realistic color, mild real-world imperfections, and no overprocessed beauty filter. Do not override the requested scene with cinematic grading, HDR gloss, studio flash, fashion editorial lighting, or an invented time of day.",
+    " "
+   ]
+  },
+  {
+   "id": 21,
+   "type": "StringConcatenate",
+   "pos": [
+    -1915.3721830634108,
+    408.0059157451808
+   ],
+   "size": [
+    680,
+    190
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "string_a",
+     "type": "STRING",
+     "widget": {
+      "name": "string_a"
+     },
+     "link": 23
+    }
+   ],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "slot_index": 0,
+     "links": [
+      24
+     ]
+    }
+   ],
+   "title": "Add FLUX_BODY_COHERENCE_RULES",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "StringConcatenate"
+   },
+   "widgets_values": [
+    "",
+    "Keep the body anatomically believable and physically coherent. Hands should have natural finger counts, visible fingers should connect to the palm correctly, limbs should connect naturally to shoulders and hips, and the pose should remain possible for a real person. Render whatever the user describes as part of one realistic, coherent body.",
+    " "
+   ]
+  },
+  {
+   "id": 17,
+   "type": "SaveImage",
+   "pos": [
+    1032.7976878298664,
+    292.8782152950858
+   ],
+   "size": [
+    572.4407368066527,
+    544.6185134329901
+   ],
+   "flags": {},
+   "order": 25,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 16
+    }
+   ],
+   "outputs": [],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "ultrareal_flux/t2i_%date:yyyyMMdd_HHmmss%"
+   ]
+  },
+  {
+   "id": 24,
+   "type": "RescaleCFG",
+   "pos": [
+    1335.6723310344598,
+    -213.35340689655203
+   ],
+   "size": [
+    270,
+    58
+   ],
+   "flags": {},
+   "order": 20,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 58
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      30,
+      31
+     ]
+    }
+   ],
+   "title": "RescaleCFG 0.4 Danrisi-style",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "RescaleCFG"
+   },
+   "widgets_values": [
+    0.4
+   ]
+  },
+  {
+   "id": 20,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    -1023.6380137931028,
+    -197.836165517242
+   ],
+   "size": [
+    430,
+    82
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 20
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      25
+     ]
+    }
+   ],
+   "title": "Realistic Amplifier / d1g1cam LoRA",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "realistic_amplifier_ultrareal_d1g1cam.safetensors",
+    0.65
+   ]
+  },
+  {
+   "id": 23,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    -101.91387586207229,
+    -61.62926896552048
+   ],
+   "size": [
+    430,
+    82
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 4,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 26
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      56
+     ]
+    }
+   ],
+   "title": "Feet F1D LoRA test",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "feet_f1d_v1081295.safetensors",
+    0.4
+   ]
+  },
+  {
+   "id": 40,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    797.3103448275745,
+    -197.5862068965502
+   ],
+   "size": [
+    430,
+    82
+   ],
+   "flags": {},
+   "order": 18,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 57
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      58
+     ]
+    }
+   ],
+   "title": "Full Female Anatomy (caith) — anatomy detail ()",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "detail_body_lora.safetensors",
+    0.7
+   ]
+  },
+  {
+   "id": 15,
+   "type": "SamplerCustomAdvanced",
+   "pos": [
+    587.0516413793116,
+    346.99142068965557
+   ],
+   "size": [
+    320,
+    166
+   ],
+   "flags": {},
+   "order": 23,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "noise",
+     "type": "NOISE",
+     "link": 12
+    },
+    {
+     "name": "guider",
+     "type": "GUIDER",
+     "link": 8
+    },
+    {
+     "name": "sampler",
+     "type": "SAMPLER",
+     "link": 11
+    },
+    {
+     "name": "sigmas",
+     "type": "SIGMAS",
+     "link": 10
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 13
+    }
+   ],
+   "outputs": [
+    {
+     "name": "output",
+     "type": "LATENT",
+     "slot_index": 0,
+     "links": [
+      14
+     ]
+    },
+    {
+     "name": "denoised_output",
+     "type": "LATENT",
+     "slot_index": 1,
+     "links": []
+    }
+   ],
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "SamplerCustomAdvanced"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 41,
+   "type": "MarkdownNote",
+   "pos": [
+    -658.7424608620964,
+    -722.9132822413769
+   ],
+   "size": [
+    1180,
+    280
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "Detail LoRA stack — как включать",
+   "properties": {
+    "Node name for S&R": "MarkdownNote"
+   },
+   "widgets_values": [
+    "## Две дополнительные detail-LoRA под главной цепочкой\n\nСнизу от `Feet F1D` стоят **две дополнительные LoRA** в ряд — стиль и детальность тела/кожи. Обе **включены по умолчанию** (`mode=0 / Always`) и раскачиваются только под тематические слова в промпте: без них модели ведут себя нейтрально, поэтому держать включёнными безопасно. Подставь сюда свои LoRA под задачу.\n\nНоды `Hands F1D` и `Feet F1D` **переведены в Bypass навсегда** (`mode=4`, светло-серая пунктирная рамка) — перегружали общий вес, вернём при точечной надобности.\n\n### Как переключать ноды (без Ctrl+B)\n\n`Ctrl+B` конфликтует с хоткеем Brave (панель закладок). Способы:\n\n1. **Правый клик по ноде** → `Mode` → `Always` / `Never` / `Bypass`. Самый надёжный.\n2. **Правый клик по заголовку группы** → `Bypass Group Nodes` / `Set Group Nodes to Always` — вся группа разом.\n3. **Перемапить хоткей:** шестерёнка (или `Ctrl+,`) → `Keybinding` → найди `Bypass` → задай `Alt+B` → Save.\n\n**Важно:** не путай `Bypass` и `Mute`. Для `LoraLoaderModelOnly` используй только `Bypass` — MODEL проходит насквозь. `Mute` рвёт цепочку, и генерация упадёт с ошибкой.\n\n### Веса и бюджет (важно для Flux)\n\n- Держи вес каждой доп-LoRA в `0.5-0.8`. Выше `0.9` начинает ломать лицо.\n- Активный стек по умолчанию: `d1g1cam 0.65` + две доп-LoRA (~0.5 и ~0.7) ≈ **1.85**. Бюджет Flux ~2.0.\n- Плывёт лицо или ломается композиция — снижай доп-LoRA до `0.3-0.5` (суммарно ~1.45), либо переводи их в Bypass.\n\n### Двухпроходная стратегия (чище результат)\n\n1. **t2i (LEFT + MIDDLE):** базовый стек.\n2. **Inpaint (RIGHT):** маской по нужной зоне → detail-LoRA уже в общей MODEL-цепочке, `denoise 0.55-0.65`.\n\nЛицо и композиция остаются от t2i прохода, деталь дорабатывается только под маской.\n\n### Лицензия\n\nLoRA под BFL FLUX.1-dev Non-Commercial — личное использование ок, продажа контента требует отдельной коммерческой лицензии BFL."
+   ],
+   "color": "#432",
+   "bgcolor": "#653"
+  },
+  {
+   "id": 7,
+   "type": "StringConcatenate",
+   "pos": [
+    -1915.5172413793098,
+    888.2758620689654
+   ],
+   "size": [
+    680,
+    230
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "string_a",
+     "type": "STRING",
+     "widget": {
+      "name": "string_a"
+     },
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "slot_index": 0,
+     "links": [
+      4
+     ]
+    }
+   ],
+   "title": "Add FLUX_ADULT_STYLE_RULES",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "StringConcatenate"
+   },
+   "widgets_values": [
+    "",
+    "Render skin, hair, fabric, and body details with realistic texture, natural asymmetry, and ordinary camera imperfections. Do not add watermarks, text, plastic skin, or polished advertising retouching unless the user explicitly requests that look. Follow the user's scene faithfully.",
+    " "
+   ]
+  },
+  {
+   "id": 5,
+   "type": "StringConcatenate",
+   "pos": [
+    -1652.5294981910467,
+    -41.327144778550775
+   ],
+   "size": [
+    706.5517241379312,
+    344.8275862068964
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "STRING",
+     "type": "STRING",
+     "slot_index": 0,
+     "links": [
+      23
+     ]
+    }
+   ],
+   "title": "FLUX_SYSTEM_PROMPT + USER_SCENE",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "StringConcatenate"
+   },
+   "widgets_values": [
+    "Use the d1g1cam amateur-camera look only as a subtle realism prior, and treat the user scene as the main instruction. Create a grounded, realistic image that reads as a real camera capture rather than a tag-based Stable Diffusion render. Preserve the subject, pose, wardrobe or detail, setting, action, mood, lighting, camera distance, and framing described by the user. Do not add unrelated garments, props, people, censorship, glamour retouching, studio lighting, or a different location unless the user asks for them.",
+    "USER_SCENE: Describe the scene here in complete natural-language sentences. Include the adult subject, pose, action, wardrobe or detail, location, lighting, camera angle, framing, and mood. The generated image should follow this scene literally and should not add censoring or extra clothing that is not described.",
+    " "
+   ]
+  },
+  {
+   "id": 22,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    -580.879393103449,
+    -68.52582068965832
+   ],
+   "size": [
+    430,
+    82
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 4,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 25
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      26
+     ]
+    }
+   ],
+   "title": "Hands F1D LoRA test",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "hands_f1d_v804967.safetensors",
+    0.65
+   ]
+  },
+  {
+   "id": 39,
+   "type": "LoraLoaderModelOnly",
+   "pos": [
+    274.20689655171367,
+    -209.65517241379138
+   ],
+   "size": [
+    430,
+    82
+   ],
+   "flags": {},
+   "order": 16,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 56
+    }
+   ],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "slot_index": 0,
+     "links": [
+      57
+     ]
+    }
+   ],
+   "title": "detail_style_lora v6 — Detail unlock ()",
+   "properties": {
+    "cnr_id": "comfy-core",
+    "ver": "0.19.0",
+    "Node name for S&R": "LoraLoaderModelOnly"
+   },
+   "widgets_values": [
+    "detail_style_lora.safetensors",
+    0.5
+   ]
+  }
+ ],
+ "links": [
+  [
+   3,
+   6,
+   0,
+   7,
+   0,
+   "STRING"
+  ],
+  [
+   4,
+   7,
+   0,
+   8,
+   1,
+   "STRING"
+  ],
+  [
+   5,
+   3,
+   0,
+   8,
+   0,
+   "CLIP"
+  ],
+  [
+   6,
+   8,
+   0,
+   9,
+   0,
+   "CONDITIONING"
+  ],
+  [
+   7,
+   9,
+   0,
+   10,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   8,
+   10,
+   0,
+   15,
+   1,
+   "GUIDER"
+  ],
+  [
+   10,
+   11,
+   0,
+   15,
+   3,
+   "SIGMAS"
+  ],
+  [
+   11,
+   12,
+   0,
+   15,
+   2,
+   "SAMPLER"
+  ],
+  [
+   12,
+   13,
+   0,
+   15,
+   0,
+   "NOISE"
+  ],
+  [
+   13,
+   14,
+   0,
+   15,
+   4,
+   "LATENT"
+  ],
+  [
+   14,
+   15,
+   0,
+   16,
+   0,
+   "LATENT"
+  ],
+  [
+   15,
+   4,
+   0,
+   16,
+   1,
+   "VAE"
+  ],
+  [
+   16,
+   16,
+   0,
+   17,
+   0,
+   "IMAGE"
+  ],
+  [
+   17,
+   3,
+   0,
+   18,
+   0,
+   "CLIP"
+  ],
+  [
+   19,
+   18,
+   0,
+   10,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   20,
+   2,
+   0,
+   20,
+   0,
+   "MODEL"
+  ],
+  [
+   23,
+   5,
+   0,
+   21,
+   0,
+   "STRING"
+  ],
+  [
+   24,
+   21,
+   0,
+   6,
+   0,
+   "STRING"
+  ],
+  [
+   25,
+   20,
+   0,
+   22,
+   0,
+   "MODEL"
+  ],
+  [
+   26,
+   22,
+   0,
+   23,
+   0,
+   "MODEL"
+  ],
+  [
+   30,
+   24,
+   0,
+   10,
+   0,
+   "MODEL"
+  ],
+  [
+   31,
+   24,
+   0,
+   11,
+   0,
+   "MODEL"
+  ],
+  [
+   56,
+   23,
+   0,
+   39,
+   0,
+   "MODEL"
+  ],
+  [
+   57,
+   39,
+   0,
+   40,
+   0,
+   "MODEL"
+  ],
+  [
+   58,
+   40,
+   0,
+   24,
+   0,
+   "MODEL"
+  ]
+ ],
+ "groups": [
+  {
+   "id": 1,
+   "title": "LEFT — PROMPT BUILDER",
+   "bounding": [
+    -2180,
+    -1480,
+    1300,
+    2690
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "MIDDLE — T2I SETTINGS",
+   "bounding": [
+    -1022.2587034482762,
+    -288.87064827586204,
+    2720,
+    1182
+   ],
+   "color": "#b58b2a",
+   "font_size": 24,
+   "flags": {}
+  }
+ ],
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.8390545288824038,
+   "offset": [
+    -2960.610751544495,
+    337.44270592069574
+   ]
+  },
+  "frontendVersion": "1.42.10"
+ },
+ "version": 0.4
+}

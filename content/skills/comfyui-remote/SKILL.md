@@ -141,6 +141,21 @@ while True:
 - **pose-reference (ControlNet).** Чужое фото → извлечь скелет позы (DWPose/ViTPose) →
   генерация нового субъекта в этой позе.
 
+## Примеры воркфлоу (в репозитории)
+
+Рядом со скиллом лежат три готовых Flux-воркфлоу как референс архитектуры. 18+-поля и имена
+приватных LoRA убраны — вместо них плейсхолдеры `detail_*_lora`, а сам промпт пишется в
+`USER_SCENE`. Архитектура (switch'и, master-route, цепочка LoRA, inpaint-колонка) на месте —
+дальше подставляешь свои модели и сцену:
+
+- `workflows/ultrareal_flux_text2image.json` — t2i: switch резолюции, master-route, цепочка
+  LoRA, inpaint-фикс правой колонкой, MarkdownNote-инструкции прямо в графе.
+- `workflows/ultrareal_flux_pose_ref.json` — генерация по референс-позе (скелет из фото).
+- `workflows/flux_img_edit.json` — Kontext img2img (`Change X. Keep Y unchanged.`).
+
+Эти файлы едут через GitHub-репо (`get_skill` отдаёт только текст скилла, не вложения) —
+клонируй репо или тяни raw. В ComfyUI просто перетащи JSON мышкой в окно — граф развернётся сразу.
+
 ## Доставка в Telegram
 
 ```python
