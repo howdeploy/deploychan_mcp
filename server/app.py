@@ -62,6 +62,37 @@ def build_server() -> FastMCP:
 mcp = build_server()
 
 
+class _RelaxMcpAccept:
+    """Normalize a missing or ``*/*`` Accept header on the MCP endpoint only.
+
+    MCP Streamable HTTP requires clients to send ``Accept: application/json,
+    text/event-stream``; the SDK returns 406 otherwise. Proper MCP clients comply, but
+    curl (``*/*``) and minimal JSON-RPC clients often don't. Accept is content negotiation,
+    not a security control, so normalizing it for the ``/mcp`` path removes needless
+    friction without weakening anything. Non-HTTP scopes (lifespan) pass through untouched.
+    """
+
+    def __init__(self, app, mcp_path: str):
+        self.app = app
+        self.mcp_path = mcp_path
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") == "http" and scope.get("path", "").startswith(self.mcp_path):
+            accept = b""
+            rest = []
+            for key, value in scope["headers"]:
+                if key == b"accept":
+                    accept = value
+                else:
+                    rest.append((key, value))
+            a = accept.decode("latin-1").lower()
+            if (not a) or ("*/*" in a) or ("application/json" not in a):
+                accept = b"application/json, text/event-stream"
+            rest.append((b"accept", accept))
+            scope = {**scope, "headers": rest}
+        await self.app(scope, receive, send)
+
+
 def create_app():
     asgi = mcp.streamable_http_app()
     # Serve the static site (landing, docs, catalog.json) at / — the /mcp route is
@@ -71,7 +102,7 @@ def create_app():
             Mount("/", app=StaticFiles(directory=str(config.WEB_DIR), html=True))
         )
     asgi.add_middleware(TrustedHostMiddleware, allowed_hosts=config.allowed_hosts())
-    return asgi
+    return _RelaxMcpAccept(asgi, config.MCP_PATH)
 
 
 app = create_app()

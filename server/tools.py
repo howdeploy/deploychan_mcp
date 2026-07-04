@@ -14,6 +14,8 @@ import json
 import re
 import sqlite3
 
+from mcp.server.fastmcp.exceptions import ToolError
+
 from . import config, db
 
 # Word tokens: latin, digits, and Cyrillic. Everything else (FTS5 operators, quotes,
@@ -117,19 +119,18 @@ def get_skill(skill_id: str) -> dict:
         skill_id: A skill id from list_skills().
 
     Returns {id, name, summary, reminder, tags, allowed_tools, triggers, author,
-    recommended, base, body}. The ``body`` is the full markdown pack. On failure returns
-    {"error": "not_found"} or {"error": "wrong_type"} (tools/knowledge live in search_knowledge).
+    recommended, base, body}. The ``body`` is the full markdown pack. Raises an error
+    (isError) if the id is unknown or is not a skill (tools/knowledge live in search_knowledge).
     """
     rows = _query("SELECT * FROM items WHERE id = ?", (skill_id,))
     if not rows:
-        return {"error": "not_found", "id": skill_id}
+        raise ToolError(f"Skill not found: '{skill_id}'. Use list_skills() to see valid ids.")
     r = rows[0]
     if r["type"] != "skill":
-        return {
-            "error": "wrong_type",
-            "id": skill_id,
-            "hint": "Not a skill. Tools and knowledge are available via search_knowledge or the catalog.",
-        }
+        raise ToolError(
+            f"'{skill_id}' is a {r['type']}, not a skill — find tools and knowledge "
+            "via search_knowledge or the catalog."
+        )
     extra = json.loads(r["extra"] or "{}")
     return {
         "id": r["id"],
@@ -222,14 +223,15 @@ def next_step(step_id: str) -> dict:
 
     Returns {step_id, route_id, idx, total, title, action, ref, materials, body,
     next_step_id}. ``materials`` is the referenced item (id/type/name/summary/body) when the
-    step points at one. ``next_step_id`` is null on the last step. On failure: {"error": "not_found"}.
+    step points at one. ``next_step_id`` is null on the last step. Raises an error (isError)
+    if the step id is unknown.
     """
     rows = _query(
         "SELECT step_id, route_id, idx, title, action, ref, body FROM route_steps WHERE step_id = ?",
         (step_id,),
     )
     if not rows:
-        return {"error": "not_found", "step_id": step_id}
+        raise ToolError(f"Step not found: '{step_id}'. Get valid step ids from onboard().")
     s = rows[0]
     total = _query("SELECT COUNT(*) AS n FROM route_steps WHERE route_id = ?", (s["route_id"],))[0]["n"]
     materials = None

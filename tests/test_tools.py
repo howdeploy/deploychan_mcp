@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
+from mcp.server.fastmcp.exceptions import ToolError
+
 from server import tools
 
 
@@ -38,8 +41,10 @@ def test_list_and_get_skill(seeded):
 
 
 def test_get_skill_errors(seeded):
-    assert tools.get_skill("nope") == {"error": "not_found", "id": "nope"}
-    assert tools.get_skill("prompt")["error"] == "wrong_type"  # knowledge, not a skill
+    with pytest.raises(ToolError):
+        tools.get_skill("nope")
+    with pytest.raises(ToolError):
+        tools.get_skill("prompt")  # knowledge, not a skill
 
 
 def test_onboard_matches_and_falls_back(seeded):
@@ -65,7 +70,8 @@ def test_next_step_walks_route(seeded):
     assert last["materials"]["id"] == "tavily-setup"
     assert last["next_step_id"] is None
 
-    assert tools.next_step("route-zero:99") == {"error": "not_found", "step_id": "route-zero:99"}
+    with pytest.raises(ToolError):
+        tools.next_step("route-zero:99")
 
 
 def test_list_recommended_excludes_base(seeded):
