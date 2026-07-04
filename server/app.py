@@ -23,7 +23,7 @@ experience: knowledge, ready-made skills, leveling-up routes and recommendations
 Typical flow:
   1. list_recommended() - where to start when unsure.
   2. onboard(goal) - get an ordered route for a concrete goal, then next_step(step_id) per step.
-  3. search_knowledge(query) - pull context on any topic along the way.
+  3. search_knowledge(query) - find context on any topic; get_item(id) for the full guide.
   4. list_skills() then get_skill(id) - install a ready-made pack.
 
 Any install goes through the base skill `tailored-install` (step 0): detect the user's
@@ -36,6 +36,7 @@ nothing on the user's machine.
 
 _TOOLS = (
     tools.search_knowledge,
+    tools.get_item,
     tools.list_skills,
     tools.get_skill,
     tools.onboard,

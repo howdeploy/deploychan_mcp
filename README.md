@@ -8,8 +8,8 @@ coding agent over one URL.
 - **Transport:** Streamable HTTP · **Access:** public, read-only, no login, no keys
 - **License:** MIT · everything (site, server, database) is open source
 
-> Point your agent at the endpoint and it gets `search_knowledge`, `list_skills`,
-> `get_skill`, `onboard`, `next_step`, and `list_recommended`.
+> Point your agent at the endpoint and it gets `search_knowledge`, `get_item`,
+> `list_skills`, `get_skill`, `onboard`, `next_step`, and `list_recommended`.
 
 ## Connect
 
@@ -41,7 +41,7 @@ transport = "http"
 
 | Facet | Tools | What it returns |
 |---|---|---|
-| Knowledge | `search_knowledge(query)` | Relevant fragments from KISA's notes and guides. |
+| Knowledge | `search_knowledge(query)` · `get_item(id)` | Search for fragments, then pull the full guide by id. |
 | Skills | `list_skills()` · `get_skill(id)` | Ready-made packs: steps, config, checklist. |
 | Leveling up | `onboard(goal)` · `next_step(step_id)` | An ordered route for a goal; materials per step. |
 | Recommended | `list_recommended()` | KISA's curated cross-type picks. |

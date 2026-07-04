@@ -57,6 +57,7 @@ def search_knowledge(query: str, limit: int = 5) -> list[dict]:
         limit: Max number of fragments (default 5).
 
     Returns a list of {id, title, snippet, source, type, tags}. Empty list if nothing matches.
+    The snippet is only a fragment — call get_item(id) to read the full guide.
     """
     match = _fts_query(query)
     if not match:
@@ -81,6 +82,52 @@ def search_knowledge(query: str, limit: int = 5) -> list[dict]:
         }
         for r in rows
     ]
+
+
+def get_item(item_id: str) -> dict:
+    """Get the FULL content of any catalog item by id — knowledge, tool, route or skill.
+
+    search_knowledge and list_recommended give only a title and a short snippet. Once you
+    know which item you want, call get_item(id) for the complete guide body. Works for every
+    type: knowledge and tool guides (otherwise unreachable in full), skills (same body as
+    get_skill), and routes (overview + step list — walk them with next_step).
+
+    Args:
+        item_id: An item id from search_knowledge, list_recommended, list_skills or the catalog.
+
+    Returns {id, type, name, summary, body, tags, author, recommended, source}. Routes also
+    include ``steps``. Raises an error (isError) if the id is unknown.
+    """
+    rows = _query("SELECT * FROM items WHERE id = ?", (item_id,))
+    if not rows:
+        raise ToolError(
+            f"Item not found: '{item_id}'. Find valid ids via search_knowledge, "
+            "list_recommended or list_skills."
+        )
+    r = rows[0]
+    out = {
+        "id": r["id"],
+        "type": r["type"],
+        "name": r["name"],
+        "summary": r["summary"],
+        "body": r["body"],
+        "tags": json.loads(r["tags"] or "[]"),
+        "author": r["author"],
+        "recommended": bool(r["recommended"]),
+        "source": r["source"] or r["id"],
+    }
+    if r["type"] == "route":
+        steps = _query(
+            "SELECT step_id, idx, title, action, ref FROM route_steps "
+            "WHERE route_id = ? ORDER BY idx",
+            (item_id,),
+        )
+        out["steps"] = [
+            {"step_id": s["step_id"], "idx": s["idx"], "title": s["title"],
+             "action": s["action"], "ref": s["ref"]}
+            for s in steps
+        ]
+    return out
 
 
 # --- 02 · Skills -----------------------------------------------------------------------

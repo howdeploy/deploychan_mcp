@@ -47,6 +47,26 @@ def test_get_skill_errors(seeded):
         tools.get_skill("prompt")  # knowledge, not a skill
 
 
+def test_get_item_returns_full_body(seeded):
+    # tool: full body retrievable (search_knowledge only returns a snippet)
+    tool = tools.get_item("tavily-setup")
+    assert tool["type"] == "tool"
+    assert "Install steps for Tavily" in tool["body"]
+
+    # knowledge
+    kn = tools.get_item("prompt")
+    assert kn["type"] == "knowledge"
+    assert "Roles, context, constraints" in kn["body"]
+
+    # route: overview + ordered steps
+    rt = tools.get_item("route-zero")
+    assert rt["type"] == "route"
+    assert [s["step_id"] for s in rt["steps"]] == ["route-zero:1", "route-zero:2"]
+
+    with pytest.raises(ToolError):
+        tools.get_item("nope")
+
+
 def test_onboard_matches_and_falls_back(seeded):
     matched = tools.onboard("from zero to vibe coding")
     assert matched["route_id"] == "route-zero"

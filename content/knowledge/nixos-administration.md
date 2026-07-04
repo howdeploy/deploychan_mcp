@@ -19,6 +19,12 @@ source: https://mcp.deploychan.webcam/docs
 Всё декларативно: система собирается из конфига, а не правится «на живую». Ниже —
 рабочий цикл правки, nix-ld, интеграция с рабочим столом и NixOS-специфичные тонкости.
 
+> **Обязательное vs вкус.** Для агента ОБЯЗАТЕЛЬНОЕ — цикл правки/rebuild, nix-ld,
+> `LD_LIBRARY_PATH`, права на serial, EFI, монтаж HDD, автономный rebuild. Всё про
+> ОФОРМЛЕНИЕ (Waybar, Niri, Fuzzel, Dunst, SwayOSD, GTK, обои, Fastfetch) — это ЛИЧНЫЙ
+> вкус KISA (Catppuccin Mocha), помечено «вкус · пример». Это НЕ инструкция агенту, а
+> пример «как можно». Агент повторяет вкус СВОЕГО пользователя, а не копирует этот.
+
 ## Базовый цикл: правка системного конфига
 
 ### 1. Прочитать текущий конфиг
@@ -35,9 +41,15 @@ sudo chmod 666 /tmp/configuration.nix
 sudo cp /tmp/configuration.nix /etc/nixos/configuration.nix
 ```
 
-### 3. Пересобрать
+### 3. Проверить и пересобрать
 ```bash
-sudo nixos-rebuild switch
+sudo nixos-rebuild dry-build   # собрать конфиг БЕЗ применения — ловит ошибки заранее
+sudo nixos-rebuild switch      # применить
+```
+После switch убедись, что нужные сервисы поднялись:
+```bash
+systemctl status <service>            # системный сервис
+systemctl --user status <service>     # пользовательский (напр. waybar, hermes-gateway)
 ```
 
 ### Альтернатива: flake-система
@@ -84,7 +96,13 @@ Python-пакеты, использующие `ctypes.util.find_library` (нап
 environment.sessionVariables.LD_LIBRARY_PATH = "/run/current-system/sw/lib";
 ```
 
-## Waybar на NixOS
+## Рабочий стол — личный вкус (пример, не инструкция)
+
+Разделы отсюда и до «Порядок загрузки EFI» (Waybar, Niri, Fuzzel, Dunst, SwayOSD, GTK,
+обои), а также Fastfetch ниже — это ОФОРМЛЕНИЕ под вкус KISA (Catppuccin Mocha). Пример
+«как можно», НЕ требование к агенту. Агент повторяет вкус СВОЕГО пользователя.
+
+## Waybar на NixOS (вкус · пример)
 
 ### Включить
 ```nix
@@ -287,6 +305,12 @@ services.udev.extraRules = ''
 **Используй `:=`, а не `=`** — системные правила перекрывают простое `=`.
 (VID `0483` / PID `5740` — это USB-CDC serial STMicroelectronics; так же определяется, например, FlipperZero.)
 
+Проверить права и VID/PID воткнутого устройства:
+```bash
+ls -la /dev/ttyACM0                                          # ожидаем crw-rw-rw-
+udevadm info -a -n /dev/ttyACM0 | grep -E 'idVendor|idProduct' | head -2
+```
+
 ## Автомонтаж HDD (NTFS)
 
 ```bash
@@ -308,7 +332,7 @@ Print        { screenshot; }
 Mod+Shift+S  { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty -f -"; }
 ```
 
-## Fastfetch (Catppuccin Mocha)
+## Fastfetch (вкус · пример)
 
 ```jsonc
 {
@@ -327,14 +351,24 @@ Mod+Shift+S  { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty -f -"; }
 }
 ```
 
-## Rebuild руками агента
+## Rebuild руками агента (полная автономность, осознанный риск)
 
-Для автономного `nixos-rebuild switch`:
+Чтобы агент сам делал `nixos-rebuild switch` без пароля:
 ```nix
 security.sudo.extraRules = [{
     users = ["YOUR_USER"];
     commands = [{ command = "ALL"; options = ["NOPASSWD"]; }];
 }];
+```
+
+**Это осознанный выбор, а не недосмотр.** `command = "ALL"` + NOPASSWD даёт агенту
+беспарольный `sudo` на ВСЁ. Так и задумано — ради ПОЛНОЙ автономности агента на СВОЕЙ
+личной машине, с принятием рисков: ошибающийся или скомпрометированный агент получает
+root целиком. Это НЕ для рабочих, общих или продовых машин.
+
+Хочешь меньше рисков — сузь до одной команды (агент сможет только пересобирать систему):
+```nix
+commands = [{ command = "/run/current-system/sw/bin/nixos-rebuild"; options = ["NOPASSWD"]; }];
 ```
 
 ## См. также
