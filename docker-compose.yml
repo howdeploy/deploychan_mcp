@@ -5,8 +5,9 @@ services:
     container_name: deploychan-mcp
     restart: unless-stopped
     # Loopback only — a reverse proxy (TLS + rate-limit) sits in front. Never publish 0.0.0.0.
+    # Override the host port with DEPLOYCHAN_HOST_PORT (e.g. in .env) when 8080 is taken.
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:${DEPLOYCHAN_HOST_PORT:-8080}:8080"
     volumes:
       - ./content:/app/content:ro   # content is read-only to the container; ingest only reads it
       - ./web:/app/web              # catalog.json is written here so the static site can read it
