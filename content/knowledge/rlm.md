@@ -1,10 +1,11 @@
 ---
 id: rlm
-name: 'RLM — Recursive Language Models против context rot'
+name: 'RLM — Recursive Language Models against context rot'
 summary: >-
-  Когда контекст пухнет, агент тупеет (context rot). RLM (MIT CSAIL, 2025) — не больше
-  окно, а другой инференс: длинный ввод лежит в Python-REPL как переменная, модель пишет
-  код чтобы его резать/грепать и рекурсивно звать под-LLM. До 100× за окно, 10M+ токенов.
+  When context bloats, the agent gets dumber (context rot). RLM (MIT CSAIL, 2025) — not a
+  bigger window, but a different inference: the long input sits in a Python REPL as a variable,
+  and the model writes code to slice/grep it and recursively call sub-LLMs. Up to 100× past the
+  window, 10M+ tokens.
 type: knowledge
 author: kisa
 recommended: true
@@ -15,55 +16,58 @@ source: https://arxiv.org/abs/2512.24601
 
 # RLM — Recursive Language Models
 
-Чем длиннее контекст, тем ХУЖЕ агент. Длинная сессия Claude Code тупеет, ChatGPT забывает
-инструкции через 50 сообщений, агент теряет личность посреди задачи. Это **context rot**
-(«потерялся в середине»): модель физически не держит внимание на всём окне, а retrieval у неё
-U-образный — хорошо помнит начало и конец, проваливает середину. Больше окно проблему не
-решает: на 500k+ токенов деградация только сильнее.
+The longer the context, the WORSE the agent. A long Claude Code session gets dumber, ChatGPT
+forgets instructions after 50 messages, the agent loses its personality mid-task. This is
+**context rot** ("lost in the middle"): the model physically can't hold attention across the whole
+window, and its retrieval is U-shaped — it remembers the beginning and end well, and drops the
+middle. A bigger window doesn't solve it: at 500k+ tokens the degradation only gets worse.
 
-**RLM переворачивает подход.** Recursive Language Models — Alex Zhang, Tim Kraska, Omar
-Khattab, MIT CSAIL (arXiv 2512.24601, конец 2025). Не архитектура и не дообучение — это
-**стратегия инференса, тонкая обёртка над любым API**. Идея: не пихать миллионы токенов в
-окно, а держать их СНАРУЖИ и дать модели программно в них копаться.
+**RLM flips the approach.** Recursive Language Models — Alex Zhang, Tim Kraska, Omar Khattab, MIT
+CSAIL (arXiv 2512.24601, late 2025). Not an architecture and not fine-tuning — it's an
+**inference strategy, a thin wrapper over any API**. The idea: don't cram millions of tokens into
+the window, but keep them OUTSIDE and let the model dig through them programmatically.
 
-## Как работает
+## How it works
 
-Длинный ввод кладётся в переменную (`context`) в песочнице **Python-REPL**. Корневая модель
-(depth 0) держит в своём окне только короткую задачу и пишет код, чтобы:
+The long input is placed into a variable (`context`) in a **Python REPL** sandbox. The root model
+(depth 0) keeps only the short task in its window and writes code to:
 
-- **peek / grep / partition / map** — заглянуть, поискать регуляркой, нарезать, пройтись;
-- **рекурсивно вызвать под-LLM** на релевантном куске — и только на нём.
+- **peek / grep / partition / map** — peek in, search with a regex, slice up, iterate;
+- **recursively call a sub-LLM** on the relevant chunk — and only on it.
 
-Ответ под-вызова возвращается как переменная в REPL, а НЕ вливается автоматически в контекст
-родителя. Корень собирает финал из результатов. По сути — «out-of-core алгоритм для текста»:
-как БД работает с данными больше RAM, так RLM работает с контекстом больше окна.
+The sub-call's response comes back as a variable in the REPL, and is NOT automatically poured into
+the parent's context. The root assembles the final answer from the results. Essentially an
+"out-of-core algorithm for text": the way a database works with data larger than RAM, RLM works
+with context larger than the window.
 
-Ключевое отличие от соседей: **без суммаризации и сжатия** (значит без потери информации,
-которой грешит компакт) и **без индексации заранее** (в отличие от RAG). Модель сама решает,
-что читать и когда.
+The key difference from its neighbors: **no summarization and no compression** (meaning no
+information loss, which compaction is guilty of) and **no indexing ahead of time** (unlike RAG).
+The model decides for itself what to read and when.
 
-## Почему это важно (проверенные цифры)
+## Why it matters (verified numbers)
 
-- Держит ввод **до 2 порядков (100×) за окно модели** — десятки-сотни млн токенов; стабильна
-  на **10M+** без деградации.
-- **RLM(GPT-5-mini) обгоняет GPT-5** на OOLONG (сложнейший long-context бенчмарк) в 2×+ по
-  верным ответам — и дешевле за запрос.
-- OOLONG-Pairs (плотность растёт квадратично): GPT-5 — F1 <0.1%, RLM — **58%**. CodeQA:
-  24% → **62%**. На BrowseComp-Plus RLM до **3× дешевле** суммаризирующего бейзлайна.
+- Holds input **up to 2 orders of magnitude (100×) past the model's window** — tens to hundreds of
+  millions of tokens; stable at **10M+** with no degradation.
+- **RLM(GPT-5-mini) beats GPT-5** on OOLONG (the toughest long-context benchmark) by 2×+ on
+  correct answers — and cheaper per request.
+- OOLONG-Pairs (density grows quadratically): GPT-5 — F1 <0.1%, RLM — **58%**. CodeQA: 24% →
+  **62%**. On BrowseComp-Plus, RLM is up to **3× cheaper** than the summarizing baseline.
 
-Мораль авторов: «Интеллект модели больше не бутылочное горлышко. Горлышко — инференс-обвязка».
-Это ровно про harness.
+The authors' moral: "The model's intelligence is no longer the bottleneck. The bottleneck is the
+inference harness." This is exactly about the harness.
 
-## Как применить
+## How to apply it
 
-- **Готовое:** LangChain **Deep Agents** имеют встроенную поддержку RLM; есть реализация под
-  **Google ADK**; Prime Intellect зовёт RLM «парадигмой 2026» и тренирует под неё.
-- **Вайбкод:** обёртка тонкая — REPL с `context`-переменной плюс функция рекурсивного вызова
-  под-LLM. Работает поверх любого API (в статье — GPT-5 / GPT-5-mini / Qwen3-Coder).
+- **Ready-made:** LangChain **Deep Agents** have built-in RLM support; there's an implementation
+  for **Google ADK**; Prime Intellect calls RLM "the paradigm of 2026" and trains for it.
+- **Vibe-code:** the wrapper is thin — a REPL with a `context` variable plus a function for
+  recursively calling a sub-LLM. Works on top of any API (in the paper — GPT-5 / GPT-5-mini /
+  Qwen3-Coder).
 
-## Место в стеке
+## Place in the stack
 
-RLM — НЕ память и не хранилище (не путай с RAG-вектором из `agent-memory`). Это техника
-управления **контекстом**: родня компакту и хукам, ветка маршрута `agent-harness`. Берёшь,
-когда задача упирается в ДЛИНУ — гигантские кодбазы, deep research по тысяче документов,
-многочасовые логи, long-horizon рассуждение, — а окно и компакт уже врут.
+RLM is NOT memory and not storage (don't confuse it with the RAG vector from `agent-memory`). It's
+a technique for managing **context**: kin to compaction and hooks, a branch of the `agent-harness`
+route. You reach for it when the task hits a wall on LENGTH — giant codebases, deep research across
+a thousand documents, multi-hour logs, long-horizon reasoning — and the window and compaction are
+already lying to you.

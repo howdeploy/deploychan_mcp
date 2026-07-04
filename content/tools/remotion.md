@@ -1,11 +1,11 @@
 ---
 id: remotion
-name: 'Remotion: видео на React руками агента'
+name: 'Remotion: React video built by your agent'
 summary: >-
-  Remotion — React-фреймворк для программного создания видео. Любой кодинг-агент
-  (Claude Code, Codex, OpenCode, Cursor) пишет motion-графику по текстовому промпту.
-  Установка Node 22 LTS, create-video, скилл под выбранного агента, workflow в Studio,
-  рендер и референс-пайплайны.
+  Remotion is a React framework for creating video programmatically. Any coding agent
+  (Claude Code, Codex, OpenCode, Cursor) writes motion graphics from a text prompt.
+  Installing Node 22 LTS, create-video, a skill for your chosen agent, the Studio workflow,
+  rendering, and reference pipelines.
 type: tool
 author: third_party
 recommended: true
@@ -14,119 +14,119 @@ tags: [remotion, video, react, agent, motiongraphics]
 source: https://www.remotion.dev/docs/ai/coding-agents
 ---
 
-# Remotion: видео на React руками агента
+# Remotion: React video built by your agent
 
-Remotion — React-фреймворк для **программного** создания видео. Анимация — это код,
-а не таймлайн. В связке с кодинг-агентом ты описываешь ролик словами, агент пишет React,
-и на выходе получается настоящий MP4. За 4–15 итераций собирается современный монтаж с
-нуля, без навыков видео.
+Remotion is a React framework for creating video **programmatically**. Animation is code,
+not a timeline. Paired with a coding agent, you describe the clip in words, the agent writes
+React, and out comes a real MP4. In 4–15 iterations you assemble a modern edit from scratch,
+with no video skills.
 
-**Мультиагентность:** по официальным докам Remotion работает с кодинг-агентами
-**Claude Code, Codex, OpenCode** (и Cursor). Скилл ставится под любого из них — выбираешь
-при установке. Ниже — инструкции для агента, не для конкретного клиента.
+**Multi-agent:** per the official docs, Remotion works with the coding agents
+**Claude Code, Codex, OpenCode** (and Cursor). The skill installs for any of them — you
+choose at install time. Below are instructions for the agent, not for a specific client.
 
-## Предусловия
+## Prerequisites
 
-1. **Node.js 22 LTS** (именно LTS, не «Current» — Remotion 4.x ломается на нестабильных
-   версиях: зависания `npm run dev`, `ERR_MODULE_NOT_FOUND`, ошибки ESM/CommonJS).
-2. Установленный кодинг-агент (Claude Code / Codex / OpenCode / Cursor…).
+1. **Node.js 22 LTS** (LTS specifically, not "Current" — Remotion 4.x breaks on unstable
+   versions: `npm run dev` hangs, `ERR_MODULE_NOT_FOUND`, ESM/CommonJS errors).
+2. An installed coding agent (Claude Code / Codex / OpenCode / Cursor…).
 
-### Установка Node 22 LTS
-- **Windows:** `winget install OpenJS.NodeJS.LTS` (или установщик с nodejs.org). Пути без
-  пробелов/кириллицы. Если скрипты не идут: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`.
-- **macOS:** через Homebrew — `brew install node@22`. При ошибках нативной сборки:
+### Installing Node 22 LTS
+- **Windows:** `winget install OpenJS.NodeJS.LTS` (or the installer from nodejs.org). Paths
+  without spaces/Cyrillic. If scripts won't run: `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`.
+- **macOS:** via Homebrew — `brew install node@22`. On native-build errors:
   `xcode-select --install`.
 - **Linux (nvm):**
   ```bash
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
-  source ~/.bashrc   # или ~/.zshrc
+  source ~/.bashrc   # or ~/.zshrc
   nvm install 22 && nvm use 22 && nvm alias default 22
   ```
 
-## Создать проект
+## Create a project
 
 ```bash
 npx create-video@latest
 ```
-Рекомендуемые ответы: шаблон **Blank**, **TailwindCSS — yes**, **install Skills — yes**.
-Создаст папку проекта со структурой:
+Recommended answers: **Blank** template, **TailwindCSS — yes**, **install Skills — yes**.
+It creates a project folder with the structure:
 
 ```
-public/   — твои ассеты (картинки, аудио, видео, шрифты, референсы)
-src/      — код (агент пишет сюда)
-out/      — готовые MP4 после рендера
+public/   — your assets (images, audio, video, fonts, references)
+src/      — code (the agent writes here)
+out/      — finished MP4s after rendering
 ```
-Плюс файл инструкций, который агент читает при старте (`CLAUDE.md` / `AGENTS.md` — под
-твой агент). Референсы клади в `public/` — агент прочитает изображение и повторит стиль.
+Plus an instructions file the agent reads at startup (`CLAUDE.md` / `AGENTS.md` — depending
+on your agent). Put references in `public/` — the agent will read the image and reproduce the style.
 
-## Поставить скилл Remotion (под своего агента)
+## Install the Remotion skill (for your agent)
 
 ```bash
 npx skills add remotion-dev/skills
 ```
-`skills` — открытая экосистема (`vercel-labs/skills`), ставит в **любой из 70+ агентов**
-(Claude Code, Codex, Cursor, OpenCode, Windsurf, Gemini…). При установке выбери СВОЙ агент,
-scope (глобально — чтобы работать из любого проекта) и подтверди рекомендованные опции.
-Скилл — это инструкция, обучающая агента писать корректный Remotion-код (правильные
-анимационные примитивы, тайминги, spring-анимации, чистую структуру композиций).
+`skills` is an open ecosystem (`vercel-labs/skills`) that installs into **any of 70+ agents**
+(Claude Code, Codex, Cursor, OpenCode, Windsurf, Gemini…). At install time pick YOUR agent,
+the scope (global — to work from any project), and confirm the recommended options. The skill
+is an instruction set that teaches the agent to write correct Remotion code (the right
+animation primitives, timings, spring animations, clean composition structure).
 
-Проверка (для Claude Code — путь примера): `ls .claude/skills/remotion/` → там `SKILL.md`.
-У других агентов путь свой (Cursor — `.cursor/rules`, универсальный fallback — `~/.agents/skills/`).
+Check (for Claude Code — example path): `ls .claude/skills/remotion/` → `SKILL.md` is in there.
+Other agents have their own path (Cursor — `.cursor/rules`, universal fallback — `~/.agents/skills/`).
 
 ## Workflow
 
 ```bash
 npm install
-npm run dev        # Studio на http://localhost:3000 (порт может отличаться)
+npm run dev        # Studio at http://localhost:3000 (port may differ)
 ```
-Дальше — промпт агенту. Рабочий паттерн из трёх шагов:
-1. **Планирование** — агент задаёт уточняющие вопросы по ассетам и задумке.
-2. **Сценарий** — агент кратко описывает будущий ролик, ты вносишь правки.
-3. **Сборка** — агент пишет готовое решение.
+Then — a prompt to the agent. A working three-step pattern:
+1. **Planning** — the agent asks clarifying questions about the assets and the concept.
+2. **Script** — the agent briefly describes the future clip, you make edits.
+3. **Build** — the agent writes the finished solution.
 
-В Studio виден предпросмотр по слоям. Любой аспект агент может переписать — всё анимация
-файлами, не готовое видео. Каждый отрезок имеет число кадров: описывай отрезки/кадры/время,
-чтобы точечно править. Изменения в Studio применяются мгновенно, без перезагрузки страницы.
+In Studio you see a layered preview. The agent can rewrite any aspect — it's all animation as
+files, not a finished video. Each segment has a frame count: describe segments/frames/time to
+edit precisely. Changes in Studio apply instantly, without a page reload.
 
-Музыка в фоне — например через генеративные сервисы (Suno и подобные).
+Background music — for example via generative services (Suno and the like).
 
-## Рендер
+## Render
 
-Либо командой/агентом напрямую, либо кнопкой в Studio (кнопка даёт больше контроля над
-процессом).
+Either via a command/the agent directly, or with the button in Studio (the button gives more
+control over the process).
 
-## Квирки по ОС
-- **Linux/Wayland (headless):** Remotion рендерит через Chromium. Может понадобиться
-  `export DISPLAY=:0` или `npx remotion render ... --gl=angle`. Свой Chromium:
-  `export REMOTION_CHROME_EXECUTABLE=$(which chromium)`. Depsы Chromium (Ubuntu/Debian):
+## OS-specific quirks
+- **Linux/Wayland (headless):** Remotion renders through Chromium. You may need
+  `export DISPLAY=:0` or `npx remotion render ... --gl=angle`. Your own Chromium:
+  `export REMOTION_CHROME_EXECUTABLE=$(which chromium)`. Chromium deps (Ubuntu/Debian):
   `libnss3 libatk-bridge2.0-0 libdrm2 libxcomposite1 libxdamage1 libxrandr2 libgbm1
-  libasound2 libpango-1.0-0 libcairo2 libatspi2.0-0 libcups2 libxkbcommon0`. Шрифты
-  (иначе квадратики): `noto-fonts`/`fonts-noto` + liberation.
-- **macOS (Apple Silicon):** ARM поддержан из коробки. Свой Chrome:
+  libasound2 libpango-1.0-0 libcairo2 libatspi2.0-0 libcups2 libxkbcommon0`. Fonts
+  (otherwise little squares): `noto-fonts`/`fonts-noto` + liberation.
+- **macOS (Apple Silicon):** ARM supported out of the box. Your own Chrome:
   `export REMOTION_CHROME_EXECUTABLE="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"`.
-- **IPv6:** если превью не открывается — запуск строго на IPv4 помогает.
+- **IPv6:** if the preview won't open — running strictly on IPv4 helps.
 
-## Референс-пайплайны
+## Reference pipelines
 
-Не изобретай с нуля — возьми готовое за основу и попроси агента построить своё:
+Don't reinvent from scratch — take something ready as a base and ask the agent to build its own:
 
-- **claude-remotion-kickstart** (jhartquist) — шаблон: 14 компонентов, слэш-команды, MCP
-  (Replicate для картинок/видео, ElevenLabs для озвучки, Deepgram для транскрипции).
-  Форкаешь через «Use this template», добавляешь API-ключи в env:
+- **claude-remotion-kickstart** (jhartquist) — a template: 14 components, slash commands, MCP
+  (Replicate for images/video, ElevenLabs for voiceover, Deepgram for transcription).
+  Fork it via "Use this template", add API keys to env:
   ```bash
   export REPLICATE_API_TOKEN=...    # /generate-image, /generate-video
   export DEEPGRAM_API_KEY=...       # /transcribe
-  export ELEVENLABS_API_KEY=...     # озвучка через MCP
+  export ELEVENLABS_API_KEY=...     # voiceover via MCP
   ```
-- **video_explainer** (prajwal-y) — полный пайплайн на Python: документ (PDF/MD/URL) →
-  скрипт → TTS → анимации (React .tsx пишет агент) → рендер. Синхронизация голоса с кадрами.
+- **video_explainer** (prajwal-y) — a full pipeline in Python: document (PDF/MD/URL) →
+  script → TTS → animations (the agent writes React .tsx) → render. Voice synced to frames.
   ```bash
   git clone https://github.com/prajwal-y/video_explainer.git && cd video_explainer
   python -m venv .venv && source .venv/bin/activate
   pip install -e . && cd remotion && npm install && cd ..
   python -m src.cli create my-video
-  python -m src.cli generate my-video   # весь пайплайн
+  python -m src.cli generate my-video   # the whole pipeline
   python -m src.cli render my-video     # MP4
   ```
 
-**Главный инсайт:** сначала вайбкодь сам пайплайн, а уже на нём вайбкодь конкретные ролики.
+**The key insight:** first vibecode the pipeline itself, then vibecode the specific clips on top of it.

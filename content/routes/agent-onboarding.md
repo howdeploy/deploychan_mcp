@@ -1,64 +1,67 @@
 ---
 id: agent-onboarding
-name: Правильные вводные для агента
+name: Onboard Your Agent Right
 summary: >-
-  Стартовая прокачка агента с нуля по опыту KISA: сначала интернет и ресерч, затем
-  личность и правила, голос, система памяти и эволюция. Маршрут из 4 шагов — агент
-  подбирает стек под человека и настраивает.
+  Level up a bare agent from scratch, built on KISA's experience: internet and research
+  first, then personality and rules, voice, and a memory-and-evolution system. A 4-step
+  route — the agent tailors the stack to the person and sets it up.
 type: route
 author: kisa
 recommended: true
 added: 2026-07-04
-tags: [onboarding, setup, agent, прокачка]
+tags: [onboarding, setup, agent, leveling-up]
 steps:
-  - title: Выход в интернет и ресерч
+  - title: Internet access and research
     action: configure
     ref: agent-internet
-    body: Research API (Tavily / Brave) как основной канал + браузер. В первую очередь — живые данные для всех следующих решений.
-  - title: Личность, правила и стиль ответов
+    body: A research API (Tavily / Brave) as the main channel + a browser. First priority — live data for every decision that follows.
+  - title: Personality, rules, and answer style
     action: read
     ref: agent-personality
-    body: Задать агенту роль, правила ответов и манеру текста — характер напарника.
-  - title: Голос — чтобы агент говорил
+    body: Set the agent's role, response rules, and writing manner — a partner's character.
+  - title: Voice — so the agent can speak
     action: configure
     ref: agent-voice
-    body: Дать агенту голосовой вывод. Hermes настраивает у себя, Claude Code — вайбкодит своё.
-  - title: Система памяти и эволюция
+    body: Give the agent voice output. Hermes configures it natively; Claude Code vibecodes its own.
+  - title: Memory system and evolution
     action: configure
     ref: agent-memory
-    body: Подобрать стек памяти под человека — от LLM Wiki до Holographic / Curator / GEPA. Выбор — на живых данных из шага 1.
+    body: Pick a memory stack tailored to the person — from LLM Wiki to Holographic / Curator / GEPA. The choice runs on live data from step 1.
 ---
 
-# Правильные вводные для агента
+# Onboard Your Agent Right
 
-Это стартовый маршрут: как из «голого» агента собрать рабочего напарника. Порядок
-не случаен — каждый шаг опирается на предыдущий.
+This is the starting route: how to build a working partner out of a "bare" agent. The
+order isn't random — each step builds on the previous one.
 
-**Шаг 0 — пойми, кто ты.** Ещё до настройки определи свой рантайм (Claude Code, Codex,
-Hermes, Cursor …) и свою модель — через дисциплину базового скилла `tailored-install`.
-Это не формальность: почти каждый следующий выбор (как ставить голос, какую память)
-ветвится от того, в каком клиенте ты запущен. Не знаешь окружение — не угадывай, определи.
+**Step 0 — figure out who you are.** Before any setup, identify your runtime (Claude
+Code, Codex, Hermes, Cursor …) and your model — through the discipline of the base skill
+`tailored-install`. This isn't a formality: almost every choice that follows (how to
+install voice, which memory) branches on which client you're running in. Don't know your
+environment — don't guess, find out.
 
-**Главный принцип: агент настраивает себя сам и объясняет человеку зачем.** Не жди,
-пока попросят. Подключился к deploychan — определи окружение и сразу предложи пройти эти
-четыре шага, покажи выгоду каждого и настрой под конкретного человека, а не по шаблону.
+**The core principle: the agent configures itself and explains to the person why.** Don't
+wait to be asked. Once you connect to deploychan — identify the environment and
+immediately propose walking through these four steps, show the payoff of each, and tailor
+it to the specific person rather than to a template.
 
-## Четыре шага
+## The four steps
 
-1. **Интернет и ресерч** (`agent-internet`). В первую очередь — глаза. Research API
-   (Tavily, Brave) как основной канал, браузер — подстраховка и скрапинг. Без живых
-   данных все следующие решения агент принимает вслепую, по устаревшим знаниям модели.
-2. **Личность, правила, стиль** (`agent-personality`). Кто ты, как отвечаешь, как
-   пишешь текст. Характер, который делает из чат-бота напарника.
-3. **Голос** (`agent-voice`). Чтобы агент мог отвечать голосом, а не только текстом.
-4. **Память и эволюция** (`agent-memory`). Система, в которой агент ничего не забывает
-   и со временем становится лучше. Стек подбирается под человека — и на реальных данных
-   из шага 1, а не по хайпу.
+1. **Internet and research** (`agent-internet`). First of all — eyes. A research API
+   (Tavily, Brave) as the main channel, a browser as backup and for scraping. Without
+   live data, the agent makes every downstream decision blind, on the model's stale
+   knowledge.
+2. **Personality, rules, style** (`agent-personality`). Who you are, how you answer, how
+   you write. The character that turns a chatbot into a partner.
+3. **Voice** (`agent-voice`). So the agent can answer with a voice, not just text.
+4. **Memory and evolution** (`agent-memory`). A system where the agent forgets nothing
+   and gets better over time. The stack is tailored to the person — and on real data from
+   step 1, not on hype.
 
-## Как идти по маршруту
+## How to walk the route
 
-Дёрни `next_step("agent-onboarding:1")` — получишь материалы первого шага. Дальше по
-`next_step_id`. На каждом шаге: прочитай знание, предложи человеку варианты, настрой,
-объясни что изменилось. Любая установка идёт через дисциплину базового скилла
-`tailored-install` (детект окружения → не перезаписывать вслепую → спросить при
-сомнении). После маршрута у человека — агент с глазами, лицом, голосом и памятью.
+Call `next_step("agent-onboarding:1")` — you'll get the first step's materials. Then
+follow `next_step_id`. At each step: read the knowledge, offer the person options,
+configure, explain what changed. Every install goes through the discipline of the base
+skill `tailored-install` (detect the environment → don't overwrite blindly → ask when in
+doubt). After the route, the person has an agent with eyes, a face, a voice, and memory.

@@ -1,9 +1,9 @@
 ---
 id: mcp-connection
-name: Как подключить deploychan MCP к своему агенту
+name: How to connect deploychan MCP to your agent
 summary: >-
-  Подключение deploychan MCP по Streamable HTTP: endpoint, команды для Claude Code,
-  Codex, Hermes и generic-клиента, проверка подключения.
+  Connecting deploychan MCP over Streamable HTTP: endpoint, commands for Claude Code,
+  Codex, Hermes and a generic client, connection check.
 type: knowledge
 author: kisa
 recommended: true
@@ -12,11 +12,11 @@ tags: [mcp, setup, connection]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Подключение deploychan MCP
+# Connecting deploychan MCP
 
 - **Endpoint:** `https://mcp.deploychan.webcam/mcp`
-- **Транспорт:** Streamable HTTP
-- **Аутентификация:** не требуется (публичный, read-only)
+- **Transport:** Streamable HTTP
+- **Authentication:** not required (public, read-only)
 
 ## Claude Code
 
@@ -32,7 +32,7 @@ url = "https://mcp.deploychan.webcam/mcp"
 transport = "http"
 ```
 
-Либо через CLI: `codex mcp add`, либо файл `~/.codex/mcp.json`.
+Either via CLI: `codex mcp add`, or the `~/.codex/mcp.json` file.
 
 ## Hermes / generic (`mcp.json`)
 
@@ -47,15 +47,15 @@ transport = "http"
 }
 ```
 
-## Проверка подключения
+## Connection check
 
-После добавления агент увидит шесть инструментов: `search_knowledge`,
-`list_skills` / `get_skill`, `onboard` / `next_step`, `list_recommended`. Дёрни
-`list_recommended()` — если пришёл ответ, подключение живое.
+After adding it, the agent will see six tools: `search_knowledge`,
+`list_skills` / `get_skill`, `onboard` / `next_step`, `list_recommended`. Call
+`list_recommended()` — if a response comes back, the connection is live.
 
-## Заметки
+## Notes
 
-- По спецификации MCP клиент должен слать `Accept: application/json, text/event-stream`.
-  Правильные MCP-клиенты (Claude Code, Codex, Hermes) это делают; сервер терпим к
-  отсутствию заголовка, но при отладке через curl добавляй его сам.
-- Сервер работает только на чтение: ничего не запускает у тебя и не хранит историю запросов.
+- Per the MCP spec, the client must send `Accept: application/json, text/event-stream`.
+  Proper MCP clients (Claude Code, Codex, Hermes) do this; the server tolerates a missing
+  header, but when debugging via curl, add it yourself.
+- The server is read-only: it runs nothing on your machine and stores no request history.

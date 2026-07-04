@@ -1,10 +1,11 @@
 ---
 id: nixos-agent-environment
-name: 'Агент на NixOS: окружение и рабочие паттерны'
+name: 'The agent on NixOS: environment and working patterns'
 summary: >-
-  Как агент выживает и работает на NixOS: coreutils нет в PATH → Python-фолбэк,
-  реальные бинарники в /run/current-system/sw/bin, симлинк /bin/bash, и управление
-  Hermes (подключение MCP через mcp_servers, pty для интерактива, рестарт gateway).
+  How the agent survives and works on NixOS: coreutils aren't in PATH → Python
+  fallback, the real binaries in /run/current-system/sw/bin, the /bin/bash
+  symlink, and managing Hermes (connecting MCP via mcp_servers, pty for
+  interactive prompts, restarting the gateway).
 type: knowledge
 author: kisa
 recommended: false
@@ -13,31 +14,31 @@ tags: [nixos, agent, hermes, environment, python]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Агент на NixOS: окружение и рабочие паттерны
+# The agent on NixOS: environment and working patterns
 
-NixOS — декларативная, store-based файловая система. Обычные POSIX-утилиты
-(`cat`, `ls`, `find`, `grep`, `which`, `rm`) **не гарантированы в PATH**. Агент,
-привыкший к обычному Linux, спотыкается на первой же команде. Ниже — надёжные обходы,
-проверенные на живой системе.
+NixOS is a declarative, store-based filesystem. The usual POSIX utilities
+(`cat`, `ls`, `find`, `grep`, `which`, `rm`) are **not guaranteed to be in PATH**. An agent
+used to ordinary Linux trips on the very first command. Below — reliable workarounds,
+tested on a live system.
 
-## Python как универсальный фолбэк
+## Python as the universal fallback
 
-Python 3 на NixOS есть всегда. Нет утилиты — бери Python.
+Python 3 is always present on NixOS. No utility — reach for Python.
 
-| Утилита | В PATH? | Замена |
+| Utility | In PATH? | Replacement |
 |---|---|---|
-| `cat` | Нет | `python3 -c "print(open('f').read())"` |
-| `ls` | Нет | `python3 -c "import os; print(os.listdir('.'))"` |
-| `find` | Нет | `python3` с `os.walk()` |
-| `rm` | Нет | `python3 -c "import os; os.remove('f')"` |
-| `grep` | Нет | инструмент `search_files` или поиск строк в Python |
-| `which` | Нет | не нужен — используй `python3` |
-| `df` | Нет | `/run/current-system/sw/bin/df -h` |
-| `free` | Нет | `/run/current-system/sw/bin/free -h` |
+| `cat` | No | `python3 -c "print(open('f').read())"` |
+| `ls` | No | `python3 -c "import os; print(os.listdir('.'))"` |
+| `find` | No | `python3` with `os.walk()` |
+| `rm` | No | `python3 -c "import os; os.remove('f')"` |
+| `grep` | No | the `search_files` tool or string search in Python |
+| `which` | No | not needed — use `python3` |
+| `df` | No | `/run/current-system/sw/bin/df -h` |
+| `free` | No | `/run/current-system/sw/bin/free -h` |
 
-## Файловые операции
+## File operations
 
-### Записать файл
+### Write a file
 ```bash
 python3 << 'PYEOF'
 with open('/path/to/file', 'w') as f:
@@ -45,24 +46,24 @@ with open('/path/to/file', 'w') as f:
 PYEOF
 ```
 
-### Прочитать файл
+### Read a file
 ```bash
 python3 -c "print(open('/path/to/file').read())"
 ```
 
-### Проверить существование
+### Check existence
 ```bash
 python3 -c "import os; p='/path/to/file'; print(f'exists={os.path.exists(p)}, size={os.path.getsize(p)}')"
 ```
 
-### Создать директории
+### Create directories
 ```bash
 python3 -c "import os; os.makedirs('/path/to/dir', exist_ok=True)"
 ```
 
-## Системный discovery
+## System discovery
 
-Реальные бинарники живут в `/nix/store/` и доступны через `/run/current-system/sw/bin/`:
+The real binaries live in `/nix/store/` and are reachable via `/run/current-system/sw/bin/`:
 ```bash
 /run/current-system/sw/bin/nixos-version
 /run/current-system/sw/bin/df -h / /home
@@ -70,40 +71,40 @@ python3 -c "import os; os.makedirs('/path/to/dir', exist_ok=True)"
 /run/current-system/sw/bin/systemctl --user list-units --type=service
 ```
 
-## Подводные камни
+## Pitfalls
 
-1. **Никогда не считай, что coreutils в PATH.** Используй явные пути или Python.
-2. **Инструмент `write_file` может падать** — он шеллит на `cat`/`rm`.
-3. **`/bin/bash` не существует.** Симлинк: `sudo ln -sf /run/current-system/sw/bin/bash /bin/bash`
-4. **Чистота NixOS** — `/bin`, `/usr/bin`, `/usr/local/bin` часто пусты. Реальные бинарники в `/nix/store/`, доступны через `/run/current-system/sw/bin/`.
-5. **`nix-shell` медленный** — для разовых задач бери Python, а не nix-shell.
+1. **Never assume coreutils are in PATH.** Use explicit paths or Python.
+2. **The `write_file` tool may fail** — it shells out to `cat`/`rm`.
+3. **`/bin/bash` doesn't exist.** Symlink it: `sudo ln -sf /run/current-system/sw/bin/bash /bin/bash`
+4. **NixOS cleanliness** — `/bin`, `/usr/bin`, `/usr/local/bin` are often empty. The real binaries are in `/nix/store/`, reachable via `/run/current-system/sw/bin/`.
+5. **`nix-shell` is slow** — for one-off tasks reach for Python, not nix-shell.
 
-## Hermes на NixOS
+## Hermes on NixOS
 
-### Подключить MCP-сервер
+### Connect an MCP server
 ```bash
 hermes mcp add SERVER_NAME --url https://mcp.example.com/mcp
 ```
-Интерактивные промпты: auth=N, key=Enter, tools=Y. Нужен `pty=true`.
+Interactive prompts: auth=N, key=Enter, tools=Y. Needs `pty=true`.
 
-**Подводный камень — секции конфига.** `hermes config set mcp.*` пишет в секцию `mcp:`,
-а `hermes mcp add` — в `mcp_servers:`. Hermes читает из `mcp_servers:`. Используй
-`hermes mcp add`, а не ручную правку `mcp:`.
+**Pitfall — config sections.** `hermes config set mcp.*` writes to the `mcp:` section,
+while `hermes mcp add` writes to `mcp_servers:`. Hermes reads from `mcp_servers:`. Use
+`hermes mcp add`, not a manual edit of `mcp:`.
 
-### Интерактивные команды Hermes
-Для `hermes mcp add`, `hermes setup` и подобных используй `pty=true` — они дёргают
-`getpass`, который падает без TTY.
+### Interactive Hermes commands
+For `hermes mcp add`, `hermes setup` and the like, use `pty=true` — they call
+`getpass`, which fails without a TTY.
 
-### Рестарт gateway
-Нельзя рестартить из своей же агент-сессии. Используй отдельный терминал или cronjob:
+### Restarting the gateway
+You can't restart it from your own agent session. Use a separate terminal or a cronjob:
 ```
 cronjob(action='create', schedule='every 1h', no_agent=True,
     script='systemctl --user restart hermes-gateway')
 ```
 
-### Внешние install-скрипты
-Многие тулзы хардкодят `/bin/bash`. Обход:
+### External install scripts
+Many tools hardcode `/bin/bash`. Workaround:
 ```bash
 sudo ln -sf /run/current-system/sw/bin/bash /bin/bash
 ```
-Временно — только на время установки.
+Temporary — only for the duration of the install.

@@ -1,10 +1,10 @@
 ---
 id: comfyui-prompt-craft
-name: 'Промпт-крафт для генерации в ComfyUI'
+name: 'Prompt craft for ComfyUI generation'
 summary: >-
-  Как писать промпты для генеративных моделей (Flux и Anima-подобные) в ComfyUI: два
-  формата (Danbooru-теги vs литературный текст), принципы композиции, анти-паттерны и
-  их фиксы, семплеры под LoRA, промпты для анимации. Подход, выверенный практикой.
+  How to write prompts for generative models (Flux and Anima-like) in ComfyUI: two
+  formats (Danbooru tags vs literary text), composition principles, anti-patterns and
+  their fixes, samplers per LoRA, animation prompts. A practice-tested approach.
 type: skill
 author: kisa
 recommended: false
@@ -17,106 +17,107 @@ description: >-
   short movement prompts for video. Neutral examples only.
 ---
 
-# Промпт-крафт для генерации в ComfyUI
+# Prompt craft for ComfyUI generation
 
-Подход к промптам, выверенный практикой на Flux и Anima-подобных моделях. Примеры ниже —
-нейтральные; техника применима к любому контенту.
+A prompting approach, practice-tested on Flux and Anima-like models. The examples below
+are neutral; the technique applies to any content.
 
-## Два формата промпта
+## Two prompt formats
 
-| Формат | Когда | Пример |
+| Format | When | Example |
 |---|---|---|
-| **Danbooru-теги** | простые сцены, портреты, стандартные позы | `1girl, blonde hair, sitting, park` |
-| **Литературный текст** | сложные позы, необычные ракурсы, много планов | `Девушка сидит на краю скамьи, поправляет волосы, вид сверху` |
+| **Danbooru tags** | simple scenes, portraits, standard poses | `1girl, blonde hair, sitting, park` |
+| **Literary text** | complex poses, unusual angles, many planes | `A girl sits on the edge of a bench, adjusting her hair, seen from above` |
 
-**Ключевой инсайт:** литературный формат мгновенно решает композицию, которую теги не
-тянут — модель лучше понимает пространственные отношения в свободном тексте. **Flux** особенно
-любит литературные описания в духе «девушка стоит среди кустов посреди улицы», а НЕ перечисление
-слов через запятую. Нюанс: некоторые LoRA обучены только на тегах — тестируй свою связку.
+**Key insight:** the literary format instantly solves composition that tags can't
+handle — the model understands spatial relationships better in free text. **Flux** is
+especially fond of literary descriptions along the lines of "a girl stands among bushes
+in the middle of the street", NOT a comma-separated list of words. Caveat: some LoRA are
+trained only on tags — test your own stack.
 
-## Quality-префикс
+## Quality prefix
 
 ```text
 masterpiece, best quality, newest, highres
 ```
-Избегай `score_5`, `score_6`, `year 2025` — это артефакты чужих LoRA.
+Avoid `score_5`, `score_6`, `year 2025` — these are artifacts of other people's LoRA.
 
-## Принципы (критично)
+## Principles (critical)
 
-1. **Композиция — в первых 3–4 тегах.** Ракурс и поза ДО внешности: `profile, from side,
-   sitting on chair` → потом волосы, одежда.
-2. **Один тег на концепт.** Не пять синонимов ракурса — только один (`from below`).
-3. **Негативы НЕ работают.** Модель не понимает `no door`. Описывай что ДОЛЖНО быть в кадре,
-   а не что не должно.
-4. **Убирай конфликт, не компенсируй.** Тег конфликтует → удали его. «Чинящие» теги раздувают
-   промпт и рождают новые конфликты.
-5. **Перегружен → перепиши с нуля.** Не патчь раздутый промпт — сбрось к 15–20 ключевым тегам.
-6. **Литературный уходит в фотореализм → откат на теги.** Если 2+ попытки дают фото или ломают
-   анатомию — вернись к Danbooru-тегам (они надёжнее для простых/средних сцен).
-7. **Числа в тегах ломают счётчик.** `double bun` → `hair bun, two buns`. Не мешай `solo` и `1girl`.
+1. **Composition goes in the first 3–4 tags.** Angle and pose BEFORE appearance:
+   `profile, from side, sitting on chair` → then hair, clothes.
+2. **One tag per concept.** Not five synonyms for an angle — just one (`from below`).
+3. **Negatives DON'T work.** The model doesn't understand `no door`. Describe what SHOULD
+   be in frame, not what shouldn't.
+4. **Remove the conflict, don't compensate.** A tag conflicts → delete it. "Fixing" tags
+   bloat the prompt and spawn new conflicts.
+5. **Overloaded → rewrite from scratch.** Don't patch a bloated prompt — reset to 15–20 key tags.
+6. **Literary drifts into photorealism → fall back to tags.** If 2+ attempts produce photos
+   or break anatomy — return to Danbooru tags (they're more reliable for simple/medium scenes).
+7. **Numbers in tags break the counter.** `double bun` → `hair bun, two buns`. Don't mix `solo` and `1girl`.
 
-## Анти-паттерны и фиксы (нейтральные)
+## Anti-patterns and fixes (neutral)
 
-| Проблема | Причина | Фикс |
+| Problem | Cause | Fix |
 |---|---|---|
-| Два персонажа вместо одного | `double bun` (слово «double») или `solo`+`1girl` | `hair bun, two buns`; убрать `solo` |
-| Персонаж спиной к окну | `front lighting` + `sunlight from window` конфликт | убрать `front lighting` |
-| Фулбади вместо крупного плана | `sneakers`, `asphalt`, `full body` вытягивают кадр | убрать обувь/землю, оставить `close-up` |
-| Красный вместо оранжевого | `red hair` | `dyed hair, orange hair` |
-| Персонаж на диване вместо пола | `sitting on floor, leaning against couch` | `sitting on armrest`; убрать `couch` |
-| Twintails → огромные банты | `twintails` триггерит декоративные ленты | `low twintails, small hair tie, elastic hair tie` |
-| Приседает вместо стоит | `standing` без уточнения | `standing straight, upright` |
-| Фотореализм из литературного | фото-термины: `shot, camera, cinematic, overhead` | описывай сцену: `seen from above, looking down at` |
-| Коллизия имён в батче | одинаковый `filename_prefix` за секунду | уникальный префикс на джобу: `batch_{i}` |
+| Two characters instead of one | `double bun` (the word "double") or `solo`+`1girl` | `hair bun, two buns`; remove `solo` |
+| Character with back to the window | `front lighting` + `sunlight from window` conflict | remove `front lighting` |
+| Full body instead of close-up | `sneakers`, `asphalt`, `full body` pull the frame out | remove shoes/ground, keep `close-up` |
+| Red instead of orange | `red hair` | `dyed hair, orange hair` |
+| Character on the couch instead of the floor | `sitting on floor, leaning against couch` | `sitting on armrest`; remove `couch` |
+| Twintails → huge bows | `twintails` triggers decorative ribbons | `low twintails, small hair tie, elastic hair tie` |
+| Crouching instead of standing | `standing` without qualification | `standing straight, upright` |
+| Photorealism from literary | photo terms: `shot, camera, cinematic, overhead` | describe the scene: `seen from above, looking down at` |
+| Name collision in a batch | identical `filename_prefix` within a second | unique prefix per job: `batch_{i}` |
 
-## Семплеры под LoRA
+## Samplers per LoRA
 
-У каждой LoRA свой оптимальный семплер / scheduler / CFG — это часть настройки, не мелочь:
+Each LoRA has its own optimal sampler / scheduler / CFG — this is part of the setup, not a detail:
 
-| Семплер | Scheduler | CFG | Примечание |
+| Sampler | Scheduler | CFG | Note |
 |---|---|---|---|
-| `er_sde` | `simple` | 4.5 | базовый набор стилевых LoRA |
-| `sa_solver_pece` | `simple` | 4 | Flat Color / Blending-стек |
-| `euler_ancestral` | `beta` | 3.5–4 | детальные LoRA |
-| `euler` | `normal` | 1 | Turbo-LoRA (8–12 шагов) |
+| `er_sde` | `simple` | 4.5 | base set of style LoRA |
+| `sa_solver_pece` | `simple` | 4 | Flat Color / Blending stack |
+| `euler_ancestral` | `beta` | 3.5–4 | detail LoRA |
+| `euler` | `normal` | 1 | Turbo-LoRA (8–12 steps) |
 
-Точные имена семплеров бери через API (`GET /api/object_info/KSampler`), не угадывай:
-`euler_a` НЕ существует → правильно `euler_ancestral`; `dpm++ 2M` → `dpmpp_2m`.
+Get exact sampler names via the API (`GET /api/object_info/KSampler`), don't guess:
+`euler_a` does NOT exist → the correct one is `euler_ancestral`; `dpm++ 2M` → `dpmpp_2m`.
 
-## Проверка воркфлоу ПЕРЕД промптом
+## Check the workflow BEFORE the prompt
 
-Воркфлоу обновляются — цепочка LoRA и номера нод меняются. В начале сессии:
+Workflows get updated — the LoRA chain and node numbers change. At the start of a session:
 
-1. Загрузи текущий **API-воркфлоу** (JSON).
-2. **Распарси цепочку LoRA** — от базовой модели (`UNETLoader`) через все `LoraLoader`'ы:
-   нода → файл → вес → назначение.
-3. **Найди master-route** — `ImpactBoolean`/`ImpactSwitch`, проверь статус (база или LoRA-цепочка).
-4. **Сверь ожидания с реальностью** — что юзер думает активно vs что реально в топологии.
-5. `SaveImage`-нода **меняет ID между версиями** — всегда проверяй перед установкой `filename_prefix`.
+1. Load the current **API workflow** (JSON).
+2. **Parse the LoRA chain** — from the base model (`UNETLoader`) through all the `LoraLoader`s:
+   node → file → weight → purpose.
+3. **Find the master-route** — `ImpactBoolean`/`ImpactSwitch`, check the status (base or LoRA chain).
+4. **Reconcile expectations with reality** — what the user thinks is active vs what's actually in the topology.
+5. The `SaveImage` node **changes ID between versions** — always check before setting `filename_prefix`.
 
-## Промпты для анимации (видео)
+## Animation prompts (video)
 
-Короткие описания движения для видео-моделей:
+Short movement descriptions for video models:
 
-- **УЛЬТРА-КОРОТКО.** 2–4 предложения. Только факты движения, без пересказа сцены — у видео-модели
-  уже есть исходная картинка.
-- **Подлежащее + глагол.** «Она дышит. Рука поднимается. Лёд звенит.» — голые кинетические фразы.
-- **Явная причинность.** «Рука заправляет прядь за ухо, затем опускается. Прядь выскальзывает.»
-- **Никакого мерцания.** `shimmers`, `flickers` → вспышка на границе кадров.
+- **ULTRA-SHORT.** 2–4 sentences. Only movement facts, no retelling of the scene — the video model
+  already has the source image.
+- **Subject + verb.** "She breathes. The hand rises. The ice rings." — bare kinetic phrases.
+- **Explicit causality.** "The hand tucks a strand behind the ear, then lowers. The strand slips out."
+- **No shimmer.** `shimmers`, `flickers` → a flash at frame boundaries.
 
-Негатив для видео:
+Negative for video:
 ```text
 frame flicker, flash, brightness pulse, extra fingers, fused fingers, morphing hands, hair duplication, inconsistent lighting
 ```
 
-Пример (нейтральный):
+Example (neutral):
 ```text
-Она медленно дышит, чуть покачиваясь — лёд в стакане позвякивает. Моргает. Рука поднимается,
-заправляет прядь за ухо, опускается. Прядь выскальзывает и падает на щёку. Рука снова тянется
-поправить её.
+She breathes slowly, swaying slightly — the ice in the glass clinks. She blinks. Her hand rises,
+tucks a strand behind her ear, lowers. The strand slips out and falls onto her cheek. Her hand reaches
+up to fix it again.
 ```
 
 ## 18+
 
-Модели и техника поддерживают контент 18+. Применяй только к совершеннолетним по согласию, не к
-реальным людям без их согласия. Соблюдай местные законы и правила площадок.
+The models and technique support 18+ content. Apply it only to consenting adults, not to
+real people without their consent. Comply with local laws and platform rules.

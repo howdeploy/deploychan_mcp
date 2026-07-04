@@ -1,10 +1,11 @@
 ---
 id: hooks
-name: 'Хуки, кэш и harness: контроль над агентом'
+name: 'Hooks, cache, and the harness: control over the agent'
 summary: >-
-  Как влезть в чёрный ящик автономного агента: хуки (перехватчики цикла — по клиентам
-  Claude Code / Codex / Hermes), кэширование контекста по префиксу (cache_control, TTL,
-  env-переменные), RTK для ужатия вывода команд, и harness как рамка, что всё объединяет.
+  How to get inside the black box of an autonomous agent: hooks (loop interceptors —
+  per client, Claude Code / Codex / Hermes), prefix-based context caching (cache_control,
+  TTL, env vars), RTK for compressing command output, and the harness as the frame that
+  ties it all together.
 type: knowledge
 author: kisa
 recommended: true
@@ -13,44 +14,47 @@ tags: [hooks, harness, caching, rtk, agent, optimization]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Хуки, кэш и harness: контроль над агентом
+# Hooks, cache, and the harness: control over the agent
 
-Современный агент (Claude Code, Codex, Hermes) — давно не чатик. Он работает сам: решает
-выполнить команду в терминале, выполняет её, читает результат, на основе результата решает
-следующий шаг — и так по кругу.
+A modern agent (Claude Code, Codex, Hermes) stopped being a chatbot long ago. It works on
+its own: it decides to run a command in the terminal, runs it, reads the result, and based
+on the result decides the next step — and round and round it goes.
 
-В этой автономности вся сила и вся проблема. Каждый шаг агент делает на своё усмотрение.
-Сам выбирает команду. Сам тянет её полный вывод обратно в контекст — целиком, со всем
-мусором: прогресс-барами, логами, стектрейсами на двести строк. И сам решает, что дальше.
-А компании любят резать мышление и менять системные инструкции — в любой момент эта
-автономность может начать стрелять по коленям.
+That autonomy is where all the power and all the trouble live. Every step the agent takes at
+its own discretion. It picks the command itself. It pulls the full output back into context
+itself — the whole thing, with all the garbage: progress bars, logs, two-hundred-line stack
+traces. And it decides what comes next itself. Meanwhile companies love to trim the thinking
+and swap out system instructions — at any moment that autonomy can start shooting you in the
+knees.
 
-Тот, кто реально шарит за агентов, эту часть обычно и пропускает: вылижет системный промпт,
-разложит правила по `CLAUDE.md`, подключит MCP, подберёт модель — а сам момент «агент решил
-→ команда выполнилась → вывод вернулся» оставит чёрным ящиком. Точка, где в этот ящик можно
-влезть — между «решил» и «выполнилось» и на обратном пути. Это и есть хуки.
+The people who actually know agents usually skip exactly this part: they polish the system
+prompt, lay out rules across `CLAUDE.md`, wire up MCP, pick the model — and leave the moment
+itself, "agent decided → command ran → output came back", a black box. The point where you
+can get into that box is between "decided" and "ran", and on the way back. That's what hooks
+are.
 
-## Что такое хуки
+## What hooks are
 
-Хук — твой скрипт, который агент дёргает сам в строго определённый момент своего цикла.
-Не ты руками, не по запросу — агент автоматически, каждый раз когда доходит до нужной точки.
-Решил выполнить команду → перед запуском срабатывает хук. Команда отработала → срабатывает
-другой. Старт сессии, сжатие контекста, конец ответа — на любое из этих событий вешаешь код.
+A hook is your script that the agent fires itself at a strictly defined moment in its loop.
+Not you by hand, not on request — the agent automatically, every time it reaches the right
+point. Decided to run a command → the hook fires before launch. Command finished → another
+one fires. Session start, context compaction, end of response — you can hang code on any of
+these events.
 
-Так возвращается контроль: агент по-прежнему автономен, но на ключевых развилках стоят твои
-перехватчики. Один не пустит `rm -rf`, другой прогонит файл через prettier после правки,
-третий подкинет напоминание в контекст, четвёртый всё залогирует. Включается через конфиг —
-у каждого клиента свой, но логика одна: «на событие X запусти команду Y».
+That's how control comes back: the agent is still autonomous, but your interceptors sit at
+the key forks. One won't let `rm -rf` through, another runs the file through prettier after
+an edit, a third slips a reminder into context, a fourth logs everything. Turned on via config
+— each client has its own, but the logic is the same: "on event X run command Y".
 
 ### Claude Code
 
-Хуки живут в `settings.json` — глобально `~/.claude/settings.json` или по проекту
-`.claude/settings.json`. События: `PreToolUse` (до инструмента), `PostToolUse` (после),
-`UserPromptSubmit`, `SessionStart`, `PreCompact` (перед сжатием контекста), `Stop`. Скрипт
-получает JSON через stdin (`tool_name`, `tool_input`, `cwd`…), а отдаёт текст в stdout
-(инъектируется в контекст), JSON, или exit code — `exit 2` блокирует выполнение.
+Hooks live in `settings.json` — globally `~/.claude/settings.json` or per project
+`.claude/settings.json`. Events: `PreToolUse` (before a tool), `PostToolUse` (after),
+`UserPromptSubmit`, `SessionStart`, `PreCompact` (before context compaction), `Stop`. The
+script receives JSON via stdin (`tool_name`, `tool_input`, `cwd`…), and returns text in stdout
+(injected into context), JSON, or an exit code — `exit 2` blocks execution.
 
-Блокировка опасных команд:
+Blocking dangerous commands:
 ```json
 {
   "hooks": {
@@ -61,15 +65,15 @@ source: https://mcp.deploychan.webcam/docs
   }
 }
 ```
-`guard.sh` читает команду из stdin, видит `rm -rf` или `git push --force` → `exit 2`, и агент
-её не выполнит. Другие классики: авто-формат после правки (`PostToolUse` + `matcher:
-"Write|Edit"` → `prettier`) и инъекция правил на старте (`SessionStart` → скрипт выводит
-гайдлайны прямо агенту в контекст).
+`guard.sh` reads the command from stdin, sees `rm -rf` or `git push --force` → `exit 2`, and
+the agent won't run it. Other classics: auto-format after an edit (`PostToolUse` + `matcher:
+"Write|Edit"` → `prettier`) and rule injection at startup (`SessionStart` → the script prints
+guidelines straight into the agent's context).
 
 ### Codex
 
-Почти один в один Claude Code — скопировал модель вплоть до совпадения имён событий. Хуки в
-`~/.codex/config.toml` (секция `[hooks]`) или отдельном `~/.codex/hooks.json`; по проекту —
+Almost identical to Claude Code — it copied the model down to matching event names. Hooks in
+`~/.codex/config.toml` (the `[hooks]` section) or a separate `~/.codex/hooks.json`; per project —
 `<repo>/.codex/...`.
 ```toml
 [[hooks.PreToolUse]]
@@ -77,147 +81,153 @@ matcher = "^Bash$"
 type = "command"
 command = "python3 ~/.codex/hooks/check.py"
 timeout = 30
-statusMessage = "Проверяю команду"
+statusMessage = "Checking the command"
 ```
-Нюанс: хуки железно ловят shell-команды, но не всегда правки файлов (`apply_patch`) и вызовы
-MCP — известное ограничение. Плюс есть механизм попроще — `notify`: команда на событие
-`agent-turn-complete` (например, десктоп-уведомление, что агент закончил).
+A caveat: hooks reliably catch shell commands, but not always file edits (`apply_patch`) and
+MCP calls — a known limitation. Plus there's a simpler mechanism — `notify`: a command on the
+`agent-turn-complete` event (for example, a desktop notification that the agent has finished).
 
 ### Hermes
 
-Hermes (Hermes Agent от Nous Research) хуки тоже умеет, но устроены они «программистски» —
-через Python, а не голый shell. Три варианта:
+Hermes (Hermes Agent by Nous Research) can do hooks too, but they're built "programmer-style"
+— through Python rather than raw shell. Three options:
 
-- **Shell hooks** — ближе всего к Claude Code: в `config.yaml` под ключом `hooks:` вешаешь
-  shell-команду на событие (уведомления, аудит-логи, алерты).
-- **Gateway hooks** — `HOOK.yaml` + `handler.py` в `~/.hermes/hooks/<имя>/`, ловят
+- **Shell hooks** — closest to Claude Code: in `config.yaml` under the `hooks:` key you hang a
+  shell command on an event (notifications, audit logs, alerts).
+- **Gateway hooks** — `HOOK.yaml` + `handler.py` in `~/.hermes/hooks/<name>/`, catching
   `gateway:startup`, `session:start`, `agent:end`, `command:`.
-- **Plugin hooks** — плагины (`~/.hermes/plugins/`, `plugin.yaml` + Python) на `pre_llm_call`,
-  `post_llm_call`, `on_session_start/end`, `transform_llm_output`, `pre/post-tool-call`. Хук
-  тут — Python-функция-middleware: можно переписать вывод модели до того, как он попадёт в диалог.
+- **Plugin hooks** — plugins (`~/.hermes/plugins/`, `plugin.yaml` + Python) on `pre_llm_call`,
+  `post_llm_call`, `on_session_start/end`, `transform_llm_output`, `pre/post-tool-call`. Here a
+  hook is a Python middleware function: you can rewrite the model's output before it lands in the dialogue.
 
-## Как работает кэширование
+## How caching works
 
-Каждый запрос к модели — это весь контекст целиком: системный промпт, список инструментов,
-скиллы, вся история диалога. Гонять это заново на каждом шаге дорого — поэтому есть кэш.
-Работает он по одному правилу: **кэшируется префикс** — то, что идёт с начала и не меняется.
+Every request to the model is the entire context in full: the system prompt, the tool list,
+the skills, the whole conversation history. Pushing all of that through again on every step is
+expensive — so there's a cache. It runs on a single rule: **the prefix gets cached** — the part
+that comes from the start and doesn't change.
 
-Порядок сборки контекста жёсткий: сначала инструменты (`tools`), потом системный промпт
-(`system`), потом сообщения (`messages`). Ставишь точку кэша (`cache_control`) — и всё, что
-до неё, складывается в кэш. Следующий запрос с тем же началом читает это за ~10% цены.
+The context assembly order is rigid: first the tools (`tools`), then the system prompt
+(`system`), then the messages (`messages`). You place a cache point (`cache_control`) — and
+everything before it goes into the cache. The next request with the same beginning reads it for
+~10% of the price.
 
-Ключевой нюанс: **кэш — это совпадение по префиксу, побайтово**. Изменился один байт в
-начале — весь кэш после этого места сгорает. Воткнул `datetime.now()` в системный промпт —
-каждый запрос уникален, кэша нет вообще. Поменял список инструментов (а они на позиции 0) —
-слетает весь кэш целиком. Поэтому стабильное держат впереди и не трогают, а изменчивое
-(текущий вопрос, свежий вывод команды) — в самом конце, после последней точки кэша.
+The key nuance: **the cache is a prefix match, byte for byte**. One byte changes at the start —
+the entire cache after that spot burns down. Stick a `datetime.now()` into the system prompt —
+every request is unique, there's no cache at all. Change the tool list (and it's at position 0) —
+the whole cache is wiped. That's why the stable stuff is kept up front and left untouched, while
+the changeable stuff (the current question, fresh command output) goes at the very end, after
+the last cache point.
 
-TTL короткий: 5 минут по умолчанию (запись 1.25x от обычного) или час (запись 2x). Чтение из
-кэша — ~0.1x. На больших повторяющихся префиксах это экономит до 90%.
+The TTL is short: 5 minutes by default (writes at 1.25x of normal) or an hour (writes at 2x).
+Reading from cache — ~0.1x. On large repeating prefixes this saves up to 90%.
 
-**Что кэширует Claude.** Тот самый префикс, в знакомом порядке: определения инструментов,
-системный промпт, начало истории. В Claude Code это: системный промпт, все описания
-инструментов, твой `CLAUDE.md` и накопленная история — стабильный фундамент сессии. Точек
-кэша можно поставить до четырёх. Есть порог: кусок меньше ~1024 токенов (на Opus 4.x —
-~4096) молча не кэшируется, без ошибки. Кэш становится читаемым только после того, как первый
-ответ начал отдаваться — поэтому десять параллельных запросов с одинаковым началом всё равно
-заплатят полную цену. Проверить: поле `cache_read_input_tokens` (прочитано, дёшево) vs
-`cache_creation_input_tokens` (записано, с наценкой). Стабильный ноль на чтении — значит
-что-то в начале меняется и рушит кэш.
+**What Claude caches.** That same prefix, in the familiar order: tool definitions, system prompt,
+the start of the history. In Claude Code that's: the system prompt, all the tool descriptions,
+your `CLAUDE.md`, and the accumulated history — the stable foundation of the session. You can
+place up to four cache points. There's a threshold: a chunk smaller than ~1024 tokens (on Opus
+4.x — ~4096) silently isn't cached, no error. The cache becomes readable only after the first
+response has started streaming — so ten parallel requests with the same beginning will still pay
+full price. To check: the `cache_read_input_tokens` field (read, cheap) vs
+`cache_creation_input_tokens` (written, with a surcharge). A steady zero on reads means something
+at the start is changing and breaking the cache.
 
-**Как включить.** В готовом агенте (Claude Code / Codex) — ничего не надо, кэш из коробки,
-управляется env:
-- `DISABLE_PROMPT_CACHING=1` — выключить (есть по моделям: `..._HAIKU/_SONNET/_OPUS`).
-- `ENABLE_PROMPT_CACHING_1H=1` — часовой TTL (на подписке час и так даётся; на API/Bedrock/Vertex — этой переменной).
-- `FORCE_PROMPT_CACHING_5M=1` — насильно вернуть 5 минут.
+**How to turn it on.** In a ready-made agent (Claude Code / Codex) — nothing to do, caching works
+out of the box, controlled by env:
+- `DISABLE_PROMPT_CACHING=1` — turn it off (there are per-model variants: `..._HAIKU/_SONNET/_OPUS`).
+- `ENABLE_PROMPT_CACHING_1H=1` — hourly TTL (on a subscription the hour is given anyway; on API/Bedrock/Vertex — via this variable).
+- `FORCE_PROMPT_CACHING_5M=1` — force 5 minutes back.
 
-Свой код через Anthropic API — точку ставишь руками, поле `cache_control` в запросе Messages API:
+Your own code through the Anthropic API — you place the point by hand, the `cache_control` field in the Messages API request:
 ```python
 client.messages.create(
     model="claude-opus-4-8",
     system=[{
         "type": "text",
-        "text": "<большой стабильный промпт>",
+        "text": "<large stable prompt>",
         "cache_control": {"type": "ephemeral"}
     }],
-    messages=[{"role": "user", "content": "вопрос"}],
+    messages=[{"role": "user", "content": "question"}],
 )
 ```
-Один `cache_control` на верхнем уровне — система сама двигает точку по мере роста диалога.
-Вручную — тот же `cache_control` на конкретный блок (до 4 точек); часовой TTL —
+A single `cache_control` at the top level — the system moves the point itself as the dialogue
+grows. Manually — the same `cache_control` on a specific block (up to 4 points); hourly TTL —
 `{"type": "ephemeral", "ttl": "1h"}`.
 
-**Где кэш живёт.** Не у тебя на машине и не «в самой модели». Аппаратно свой не сделаешь,
-весов модели он не касается — модель ничего не помнит между запросами. Физически он на
-серверах провайдера (Anthropic, Bedrock, Vertex), и лежат там не тексты/ответы, а
-промежуточные вычисления по префиксу (внутренние представления токенов). На повторе модель
-берёт готовое, отсюда экономия. Кэш эфемерный, привязан к модели, прямого доступа у тебя нет.
-Отдельный приём «свой кэш у себя» — это уже кэш готовых ОТВЕТОВ на своей стороне (Redis/база):
-тот же запрос второй раз → отдаёшь сохранённое, вообще не дёргая API. Два разных рычага, не путай.
+**Where the cache lives.** Not on your machine and not "inside the model itself". You can't build
+your own in hardware, it doesn't touch the model weights — the model remembers nothing between
+requests. Physically it's on the provider's servers (Anthropic, Bedrock, Vertex), and what's
+stored there isn't texts/answers but intermediate computations over the prefix (internal token
+representations). On a repeat the model takes the ready-made result, hence the savings. The cache
+is ephemeral, tied to the model, and you have no direct access to it. A separate trick, "your own
+cache on your side", is already a cache of finished ANSWERS on your end (Redis/a database): the
+same request a second time → you hand back the saved one, without hitting the API at all. Two
+different levers, don't confuse them.
 
-## RTK — ужать вывод команд
+## RTK — compressing command output
 
-RTK (`rtk-ai/rtk`) — «Rust Token Killer», CLI-прокси на Rust. Бьёт по другой стороне
-контекста: не по префиксу, а по выводу команд. Агент собрался выполнить `git status` или
-`ls -la` — RTK перехватывает, прогоняет и отдаёт не сырой вывод на ~2000 токенов, а ужатый до
-~150–200: фильтрует мусор, сворачивает деревья файлов, режет повторы. 60–90% экономии на
-выводе, накладные <10мс, 100+ команд. Ставится как хук (вот и связка с первой темой) — тот
-самый `PreToolUse`-перехват, который переписывает команду на `rtk`-аналог.
+RTK (`rtk-ai/rtk`) — the "Rust Token Killer", a CLI proxy written in Rust. It hits the other side
+of context: not the prefix, but command output. The agent is about to run `git status` or `ls -la`
+— RTK intercepts it, runs it, and returns not raw output at ~2000 tokens but something squeezed
+down to ~150–200: it filters garbage, collapses file trees, cuts repeats. 60–90% savings on output,
+<10ms overhead, 100+ commands. It's installed as a hook (there's the tie-in with the first topic) —
+that same `PreToolUse` interception that rewrites the command into its `rtk` equivalent.
 
-## Ужимать промпты/скиллы или вывод?
+## Compress prompts/skills or output?
 
-Можно и то, но рычаги разной природы. Вывод команд (что душит RTK) — изменчивый хвост: новый
-на каждом шаге, в кэш не попадает и копится. Ужимаешь — экономишь напрямую и на каждом шаге.
-Промпты и скиллы — наоборот, стабильный префикс: после первого запроса уже в кэше по ~10%.
-Ужимать смысл есть, но эффект на первом (холодном) запросе; на тёплом кэше — немного.
+You can do both, but the levers are different in nature. Command output (what RTK strangles) is
+the changeable tail: new on every step, it never enters the cache and just piles up. Compress it —
+you save directly and on every step. Prompts and skills are the opposite, a stable prefix: after
+the first request they're already in the cache at ~10%. Compressing them makes sense, but the
+effect is on the first (cold) request; on a warm cache — not much.
 
-Подвох из правила префикса: ужимать инструменты и системный промпт *на ходу*, посреди сессии
-— вредно. Тронул `tools` (позиция 0) — снёс весь кэш и заплатил записью заново. Со скиллами
-хитрее: у них экономия встроена (progressive disclosure) — скилл висит короткой строкой-
-описанием, а полное тело грузится, только когда задача его зовёт. Правильный ход — не пихать
-всё в `CLAUDE.md`, а держать инструкции скиллами на ленивой загрузке.
+A gotcha from the prefix rule: compressing the tools and system prompt *on the fly*, mid-session,
+is harmful. Touch `tools` (position 0) — you've blown the whole cache and paid to write it again.
+With skills it's trickier: the savings are built in (progressive disclosure) — a skill sits as a
+short description line, and the full body loads only when a task calls for it. The right move is
+not to cram everything into `CLAUDE.md` but to keep instructions as skills on lazy loading.
 
-Итого по убыванию эффекта: режь то, что не кэшируется и копится — вывод команд (RTK) и
-разбухающую историю. Префикс (инструменты, системный промпт) держи стабильным ради кэша и
-ужимай один раз на старте, а не по ходу. Скиллы — на ленивой загрузке.
+In short, by descending impact: cut what isn't cached and piles up — command output (RTK) and the
+swelling history. Keep the prefix (tools, system prompt) stable for the cache's sake and compress
+it once at the start, not along the way. Skills — on lazy loading.
 
-## Что такое harness
+## What a harness is
 
-Отдельные механизмы выше собираются в одну рамку — **harness**.
+The separate mechanisms above assemble into a single frame — the **harness**.
 
-Есть модель — это веса. Она умеет ровно одно: текст на вход → текст на выход. Не запускает
-команды, не открывает файлы, не помнит предыдущий запрос. И есть harness — программа вокруг
-модели, которая превращает «текст в текст» в работающего агента. Запускаешь Claude Code или
-Codex в терминале — ты запускаешь harness; саму модель он вызывает по сети.
+There's the model — that's weights. It can do exactly one thing: text in → text out. It doesn't
+run commands, doesn't open files, doesn't remember the previous request. And there's the harness —
+the program around the model that turns "text to text" into a working agent. You launch Claude Code
+or Codex in the terminal — you're launching the harness; the model itself it calls over the network.
 
-Что делает harness:
-- **Цикл.** Собирает контекст, шлёт модели, получает ответ. Решила вызвать инструмент —
-  выполняет и возвращает результат в контекст, снова шлёт. По кругу, пока задача не закрыта.
-  Модель на каждом шаге только принимает решение, сам цикл крутит harness.
-- **Сборка контекста.** Что и в каком порядке уходит в запрос (system, tools, CLAUDE.md,
-  история) — от порядка зависит кэш.
-- **Инструменты.** Объявляет модели набор (Bash, Read, Edit, MCP) и сам исполняет вызовы.
-- **Перехваты.** Места, где harness вклинивается в цикл и запускает твой код — хуки.
-- **Контекст и память.** Компакт, обрезка, кэш и то, что должно пережить сессию.
+What the harness does:
+- **The loop.** Assembles context, sends it to the model, gets a response. It decided to call a
+  tool — the harness runs it and returns the result into context, sends again. Round and round,
+  until the task is done. At each step the model only makes a decision; the harness runs the loop itself.
+- **Context assembly.** What goes into the request and in what order (system, tools, CLAUDE.md,
+  history) — the cache depends on the order.
+- **Tools.** Declares the set to the model (Bash, Read, Edit, MCP) and executes the calls itself.
+- **Interceptions.** The places where the harness wedges into the loop and runs your code — hooks.
+- **Context and memory.** Compaction, truncation, cache, and whatever has to survive the session.
 
-Когда говорят «агент» — почти всегда имеют в виду harness, а не модель. Модель можно поменять
-(сегодня Opus, завтра Sonnet) — harness остаётся прежним.
+When people say "agent" they almost always mean the harness, not the model. The model can be
+swapped (Opus today, Sonnet tomorrow) — the harness stays the same.
 
-Память недооценивают чаще всего. Модель не хранит состояние между запросами — каждый запрос
-независимый. Память существует только потому, что harness каждый раз заново кладёт в контекст
-историю. Но контекст ограничен, при компакте сжимается, между сессиями обнуляется. Поэтому
-долговременную память выносят за пределы модели, в harness: правила в `CLAUDE.md`, инструкции
-в скиллах, файлы, логи, внешние базы. Память агента — не свойство модели, а то, что построено
-вокруг неё.
+Memory is what people underrate most. The model holds no state between requests — every request is
+independent. Memory exists only because the harness puts the history back into context each time.
+But context is limited, it shrinks on compaction, and it resets between sessions. That's why
+long-term memory is moved outside the model, into the harness: rules in `CLAUDE.md`, instructions
+in skills, files, logs, external databases. An agent's memory is not a property of the model but
+something built around it.
 
-Всё собирается вместе:
-- **Хуки** дают контроль над циклом (защита `PreToolUse`, подстраховка `SessionStart`/`PreCompact`).
-- **Кэш** снижает стоимость (стабильный префикс читается дёшево).
-- **RTK** чистит вход (ужимает вывод команд, история растёт медленнее).
-- **Память** удерживает состояние между шагами и сессиями.
+It all comes together:
+- **Hooks** give control over the loop (protection via `PreToolUse`, a safety net via `SessionStart`/`PreCompact`).
+- **Cache** lowers the cost (a stable prefix is read cheaply).
+- **RTK** cleans the input (compresses command output, the history grows more slowly).
+- **Memory** holds state between steps and sessions.
 
-Вывод простой. Настроить системный промпт — улучшить один вход модели. Собрать harness —
-выстроить всё вокруг неё: защиту, чтобы агент не выполнил опасное; подстраховку, чтобы не
-терял контекст и правила; экономию, чтобы работал дешевле и дольше до компакта. Модель тебе
-дают готовой и в любой момент могут урезать ей мышление или сменить системные инструкции.
-Harness ты настраиваешь сам, и он остаётся под твоим контролем.
+The takeaway is simple. Tuning the system prompt improves a single input to the model. Building a
+harness sets up everything around it: protection so the agent doesn't run something dangerous; a
+safety net so it doesn't lose context and rules; savings so it runs cheaper and longer before
+compaction. The model is handed to you ready-made, and at any moment its thinking can be cut down
+or its system instructions swapped. The harness you configure yourself, and it stays under your control.

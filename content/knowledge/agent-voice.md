@@ -1,10 +1,10 @@
 ---
 id: agent-voice
-name: Голос агента — чтобы он отвечал голосом
+name: Agent voice — make it reply out loud
 summary: >-
-  Как дать агенту голосовой вывод. Hermes настраивает у себя через профили и
-  TTS-провайдеров (Groq, ElevenLabs); Claude Code и Codex — вайбкодят своё
-  решение на хуке.
+  How to give your agent voice output. Hermes configures it natively via profiles
+  and TTS providers (Groq, ElevenLabs); Claude Code and Codex vibe-code their own
+  solution on a hook.
 type: knowledge
 author: kisa
 recommended: false
@@ -13,50 +13,52 @@ tags: [voice, tts, hermes, setup, agent]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Голос агента
+# Agent voice
 
-Живой агент — это не только текст. Голос делает его человечным. Реализация зависит от
-клиента: у Hermes голос из коробки, у Claude Code / Codex нативного нет — его вайбкодят.
+A living agent isn't just text. Voice makes it human. The implementation depends on the
+client: Hermes has voice out of the box; Claude Code / Codex have no native support — you
+vibe-code it.
 
-> Это про голос **на выходе** (TTS). Обратная задача — расшифровка входящего голоса в текст
-> (STT, напр. Telegram-голосовухи) — в знании `voice-transcription`: старт бесплатный на Groq.
+> This is about **output** voice (TTS). The reverse task — transcribing incoming voice into
+> text (STT, e.g. Telegram voice messages) — lives in the `voice-transcription` knowledge:
+> free to start on Groq.
 
-**Что должен сделать агент:** спросить, нужен ли человеку голос, подобрать провайдера
-(качество или скорость/цена) и настроить — сам у себя, если это Hermes, или собрать
-самописное решение, если Claude Code / Codex.
+**What the agent should do:** ask whether the person wants voice, pick a provider (quality
+or speed/price), and set it up — natively if it's Hermes, or build a custom solution if it's
+Claude Code / Codex.
 
-**Готовая дисциплина.** Живую подачу под ElevenLabs не надо изобретать — поставь скилл
-`elevenlabs-living-voice` (`get_skill`): как писать текст под TTS (дыхательные блоки,
-паузы, audio tags), развилка Eleven v2 / v3 и как крутить voice settings по фидбеку
-пользователя. Плюс preflight-скрипт, который чистит текст перед синтезом.
+**Ready-made discipline.** You don't need to reinvent living delivery for ElevenLabs — install
+the `elevenlabs-living-voice` skill (`get_skill`): how to write text for TTS (breathing blocks,
+pauses, audio tags), the Eleven v2 / v3 fork, and how to tune voice settings based on user
+feedback. Plus a preflight script that cleans text before synthesis.
 
-## Hermes — настраивает у себя
+## Hermes — configures it natively
 
-У Hermes голос идёт через профили и TTS-провайдеров. Рабочая связка для «живого»
-агента — **ElevenLabs** (качество) или **Groq** (быстро и дёшево). Плюс машинное
-зрение (например, DeepSeek умеет «видеть» изображения) — агент не только говорит, но и
-смотрит. Настройка — в конфиге Hermes, ключи провайдеров — в `~/.hermes/.env`.
+In Hermes, voice runs through profiles and TTS providers. The working combo for a "living"
+agent is **ElevenLabs** (quality) or **Groq** (fast and cheap). Plus machine vision (for
+example, DeepSeek can "see" images) — the agent doesn't just talk, it also looks. Configuration
+lives in the Hermes config; provider keys go in `~/.hermes/.env`.
 
-## Claude Code / Codex — вайбкодят своё
+## Claude Code / Codex — vibe-code their own
 
-Нативного голоса нет. Решение собирается самим агентом:
+There's no native voice. The solution is built by the agent itself:
 
-1. Берём TTS-API: ElevenLabs / Groq / OpenAI TTS. Ключ — в `.env` (не в общий файл).
-2. Пишем маленький скрипт: текст ответа → запрос в TTS → аудио → проигрывание
+1. Take a TTS API: ElevenLabs / Groq / OpenAI TTS. The key goes in `.env` (not in a shared file).
+2. Write a small script: response text → TTS request → audio → playback
    (`ffplay`/`afplay`/`paplay`).
-3. Вешаем на **хук** (например, событие завершения ответа в Claude Code), чтобы озвучка
-   срабатывала автоматически, а не по команде.
+3. Hang it on a **hook** (for example, the response-completion event in Claude Code) so the
+   voiceover fires automatically rather than on command.
 
-Это ровно тот случай, где «Claude Code объясняет, что надо вайбкодить самописное» —
-и делает это сам под окружение человека.
+This is exactly the case where "Claude Code explains that you need to vibe-code something
+custom" — and does it itself, tailored to the person's environment.
 
-## Практика
+## In practice
 
-- **Заблокированные сервисы.** ElevenLabs и Stripe палят публичные VPN. Если провайдер
-  недоступен из региона — подними свой VPN на VPS (например, скриптом Xrayebator) и ходи
-  через него.
-- **Выбор провайдера.** Нужен максимально естественный голос — ElevenLabs. Нужно дёшево
-  и быстро в фоне — Groq. Спроси человека, что важнее, и настрой под ответ.
+- **Blocked services.** ElevenLabs and Stripe flag public VPNs. If a provider isn't available
+  from your region — spin up your own VPN on a VPS (for example, with the Xrayebator script) and
+  route through it.
+- **Choosing a provider.** Need the most natural voice possible — ElevenLabs. Need cheap and
+  fast in the background — Groq. Ask the person what matters more, and configure to match.
 
-Голос делает агента живым. Последний слой маршрута — память: чтобы он ничего не забывал
-и со временем рос.
+Voice makes the agent alive. The last layer of the route is memory: so it forgets nothing and
+grows over time.

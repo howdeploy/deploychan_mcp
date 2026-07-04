@@ -1,10 +1,10 @@
 ---
 id: obsidian-dataweave
-name: 'ObsidianDataWeave: NotebookLM, атомизация и LLM Wiki'
+name: 'ObsidianDataWeave: NotebookLM, Atomization, and LLM Wiki'
 summary: >-
-  Скилл KISA: превращает Claude Code / Codex в пульт NotebookLM + импорт .docx с
-  Zettelkasten-атомизацией + скомпилированный LLM Wiki-слой + FTS5-память по всему
-  Obsidian vault. Всё программно, всё в твой vault, без внешних зависимостей поиска.
+  KISA's skill: turns Claude Code / Codex into a NotebookLM control panel + .docx import
+  with Zettelkasten atomization + a compiled LLM Wiki layer + FTS5 memory across the whole
+  Obsidian vault. All programmatic, all into your vault, with no external search dependencies.
 type: skill
 author: kisa
 recommended: false
@@ -20,66 +20,66 @@ license: MIT
 
 # ObsidianDataWeave
 
-Превращает Claude Code и Codex в полноценный пульт управления NotebookLM и твоим Obsidian
-vault. Запускаешь deep research, управляешь источниками, вытаскиваешь заметки из нотбуков —
-всё одной командой на естественном языке. Параллельно импортирует `.docx` из Google Drive и
-атомизирует их в Zettelkasten-заметки с MOC, тегами и вики-ссылками. Поверх — изолированный
-**LLM Wiki**-слой (скомпилированная база по Карпати), и **FTS5-память** — полнотекстовый
-индекс всего vault без единой внешней зависимости. Публичный: `howdeploy/ObsidianDataWeave`, MIT.
+Turns Claude Code and Codex into a full control panel for NotebookLM and your Obsidian
+vault. You run deep research, manage sources, and pull notes out of notebooks — all with a
+single natural-language command. In parallel, it imports `.docx` from Google Drive and
+atomizes them into Zettelkasten notes with a MOC, tags, and wikilinks. On top — an isolated
+**LLM Wiki** layer (a compiled base in the Karpathy style), and **FTS5 memory** — a full-text
+index of the entire vault without a single external dependency. Public: `howdeploy/ObsidianDataWeave`, MIT.
 
-Оба клиента поддержаны: Claude Code (скилл) и Codex (`AGENTS.md`).
+Both clients are supported: Claude Code (skill) and Codex (`AGENTS.md`).
 
-## Четыре слоя
+## Four Layers
 
-1. **NotebookLM → Obsidian.** Программный контроль NotebookLM через `notebooklm-py` как
-   библиотеку (не CLI — строго one-shot, без retry-дупликации). Deep/fast research, управление
-   источниками, дедуп, извлечение заметок и атомизация в vault.
-2. **.docx → Obsidian.** Импорт из Google Drive (rclone) → парс → атомизация → запись.
-3. **LLM Wiki.** Скомпилированная вики поверх атомарных заметок: накапливается через явный
-   merge (не RAG, не пересчёт на каждый запрос), связана `[[вики-ссылками]]`.
-4. **FTS5-память.** Локальный полнотекстовый индекс всего vault на stdlib SQLite, bm25 +
-   сниппеты, обновляется сам после каждой записи. Поиск для агентов.
+1. **NotebookLM → Obsidian.** Programmatic control of NotebookLM through `notebooklm-py` as
+   a library (not the CLI — strictly one-shot, no retry duplication). Deep/fast research, source
+   management, dedup, note extraction, and atomization into the vault.
+2. **.docx → Obsidian.** Import from Google Drive (rclone) → parse → atomize → write.
+3. **LLM Wiki.** A compiled wiki on top of the atomic notes: it accumulates through an explicit
+   merge (not RAG, not a recompute on every query), linked with `[[wikilinks]]`.
+4. **FTS5 memory.** A local full-text index of the whole vault on stdlib SQLite, bm25 +
+   snippets, auto-updates after every write. Search for agents.
 
-## Установка
+## Installation
 
 ```bash
 git clone https://github.com/howdeploy/ObsidianDataWeave.git
 cd ObsidianDataWeave
-bash install.sh --vault-path "/путь/к/вашему/vault"
+bash install.sh --vault-path "/path/to/your/vault"
 ```
 
-Установщик проверит Python 3.10+, поставит зависимости (`python-docx`, `pyyaml`), создаст
-`config.toml` с путём к vault, зарегистрирует навык глобально в `~/.claude/skills/obsidian-dataweave/`
-и допишет блок в `~/.claude/CLAUDE.md`. После установки навык работает из любой директории.
+The installer checks for Python 3.10+, installs the dependencies (`python-docx`, `pyyaml`), creates
+a `config.toml` with the vault path, registers the skill globally in `~/.claude/skills/obsidian-dataweave/`,
+and appends a block to `~/.claude/CLAUDE.md`. After installation the skill works from any directory.
 
-Режимы: `--mode claude` (по умолчанию), `--mode codex` (проверка `AGENTS.md`), `--mode local`
-(только зависимости + config). Обновление идемпотентно: `git pull && bash install.sh`.
+Modes: `--mode claude` (default), `--mode codex` (checks `AGENTS.md`), `--mode local`
+(dependencies + config only). Updating is idempotent: `git pull && bash install.sh`.
 
-## Как пользоваться
+## How to Use
 
-После установки просто говоришь агенту на естественном языке:
+After installation, just tell the agent in natural language:
 
-| Что сказать | Что произойдёт |
+| What to say | What happens |
 |---|---|
-| `process МойДокумент.docx` | Скачать → разобрать → атомизировать → записать в vault |
-| `обработай заметку "Название"` | Enrich или atomize существующей заметки |
-| `обработай контакты "Контакты"` | Заметка с контактами → персональные карточки + Networking MOC |
-| `запусти ресерч в ноутбуке "<id>" "<запрос>"` | Deep research в NotebookLM через API |
-| `почисти дубли в ноутбуке "<id>"` | Дедуп источников в нотбуке |
-| `создай вики "<slug>"` | Скелет новой LLM Wiki-space (project/corpus, RU/EN) |
-| `собери вики "<slug>"` | Скомпилировать сырьё в страницы (guard на `[[wikilinks]]`) |
-| `найди в заметках "<запрос>"` | FTS5-поиск по всему vault (bm25 + сниппеты) |
+| `process MyDocument.docx` | Download → parse → atomize → write into the vault |
+| `process note "Title"` | Enrich or atomize an existing note |
+| `process contacts "Contacts"` | A note with contacts → personal cards + Networking MOC |
+| `run research in notebook "<id>" "<query>"` | Deep research in NotebookLM via the API |
+| `clean duplicates in notebook "<id>"` | Dedup sources in the notebook |
+| `create wiki "<slug>"` | Skeleton of a new LLM Wiki space (project/corpus, RU/EN) |
+| `build wiki "<slug>"` | Compile the raw material into pages (guard on `[[wikilinks]]`) |
+| `search notes "<query>"` | FTS5 search across the whole vault (bm25 + snippets) |
 
-Режимы обработки: **Enrich** (короткая заметка → теги/ссылки/расширение, 1→1), **Atomize**
-(длинная → атомарные заметки + MOC, 1→N), **Contacts** (контакты → карточки + Networking MOC).
+Processing modes: **Enrich** (short note → tags/links/expansion, 1→1), **Atomize**
+(long → atomic notes + MOC, 1→N), **Contacts** (contacts → cards + Networking MOC).
 
 ## LLM Wiki
 
-Третий слой знаний — скомпилированная вики в стиле Карпати. Живёт в изолированной папке
-`<vault>/LLM Wiki/<slug>/`; атомарные заметки туда не попадают. Накапливается через явный
-merge: существующие `[[вики-ссылки]]` обязаны сохраняться, иначе compile падает с
-`WIKI_LINKS_LOST`. Два режима: **project** (фиксированные core-страницы: overview,
-architecture, components, workflows, glossary…) и **corpus** (растут только entities/concepts).
+The third knowledge layer is a compiled wiki in the Karpathy style. It lives in the isolated folder
+`<vault>/LLM Wiki/<slug>/`; atomic notes don't go there. It accumulates through an explicit
+merge: existing `[[wikilinks]]` must be preserved, otherwise compile fails with
+`WIKI_LINKS_LOST`. Two modes: **project** (fixed core pages: overview,
+architecture, components, workflows, glossary…) and **corpus** (only entities/concepts grow).
 
 ```bash
 python3 scripts/wiki_init.py demo --mode project --title "Demo Project"
@@ -88,29 +88,29 @@ python3 scripts/wiki_compile.py demo --since-last-compile
 python3 scripts/wiki_lint.py demo --strict
 ```
 
-Все скрипты пишут через единственный writer `vault_writer.py` — атомарные пайплайны и wiki
-делят одну точку записи.
+All scripts write through a single writer, `vault_writer.py` — the atomic pipelines and the wiki
+share one write point.
 
-## NotebookLM: первый вход
+## NotebookLM: First Login
 
-Сессия Google сохраняется в `~/.notebooklm/storage_state.json` — вход одноразовый.
+The Google session is saved in `~/.notebooklm/storage_state.json` — login is one-time.
 ```bash
 python3 -m venv .venv
 .venv/bin/python scripts/notebooklm_setup.py --skip-login
-# в ОТДЕЛЬНОМ окне терминала (нужен настоящий TTY):
-.venv/bin/notebooklm login   # войти в Google в Chromium → вернуться → ENTER
+# in a SEPARATE terminal window (needs a real TTY):
+.venv/bin/notebooklm login   # log in to Google in Chromium → come back → ENTER
 ```
-Дальше: `process_notebook.py <notebook_id>` (id — последний сегмент URL нотбука),
+Then: `process_notebook.py <notebook_id>` (id is the last segment of the notebook URL),
 `research_notebook.py run "<id>" "<query>" --mode deep`.
 
-## Требования
+## Requirements
 
-- Python 3.10+ (рекомендуется 3.11+), [rclone](https://rclone.org/) с доступом к Google Drive
-  (для `.docx`), Claude Code или Codex.
-- SQLite с FTS5 (stdlib `sqlite3`) — отдельная СУБД не нужна; проверяет `doctor.py`.
-- **Плагины Obsidian:** [Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)
-  (HTTP-интерфейс к vault) + [MCP Obsidian](https://github.com/MarkusPfundstein/mcp-obsidian)
-  (MCP-мост Claude Code ↔ Obsidian).
+- Python 3.10+ (3.11+ recommended), [rclone](https://rclone.org/) with access to Google Drive
+  (for `.docx`), Claude Code or Codex.
+- SQLite with FTS5 (stdlib `sqlite3`) — no separate DBMS needed; `doctor.py` checks this.
+- **Obsidian plugins:** [Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)
+  (HTTP interface to the vault) + [MCP Obsidian](https://github.com/MarkusPfundstein/mcp-obsidian)
+  (MCP bridge Claude Code ↔ Obsidian).
 
-Смежное: [NotebookLM++](https://github.com/howdeploy/notebooklmplusplus) — Chrome-расширение
-для массового импорта источников в NotebookLM (веб, YouTube, плейлисты, PDF-снимки).
+Related: [NotebookLM++](https://github.com/howdeploy/notebooklmplusplus) — a Chrome extension
+for bulk-importing sources into NotebookLM (web, YouTube, playlists, PDF snapshots).

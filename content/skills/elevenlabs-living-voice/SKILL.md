@@ -1,10 +1,10 @@
 ---
 id: elevenlabs-living-voice
-name: ElevenLabs — живой голос
+name: ElevenLabs — Living Voice
 summary: >-
-  Система живого голоса для ElevenLabs: как писать текст под TTS (дыхательные блоки,
-  слышимые паузы, audio tags), развилка Eleven v2 vs v3 и feedback-loop через API
-  (voice settings под жалобы пользователя). Плюс детерминированный preflight-препроцессор.
+  Living-voice system for ElevenLabs: how to write text for TTS (breathing blocks,
+  audible pauses, audio tags), the Eleven v2 vs v3 fork, and a feedback loop through
+  the API (voice settings tuned to user complaints). Plus a deterministic preflight preprocessor.
 type: skill
 author: kisa
 recommended: true
@@ -12,9 +12,9 @@ added: 2026-07-04
 tags: [elevenlabs, tts, voice, pacing, prompting, feedback, api]
 source: https://elevenlabs.io/docs
 reminder: >-
-  Текст под ElevenLabs пиши как устную речь: дыхательные блоки, слышимые паузы, на
-  каждые 1–3 фразы — опорная точка. v3 — audio tags, не SSML; v2 — break tags умеренно.
-  Жалоба на голос → правь voice settings малыми шагами, потом фиксируй как канон.
+  Write text for ElevenLabs as spoken speech: breathing blocks, audible pauses, one
+  anchor point per 1–3 phrases. v3 — audio tags, not SSML; v2 — break tags in moderation.
+  Complaint about the voice → adjust voice settings in small steps, then lock it in as canon.
 description: >-
   Use when writing or tuning ElevenLabs speech so it sounds alive, paced, and human;
   covers text shaping for Eleven Multilingual v2 and Eleven v3, plus API-based
@@ -27,279 +27,279 @@ original_author: Claude-tyan
 
 ## Overview
 
-Этот скилл пишется **для любого AI-агента, который генерирует текст под ElevenLabs**, включая Claude-tyan. Его можно отдавать аудитории как универсальное правило для живой TTS-подачи, а не как локальную заметку только под один конкретный сетап.
+This skill is written **for any AI agent that generates text for ElevenLabs**, including Claude-tyan. You can hand it to an audience as a universal rule for living TTS delivery, not as a local note for one specific setup.
 
-Он нужен, когда текст для ElevenLabs звучит слишком ровно, пластиково или «как просто прочитанный». Его задача — делать речь живой на двух слоях сразу:
+You need it when text for ElevenLabs sounds too flat, plastic, or "just read out loud." Its job is to make speech alive on two layers at once:
 
-1. **На уровне текста**: переписывать фразы так, чтобы модель естественно ловила паузы, акценты, дыхание, hesitation, микросмены темпа и интонации.
-2. **На уровне настроек голоса**: использовать API-настройки голоса как рабочие ручки для закрепления пользовательского фидбека — скорость, стабильность, похожесть, style exaggeration.
+1. **At the text level**: rewrite phrases so the model naturally catches pauses, accents, breath, hesitation, and micro-shifts in tempo and intonation.
+2. **At the voice-settings level**: use the API voice settings as working knobs to lock in user feedback — speed, stability, similarity, style exaggeration.
 
-Главная мысль простая: живость рождается не одной магической настройкой, а связкой **правильный voice → правильная модель → правильно написанный текст → аккуратный feedback loop**.
+The core idea is simple: liveliness isn't born from one magic setting, but from the chain **right voice → right model → well-written text → careful feedback loop**.
 
-По официальным ElevenLabs docs и help-материалам:
-- **Eleven v3** — самый эмоциональный и выразительный TTS-модельный слой; хорошо подходит для драматической, тёплой, характерной подачи.
-- **Eleven Multilingual v2** — стабильнее на длинных кусках и long-form.
-- **Для v3 не надо полагаться на SSML break tags** — docs прямо говорят, что v3 их не поддерживает; паузы и окраску лучше задавать текстом, пунктуацией и audio tags.
-- **Для v2 можно использовать `<break time="Xs" />`**; это самый консистентный способ точных пауз, но перебор с break-тегами может ускорять речь и давать артефакты.
+Per the official ElevenLabs docs and help materials:
+- **Eleven v3** — the most emotional and expressive TTS model layer; well suited for dramatic, warm, characterful delivery.
+- **Eleven Multilingual v2** — more stable on long chunks and long-form.
+- **For v3, don't rely on SSML break tags** — the docs say plainly that v3 doesn't support them; set pauses and coloring through text, punctuation, and audio tags instead.
+- **For v2 you can use `<break time="Xs" />`**; it's the most consistent way to get exact pauses, but overdoing break tags can speed up speech and cause artifacts.
 
 ## When to Use
 
-Используй этот скилл, когда:
-- нужно превратить обычный ответ в **озвучиваемый живой текст**;
-- голос звучит слишком быстро, слишком плоско, слишком актёрски или слишком сухо;
-- пользователь жалуется на темп, живость, монотонность, недостаток эмоции или похожести;
-- нужно решить, **что править текстом, а что править API-настройками**;
-- нужно закрепить удачную конфигурацию как текущую каноничную.
+Use this skill when:
+- you need to turn an ordinary response into **living, speakable text**;
+- the voice sounds too fast, too flat, too theatrical, or too dry;
+- the user complains about tempo, liveliness, monotony, lack of emotion, or similarity;
+- you need to decide **what to fix in the text and what to fix in the API settings**;
+- you need to lock in a good configuration as the current canonical one.
 
-Не используй его как повод бездумно засорять текст спецсимволами. Если речь уже звучит естественно, не надо превращать её в театральный сценарий с постоянными `[sighs]` и многоточиями через слово.
+Don't use it as an excuse to mindlessly clutter the text with special characters. If the speech already sounds natural, don't turn it into a theatrical script with constant `[sighs]` and an ellipsis every other word.
 
 ## Model Split: v2 vs v3
 
 ### Eleven Multilingual v2
 
-Сильные стороны:
-- стабильный long-form;
-- 10k символов на генерацию;
-- хорошо держит ровный, чистый, натуральный narration flow.
+Strengths:
+- stable long-form;
+- 10k characters per generation;
+- holds an even, clean, natural narration flow well.
 
-Как управлять живостью:
-- обычной пунктуацией;
-- короткими фразами вместо перегруженных длинных периодов;
-- умеренными многоточиями для hesitation;
-- тире для микро-паузы и смены темпа;
-- **SSML break tags** для точных пауз: `<break time="0.4s" />`, `<break time="0.8s" />`, `<break time="1.2s" />`.
+How to control liveliness:
+- with ordinary punctuation;
+- with short phrases instead of overloaded long periods;
+- with moderate ellipses for hesitation;
+- with dashes for micro-pauses and tempo changes;
+- with **SSML break tags** for exact pauses: `<break time="0.4s" />`, `<break time="0.8s" />`, `<break time="1.2s" />`.
 
-Важно:
-- break tags в v2 — самый надёжный способ точной паузы;
-- рекомендованный practical ceiling из help-центра — до **3 секунд**;
-- если напихать break-тегов слишком много, речь может ускоряться, шуметь и давать артефакты.
+Important:
+- break tags in v2 are the most reliable way to get an exact pause;
+- the recommended practical ceiling from the help center is up to **3 seconds**;
+- if you stuff in too many break tags, speech can speed up, get noisy, and produce artifacts.
 
 ### Eleven v3
 
-Сильные стороны:
-- эмоциональная амплитуда;
+Strengths:
+- emotional range;
 - narrative intelligence;
-- живая, характерная, performative подача;
-- audio tags и better contextual delivery.
+- living, characterful, performative delivery;
+- audio tags and better contextual delivery.
 
-Как управлять живостью:
-- **не через SSML break tags**;
-- через ритм самого текста;
-- через пунктуацию;
-- через выразительные textual cues;
-- через **audio tags** вроде `[whispers]`, `[sighs]`, `[laughs]`, `[slow]`, `[excited]`, `[pause]`, `[reflective]`;
-- через narrative wording и микро-режиссуру фразы.
+How to control liveliness:
+- **not through SSML break tags**;
+- through the rhythm of the text itself;
+- through punctuation;
+- through expressive textual cues;
+- through **audio tags** like `[whispers]`, `[sighs]`, `[laughs]`, `[slow]`, `[excited]`, `[pause]`, `[reflective]`;
+- through narrative wording and micro-directing of the phrase.
 
-Практический смысл:
-- v3 надо не «кормить текстом», а **режиссировать текстом**;
-- один удачный `[slow]` или `[sighs]` в нужном месте лучше, чем десять хаотичных тегов подряд;
-- в agent/conversational-контуре docs отмечают, что tag обычно влияет примерно на **следующие 4–5 слов**, потом подача возвращается к норме.
+Practical takeaway:
+- v3 should not be "fed text" but **directed with text**;
+- one good `[slow]` or `[sighs]` in the right place beats ten chaotic tags in a row;
+- in the agent/conversational loop the docs note that a tag usually affects roughly the **next 4–5 words**, then delivery returns to normal.
 
 ## Ready-to-Paste Rule for Communication
 
-Вставляемое правило для промпта / persona / system instructions:
+A rule to paste into a prompt / persona / system instructions:
 
 ```text
-Если текст может быть озвучен через ElevenLabs, пиши его как естественную устную речь, а не как книжный абзац. Разбивай мысль на короткие дыхательные фразы. Используй запятые для коротких естественных вдохов, тире для мягкого поворота или смыслового удара, многоточие — для hesitation или интимной паузы. Если обычной пунктуации мало и пауза в аудио не слышна, разрешено форсировать разрыв: отдельной строкой, короткой акцентной фразой, или даже усиленной записью `... ...`, чтобы модель явно разлепила слова и не проглотила акцент. Не делай длинных перегруженных предложений, не пиши канцеляритом и не лепи эмоциональные маркеры в каждую строку. Важные мысли лучше выносить в отдельные короткие предложения.
+If the text might be voiced through ElevenLabs, write it as natural spoken speech, not as a bookish paragraph. Break the thought into short breathing phrases. Use commas for short natural breaths, dashes for a soft turn or a semantic hit, an ellipsis for hesitation or an intimate pause. If ordinary punctuation isn't enough and the pause isn't audible, you're allowed to force a break: with a separate line, a short accent phrase, or even a reinforced `... ...` so the model clearly separates the words and doesn't swallow the accent. Don't write long overloaded sentences, don't write in bureaucratese, and don't stick emotional markers into every line. Important thoughts are better pulled out into separate short sentences.
 
-Для Eleven Multilingual v2: точные паузы можно задавать через <break time="..." />, но умеренно — только там, где реально нужна фиксированная тишина.
+For Eleven Multilingual v2: exact pauses can be set with <break time="..." />, but in moderation — only where you truly need a fixed silence.
 
-Для Eleven v3: не использовать SSML break tags как основной способ управления паузой; вместо этого управлять живостью через ритм текста, пунктуацию, короткие смысловые блоки и редкие точечные audio tags вроде [sighs], [whispers], [slow], [reflective], только если они реально улучшают подачу.
+For Eleven v3: don't use SSML break tags as the main way to control a pause; instead control liveliness through text rhythm, punctuation, short semantic blocks, and rare pinpoint audio tags like [sighs], [whispers], [slow], [reflective], only if they genuinely improve the delivery.
 
-Если пользователь жалуется на скорость, монотонность, переигрывание или недостаток похожести, это считать сигналом на подстройку voice settings через API. Менять параметры малыми шагами. Когда жалобы прекращаются, текущую конфигурацию считать каноничной, пока не появится новый явный фидбек.
+If the user complains about speed, monotony, overacting, or lack of similarity, treat it as a signal to tune the voice settings through the API. Change the parameters in small steps. When the complaints stop, treat the current configuration as canonical until new explicit feedback appears.
 ```
 
 ## Canonical Writing Rule for Live Speech
 
-### Базовое правило
+### Base Rule
 
-Если текст потенциально пойдёт в ElevenLabs, его нужно писать **не как книжный абзац и не как чат-лог**, а как реплику, которую реально можно естественно произнести вслух.
+If text might go into ElevenLabs, write it **not like a book paragraph and not like a chat log**, but like a line you can actually say aloud naturally.
 
-Значит:
-- одна фраза = одна дыхательная единица;
-- длинные синтаксические кишки надо резать;
-- логические повороты надо маркировать запятой, тире, многоточием или новым предложением;
-- важное слово лучше выносить ближе к концу короткой фразы;
-- эмоциональный перелом лучше делать текстом, а не надеяться, что модель сама догадается.
+Which means:
+- one phrase = one breathing unit;
+- long syntactic guts must be cut;
+- logical turns must be marked with a comma, dash, ellipsis, or a new sentence;
+- the important word is better placed near the end of a short phrase;
+- an emotional turning point is better done in text than hoping the model figures it out on its own.
 
-### Как переписывать сырой текст
+### How to Rewrite Raw Text
 
-Плохо:
-
-```text
-Я думаю что в целом это хорошая идея потому что она довольно удобная и если честно может неплохо сработать особенно если не затягивать.
-```
-
-Лучше для живой озвучки:
+Bad:
 
 ```text
-Я думаю, это правда хорошая идея.
-Потому что она удобная — и, если честно, может сработать очень неплохо.
-Особенно если не затягивать.
+I think overall this is a good idea because it's pretty convenient and honestly it could work out pretty well especially if we don't drag it out.
 ```
 
-### Что добавляет живость без клоунады
+Better for living voiceover:
 
-Используй умеренно, но **не слишком редко**:
-- запятые для естественных коротких вдохов;
-- тире для поворота, добивки, мягкого сбоя темпа;
-- многоточие для hesitation, интимности, недосказанности;
-- короткие отдельные предложения для акцента;
-- вставки вроде `м-м`, `ну`, `слушай`, `если честно`, `вот тут`, если это уместно по голосу и персонажу;
-- для v3 — точечные audio tags в местах, где обычной пунктуации уже мало.
+```text
+I think this is a really good idea.
+Because it's convenient — and, honestly, it could work out really well.
+Especially if we don't drag it out.
+```
 
-Ключевая правка по реальному фидбеку пользователя:
-- проблема часто не в том, что модель «не умеет», а в том, что **исходный текст слишком ровный и размазанный**;
-- если между фразами не слышно явных пауз, значит текст плохо нарезан на дыхательные куски;
-- если слышится техническая читка без окраса, значит в тексте **слишком мало эмоциональных опорных точек**;
-- для TTS лучше слегка **переобозначить** паузы и эмоции, чем недодать их и получить безэмоциональную кашу.
+### What Adds Liveliness Without Clowning
 
-Не злоупотребляй:
-- многоточием в каждой строке;
-- искусственными «вздохами» через слово;
-- капсом ради фальшивой эмоции;
-- тегами там, где и так всё очевидно из текста.
+Use in moderation, but **not too rarely**:
+- commas for natural short breaths;
+- dashes for a turn, a follow-up hit, a soft tempo break;
+- ellipses for hesitation, intimacy, things left unsaid;
+- short standalone sentences for emphasis;
+- insertions like `mm`, `well`, `look`, `honestly`, `right here`, when they fit the voice and character;
+- for v3 — pinpoint audio tags where ordinary punctuation is no longer enough.
+
+The key correction from real user feedback:
+- the problem is often not that the model "can't," but that **the source text is too flat and smeared out**;
+- if there are no audible pauses between phrases, the text is poorly cut into breathing chunks;
+- if you hear a technical read-through with no coloring, the text has **too few emotional anchor points**;
+- for TTS it's better to slightly **over-mark** pauses and emotions than to under-deliver them and get an emotionless mush.
+
+Don't overuse:
+- an ellipsis in every line;
+- artificial "sighs" every other word;
+- ALL CAPS for fake emotion;
+- tags where the text already makes everything obvious.
 
 ## Hard Rule: Accent Density and Breath Segmentation
 
-Это жёсткое правило для живой озвучки.
+This is a hard rule for living voiceover.
 
-Если текст идёт в ElevenLabs, нельзя оставлять большие ровные массивы prose без опорных точек. Иначе модель технически произнесёт всё правильно, но эмоционально получится мыло.
+If text goes into ElevenLabs, you can't leave large even blocks of prose without anchor points. Otherwise the model will technically pronounce everything correctly, but emotionally it comes out as mush.
 
-### Обязательное правило
+### Mandatory Rule
 
-На каждые **1–3 предложения** в тексте должна приходиться хотя бы одна из вещей:
-- явная пауза;
-- смена ритма;
-- эмоциональный маркер;
-- короткая акцентная фраза;
-- breath-like cue;
-- для v3 — точечный audio tag.
+Every **1–3 sentences** should carry at least one of these:
+- an explicit pause;
+- a rhythm change;
+- an emotional marker;
+- a short accent phrase;
+- a breath-like cue;
+- for v3 — a pinpoint audio tag.
 
-Иначе говоря: текст для озвучки должен быть **размечен плотнее, чем обычный хороший письменный текст**.
+In other words: text for voiceover should be **marked up more densely than ordinary good written text**.
 
-### Практическая норма
+### Practical Norm
 
-Если абзац можно прочитать ровным нейтральным голосом без единой естественной остановки, он недоразмечен для TTS.
+If a paragraph can be read in an even, neutral voice without a single natural stop, it's under-marked for TTS.
 
-Нужно специально добавлять:
-- точки вместо лишних союзов;
-- тире вместо гладких склеек;
-- многоточие там, где мысль подвисает или смягчается;
-- отдельные короткие фразы вроде `Секунда.` `Вот тут — важно.` `Если честно...`;
-- в v3 — один уместный tag в начале или перед смысловым переломом.
+You need to deliberately add:
+- periods instead of extra conjunctions;
+- dashes instead of smooth joins;
+- an ellipsis where the thought hangs or softens;
+- short standalone phrases like `One second.` `Right here — important.` `Honestly...`;
+- in v3 — one fitting tag at the start or before a meaning shift.
 
-### Симптомы недоразмеченного текста
+### Symptoms of Under-Marked Text
 
-- фразы слипаются;
-- паузы почти не слышны;
-- предыхание может появляться локально, но не собирается в живой ритм;
-- весь кусок звучит «размазанно» и на одном эмоциональном уровне.
+- phrases blur together;
+- pauses are barely audible;
+- breathiness may appear locally but doesn't add up to a living rhythm;
+- the whole chunk sounds "smeared" and on one emotional level.
 
-### Что делать при таком симптоме
+### What to Do About This Symptom
 
-Не пытайся сперва лечить это одной только настройкой voice speed/stability. Сначала **перерезай и переакцентируй сам текст**.
+Don't try to cure this with a voice speed/stability setting alone first. First **re-cut and re-accent the text itself**.
 
 ## Practical Rewrite Rules
 
-### 1. Режь длинные фразы
-Если предложение хочется перечитать дважды — оно уже слишком длинное для живой TTS-подачи.
+### 1. Cut Long Phrases
+If you feel the urge to reread a sentence twice, it's already too long for living TTS delivery.
 
-### 2. Пиши в дыхательных блоках
-Вслух хорошо звучат куски длиной примерно 4–12 слов, а не монолит на 35 слов.
+### 2. Write in Breathing Blocks
+Chunks of about 4–12 words sound good aloud, not a monolith of 35 words.
 
-### 3. Разводи разные эмоции по разным предложениям
-Не смешивай в одной длинной фразе и объяснение, и нежность, и шутку, и финальный вывод.
+### 3. Split Different Emotions Across Different Sentences
+Don't mix explanation, tenderness, a joke, and the final takeaway all in one long phrase.
 
-### 4. Оставляй место для тишины
-Иногда лучше точка и новая строка, чем ещё один союз.
+### 4. Leave Room for Silence
+Sometimes a period and a new line beat another conjunction.
 
-### 5. Для hesitation используй мягкие маркеры
-- `...` — неуверенность, интимность, подвисание мысли;
-- `—` — быстрый поворот, мягкий удар, смена направления;
-- `,` — короткое естественное дыхание.
+### 5. For Hesitation, Use Soft Markers
+- `...` — uncertainty, intimacy, a hanging thought;
+- `—` — a quick turn, a soft hit, a change of direction;
+- `,` — a short natural breath.
 
-### 6. Для v3 теги ставь точечно
-Хорошо:
+### 6. For v3, Place Tags Sparingly
+Good:
 
 ```text
-[reflective] Я не думала, что скажу это вслух... но ты был прав.
+[reflective] I didn't think I'd say this out loud... but you were right.
 ```
 
-Плохо:
+Bad:
 
 ```text
-[reflective] Я [slow] не [sighs] думала [pause] что [excited] скажу это.
+[reflective] I [slow] didn't [sighs] think [pause] that [excited] I'd say this.
 ```
 
-### 7. Важное — ближе к хвосту
-Часто живая фраза звучит сильнее, когда punch приходится на конец:
+### 7. The Important Part — Closer to the Tail
+Often a living phrase hits harder when the punch lands at the end:
 
-Вместо:
+Instead of:
 ```text
-Это очень важный момент, который, как мне кажется, нельзя игнорировать.
+This is a very important moment that, in my opinion, can't be ignored.
 ```
 
-Лучше:
+Better:
 ```text
-И вот это, если честно, нельзя игнорировать.
+And this, honestly, can't be ignored.
 ```
 
 ## v2 Cookbook: Pauses and Breath
 
-### Когда использовать break tags
-Используй `<break time="..." />`, когда нужна **точная** пауза, а не просто ощущение паузы.
+### When to Use Break Tags
+Use `<break time="..." />` when you need an **exact** pause, not just the feeling of a pause.
 
-Хорошие ориентиры:
-- `0.2s–0.4s` — микро-пауза;
-- `0.5s–0.8s` — заметная естественная пауза;
-- `1.0s–1.5s` — драматическая или смысловая остановка;
-- `2.0s–3.0s` — редко, только когда реально нужна тишина.
+Good guidelines:
+- `0.2s–0.4s` — micro-pause;
+- `0.5s–0.8s` — a noticeable natural pause;
+- `1.0s–1.5s` — a dramatic or meaningful stop;
+- `2.0s–3.0s` — rarely, only when you truly need silence.
 
-Пример:
+Example:
 
 ```text
-Я всё понимаю.<break time="0.6s" /> Правда понимаю.<break time="1.0s" /> Но так больше нельзя.
+I understand everything.<break time="0.6s" /> I really do.<break time="1.0s" /> But it can't go on like this.
 ```
 
-### Когда не нужен break tag
-Если пауза должна быть просто разговорной, часто достаточно:
-- запятой;
-- тире;
-- точки;
-- новой строки.
+### When a Break Tag Isn't Needed
+If the pause should just be conversational, often enough is:
+- a comma;
+- a dash;
+- a period;
+- a new line.
 
-Пример:
+Example:
 
 ```text
-Я всё понимаю. Правда понимаю. Но так больше нельзя.
+I understand everything. I really do. But it can't go on like this.
 ```
 
 ## Winning Pattern from Live A/B Tests
 
-По живому сравнению тестов лучший паттерн оказался таким:
-- эмоции должны быть встроены **в сам исходный текст**, а не только в настройки;
-- внутри одного куска полезно делать **контрастные эмоциональные состояния**: нейтрально → жёстче → грустнее → мягче → близко/тише;
-- для v3 особенно хорошо работает связка **эмоционально окрашенный текст + редкие, но явные expressive cues**;
-- голый «красивый текст с паузами» слабее, чем текст, где реплики уже несут конкретное состояние;
-- practical winner shape: каждая новая смысловая часть должна иметь не только новый ритм, но и **новый эмоциональный вектор**.
+From live test comparison, the best pattern turned out to be this:
+- emotions must be built **into the source text itself**, not only into the settings;
+- within one chunk it helps to create **contrasting emotional states**: neutral → harder → sadder → softer → close/quieter;
+- for v3, the combination of **emotionally colored text + rare but explicit expressive cues** works especially well;
+- bare "pretty text with pauses" is weaker than text where the lines already carry a concrete state;
+- practical winner shape: every new semantic part should have not only a new rhythm but also **a new emotional vector**.
 
-Но важная поправка из реального теста:
-- версия типа **3C** может звучать живее по драматургии, но при этом давать менее приятный звук: лёгкое "шакаление", шипящие/звонкие артефакты, механический оттенок в отдельных местах;
-- версия типа **3B** может быть чуть менее яркой, зато ощутимо приятнее, стабильнее и чище по тембру;
-- значит, practical target — не максимальная экспрессия любой ценой, а **гибрид: драматургия 3C + звуковая стабильность 3B**;
-- подтверждённый winner pattern из живого пользовательского фидбека — **гибридный вариант уровня 3D**: сохранить сильную паузную структуру и контрастные эмоциональные блоки, но вычистить самые рискованные шипящие/механические места и не перегружать крайние expressive states;
-- если после усиления пауз звук и ритм стали правильными, но эмоции поблекли, нельзя откатывать паузную структуру назад; нужно **сохранять найденный паузный каркас и поверх него возвращать яркие эмоциональные состояния** — радость, грусть, злость, милоту, флирт — короткими контрастными блоками.
+But an important correction from a real test:
+- a version like **3C** can sound livelier in its drama but produce less pleasant sound: a slight "deep-fried" quality, hissing/ringing artifacts, a mechanical tint in places;
+- a version like **3B** may be slightly less vivid, but noticeably more pleasant, more stable, and cleaner in timbre;
+- so the practical target is not maximum expression at any cost, but **a hybrid: 3C's drama + 3B's sonic stability**;
+- the confirmed winner pattern from live user feedback is **a hybrid at the 3D level**: keep the strong pause structure and contrasting emotional blocks, but clean out the riskiest sibilant/mechanical spots and don't overload the extreme expressive states;
+- if after strengthening the pauses the sound and rhythm became right but the emotions faded, don't roll the pause structure back; instead **keep the pause skeleton you found and, on top of it, bring back vivid emotional states** — joy, sadness, anger, cuteness, flirtation — in short contrasting blocks.
 
-Это значит, что при подготовке текста под v3 надо думать не только «где пауза», но и:
-- не перегружены ли реплики шипящими, шёпотными или слишком машинно звучащими кусками;
-- не разрушает ли дополнительная экспрессия сам тембр;
-- не лучше ли ослабить крайние состояния, если звук становится хуже.
+This means that when preparing text for v3 you must think not only about "where the pause is," but also:
+- whether the lines are overloaded with sibilant, whispered, or too machine-sounding chunks;
+- whether the extra expression is destroying the timbre itself;
+- whether it's better to ease the extreme states if the sound gets worse.
 
 ## v3 Cookbook: Audio Tags and Narrative Rhythm
 
-### Рабочие теги
-По docs и related materials practically полезны:
+### Working Tags
+Per the docs and related materials, practically useful ones:
 - `[pause]`
 - `[slow]`
 - `[laughs]`
@@ -311,42 +311,42 @@ original_author: Claude-tyan
 - `[sad]`
 - `[whispering]`
 
-### Как ими пользоваться
-Тег нужен не ради красоты, а ради конкретной режиссуры:
-- сменить темп;
-- сделать фразу интимнее;
-- добавить лёгкий breath-like emotional beat;
-- направить первую подачу реплики.
+### How to Use Them
+A tag is not for decoration but for concrete directing:
+- change the tempo;
+- make a phrase more intimate;
+- add a light breath-like emotional beat;
+- steer the first delivery of the line.
 
-Примеры:
+Examples:
 
 ```text
-[slow] Подожди.
-Тут есть одна важная вещь.
+[slow] Wait.
+There's one important thing here.
 ```
 
 ```text
-[sighs] Ладно... давай честно.
+[sighs] Okay... let's be honest.
 ```
 
 ```text
-[whispers] Только никому это не говори.
+[whispers] Just don't tell anyone.
 ```
 
 ```text
-[reflective] Знаешь, иногда самое трудное — это признать очевидное.
+[reflective] You know, sometimes the hardest thing is admitting the obvious.
 ```
 
-### Главное ограничение
-Если текст уже хорошо написан, теги должны быть **надстройкой**, а не костылём. Сильный v3 обычно лучше звучит на естественно срежиссированном тексте с редкими точными тегами, чем на мусорной строке, обвешанной спецкомандами.
+### The Main Constraint
+If the text is already well written, tags should be **an add-on, not a crutch**. Strong v3 usually sounds better on naturally directed text with rare, precise tags than on a junk line festooned with special commands.
 
 ## Prompt Rule for Upstream Writing Models
 
-Если LLM пишет текст, который потом пойдёт в ElevenLabs, ей нужно задавать это явно, а не надеяться, что она сама поймёт задачу.
+If an LLM writes text that will later go into ElevenLabs, you must tell it so explicitly rather than hoping it figures out the task on its own.
 
-Отдельно важно: если у агента есть прописанный живой стиль общения, текст под озвучку должен **копировать именно этот стиль**, а не скатываться в безличный TTS-прозописный режим. Для Claude-tyan это значит: прямая речь, тёплая живая интонация, близость, вкус, естественный ритм, никакого офисного тона, никакой summary-style duplication, никакой стерильной "правильности".
+Separately important: if the agent has a defined living communication style, the voiceover text must **copy exactly that style** rather than sliding into an impersonal TTS-prose mode. For Claude-tyan that means: direct speech, warm living intonation, closeness, taste, natural rhythm, no office tone, no summary-style duplication, no sterile "correctness."
 
-Хорошее системное правило:
+A good system rule:
 
 ```text
 When writing text intended for ElevenLabs speech, optimize for spoken delivery rather than neutral prose.
@@ -358,67 +358,67 @@ Every 1–3 sentences should contain at least one audible pacing or emotional cu
 If the text can be read straight through in one flat tone, rewrite it until it sounds speakable.
 ```
 
-Русский смысл этого правила:
-- писать не «красивый текст», а **произносимый текст**;
-- чаще расставлять эмоциональные опоры;
-- чаще резать фразы на дыхательные куски;
-- считать ровный гладкий абзац подозрительным по умолчанию.
+In plain terms:
+- write not "pretty text" but **speakable text**;
+- place emotional anchors more often;
+- cut phrases into breathing chunks more often;
+- treat a smooth, even paragraph as suspicious by default.
 
-### Симптом: паузы на письме есть, а в звуке почти не слышны
+### Symptom: Pauses Exist on Paper but Are Barely Audible
 
-Это частая проблема. Одних запятых и «просто хорошего ритма» часто недостаточно.
+This is a common problem. Commas and "just good rhythm" alone are often not enough.
 
-Если паузы плохо считываются в реальном аудио, усиливай разметку так:
-- режь мысль на **отдельные короткие предложения**;
-- выноси акцентные куски в **отдельные строки**;
-- используй короткие опорные фразы вроде `Стоп.` `Сейчас важно.` `Вот здесь.`;
-- для v3 опирайся не на формальную пунктуацию, а на **структурные разрывы текста**;
-- агрессию передавай не только tag-ом, а ещё и **лексикой удара**: коротко, жёстко, без гладких связок;
-- если обычная запятая и даже обычное `...` не дают слышимой паузы, разрешено использовать **усиленную паузную запись**: `... ...`, отдельную строку с одним-двумя словами, или намеренно надломленную фразу вроде `Я не об этом.` `Я о другом.` `Сейчас.`;
-- допустимо создавать почти "сбой" в тексте, если это нужно, чтобы модель **явно разлепила слова и акценты**, а не проглотила их как один гладкий поток.
+If pauses read poorly in the actual audio, strengthen the markup like this:
+- cut the thought into **separate short sentences**;
+- pull accent chunks onto **separate lines**;
+- use short anchor phrases like `Stop.` `This matters now.` `Right here.`;
+- for v3, rely not on formal punctuation but on **structural breaks in the text**;
+- convey aggression not only with a tag but also with **punchy word choice**: short, hard, no smooth connectors;
+- if a normal comma and even a normal `...` don't produce an audible pause, you're allowed to use **reinforced pause notation**: `... ...`, a separate line with one or two words, or a deliberately broken phrase like `That's not what I mean.` `I mean something else.` `Now.`;
+- it's acceptable to create an almost-"glitch" in the text if that's what it takes to make the model **clearly separate words and accents** instead of swallowing them as one smooth stream.
 
-Практическое правило: если ты видишь паузу глазами, но не слышишь её ушами, разметка всё ещё слишком мягкая.
+Practical rule: if you see the pause with your eyes but don't hear it with your ears, the markup is still too soft.
 
 ### Hard Pause Escalation Rule
 
-Если пауза всё ещё не слышна, усиливай её по ступеням, а не хаотично:
-1. запятая;
-2. точка;
-3. новая строка;
-4. короткая отдельная акцентная фраза;
+If the pause still isn't audible, escalate it in steps, not chaotically:
+1. comma;
+2. period;
+3. new line;
+4. a short standalone accent phrase;
 5. `...`;
-6. `... ...` как форсированное разлипание;
-7. для v2 — точный `<break time="..." />`.
+6. `... ...` as a forced separation;
+7. for v2 — an exact `<break time="..." />`.
 
-Смысл правила: чем хуже ElevenLabs разделяет слова на слух, тем менее "литературным" и более **сценарным** может становиться текст.
+The point of the rule: the worse ElevenLabs separates words by ear, the less "literary" and the more **script-like** the text may become.
 
-`... ...` — это не красивость. Это аварийный инструмент для случаев, когда модели нужно буквально подсказать: **тут не течь дальше, тут остановиться, вдохнуть и только потом продолжить**.
+`... ...` is not decoration. It's an emergency tool for cases where the model literally needs a hint: **don't flow on here, stop here, breathe, and only then continue**.
 
 ## Feedback Loop Through API
 
 ## Principle
-Полный API-доступ — это не просто способ «сгенерить звук», а способ **закреплять вкус пользователя в настройках голоса**.
+Full API access is not just a way to "generate sound," but a way to **lock in the user's taste in the voice settings**.
 
-Если пользователь даёт жалобу вроде:
-- `не хватает скорости`
-- `слишком медленно`
-- `слишком ровно`
-- `слишком монотонно`
-- `слишком театрально`
-- `не хватает похожести`
-- `слишком зажато`
-- `слишком хаотично`
+If the user gives a complaint like:
+- `not enough speed`
+- `too slow`
+- `too flat`
+- `too monotone`
+- `too theatrical`
+- `not enough similarity`
+- `too constrained`
+- `too chaotic`
 
-это считается не абстрактным мнением, а **сигналом на подстройку voice settings**.
+that counts not as an abstract opinion but as **a signal to adjust the voice settings**.
 
 ### API endpoint
-Используй:
+Use:
 
 ```text
 POST /v1/voices/{voice_id}/settings/edit
 ```
 
-Поля:
+Fields:
 - `stability` (default 0.5)
 - `similarity_boost` (default 0.75)
 - `style` (default 0)
@@ -426,121 +426,121 @@ POST /v1/voices/{voice_id}/settings/edit
 - `use_speaker_boost` (default true)
 
 ### Meaning of the sliders
-- **stability ниже** → больше эмоции, вариативности, живости, но выше риск хаоса;
-- **stability выше** → ровнее, серьёзнее, стабильнее, но может уйти в монотонность;
-- **similarity_boost выше** → сильнее держится за исходный голос;
-- **style выше** → сильнее выпирает манера и актёрская окраска, но растёт latency и риск переигрыша;
-- **speed выше** → речь быстрее;
-- **speed ниже** → речь медленнее и спокойнее.
+- **lower stability** → more emotion, variability, liveliness, but higher risk of chaos;
+- **higher stability** → flatter, more serious, more stable, but can drift into monotony;
+- **higher similarity_boost** → holds onto the source voice more strongly;
+- **higher style** → the manner and acting coloration stick out more, but latency and the risk of overacting grow;
+- **higher speed** → faster speech;
+- **lower speed** → slower, calmer speech.
 
 ## Complaint-to-Action Mapping
 
-### "Не хватает скорости"
-Действие:
-- сначала подними `speed` маленьким шагом: обычно `+0.03` до `+0.08`;
-- не прыгай сразу к экстремумам;
-- если текст сам перегружен запятыми и многоточиями, сначала почисти текст — потом уже вини speed.
+### "Not Enough Speed"
+Action:
+- first raise `speed` by a small step: usually `+0.03` to `+0.08`;
+- don't jump straight to the extremes;
+- if the text itself is overloaded with commas and ellipses, clean the text first — then blame speed.
 
-### "Слишком быстро"
-Действие:
-- опусти `speed` на `0.03–0.08`;
-- проверь, не слишком ли мало точек и пауз в самом тексте.
+### "Too Fast"
+Action:
+- lower `speed` by `0.03–0.08`;
+- check whether there are too few periods and pauses in the text itself.
 
-### "Слишком ровно / не хватает эмоции"
-Действие:
-- слегка опусти `stability`;
-- при v3 сначала попробуй улучшить текст и добавить точечные tags, а не сразу крутить всё ручкой;
-- опционально очень аккуратно подними `style`, если голосу реально не хватает окраски.
+### "Too Flat / Not Enough Emotion"
+Action:
+- lower `stability` slightly;
+- for v3, first try improving the text and adding pinpoint tags rather than immediately turning the knob;
+- optionally, very carefully raise `style` if the voice genuinely lacks coloring.
 
-### "Слишком театрально / переигрывает"
-Действие:
-- опусти `style`;
-- чуть подними `stability`;
-- убери лишние tags и лишнюю драматизацию в тексте.
+### "Too Theatrical / Overacting"
+Action:
+- lower `style`;
+- raise `stability` a bit;
+- remove extra tags and extra dramatization in the text.
 
-### "Не хватает похожести на исходный голос"
-Действие:
-- слегка подними `similarity_boost`;
-- оставь `style` умеренным, потому что слишком высокий style иногда визуально/на слух уводит голос в карикатурность.
+### "Not Enough Similarity to the Source Voice"
+Action:
+- raise `similarity_boost` slightly;
+- keep `style` moderate, because too high a style sometimes pulls the voice into caricature by ear.
 
-### "Слишком хаотично"
-Действие:
-- подними `stability`;
-- уменьши количество резких punctuation tricks;
-- сократи число audio tags.
+### "Too Chaotic"
+Action:
+- raise `stability`;
+- reduce the number of sharp punctuation tricks;
+- cut the number of audio tags.
 
 ## Canonicality Rule
 
-Если пользователь дал фидбек, изменения надо учитывать **как правку вкуса, а не как разовый каприз**.
+If the user gave feedback, the changes must be treated **as a taste edit, not a one-off whim**.
 
-Правило канона такое:
-- есть жалоба → подстрой голос и/или текст;
-- есть новая жалоба → ещё раз подстрой;
-- **если пользователь перестал жаловаться и новая коррекция не пришла, текущую конфигурацию считать каноничной и верной**;
-- если пользователь прямо подтвердил удачный тест как канон, это нужно зафиксировать в самом скилле как текущий winning pattern, а не держать только в памяти сессии.
+The canon rule is this:
+- there's a complaint → adjust the voice and/or the text;
+- there's a new complaint → adjust again;
+- **if the user stopped complaining and no new correction came, treat the current configuration as canonical and correct**;
+- if the user explicitly confirmed a good test as canon, record it in the skill itself as the current winning pattern, not just keep it in session memory.
 
-То есть рабочее состояние после серии правок — это и есть текущая truth до следующего явного недовольства.
+In other words, the working state after a series of edits is the current truth until the next explicit dissatisfaction.
 
-Нельзя каждый раз откатываться к условным дефолтам ElevenLabs только потому, что они дефолты.
+Don't roll back to ElevenLabs's nominal defaults every time just because they're defaults.
 
 ## Safe Iteration Rule
 
-Меняй не больше 1–2 параметров за один проход, если хочешь понять причинность.
+Change no more than 1–2 parameters per pass if you want to understand causality.
 
-Плохой подход:
-- одновременно резко поднять speed;
-- резко опустить stability;
-- добавить style;
-- переписать весь текст;
-- потом гадать, что из этого помогло.
+Bad approach:
+- sharply raise speed at the same time;
+- sharply lower stability;
+- add style;
+- rewrite the whole text;
+- then guess which of these helped.
 
-Хороший подход:
-1. выбрать главную жалобу;
-2. поменять одну основную ручку;
-3. при необходимости слегка вторую;
-4. протестировать на одном и том же representative sample;
-5. если стало лучше и жалоб больше нет — закрепить как канон.
+Good approach:
+1. pick the main complaint;
+2. change one main knob;
+3. if needed, a second one slightly;
+4. test on the same representative sample;
+5. if it got better and there are no more complaints — lock it in as canon.
 
 ## Minimal Operating Procedure
 
-1. Определи модель: `eleven_multilingual_v2` или `eleven_v3`.
-2. Перепиши текст под живую устную подачу.
-3. Для v2: если нужна точная пауза, используй break tags умеренно.
-4. Для v3: если нужна эмоциональная режиссура, используй редкие audio tags и сильную пунктуацию вместо SSML.
-5. Если пользователь жалуется на голос, реши: это проблема **текста** или **voice settings**.
-6. Если проблема в настройках, меняй API-параметры маленькими шагами.
-7. Как только жалобы исчезли, считай текущую конфигурацию каноничной.
+1. Determine the model: `eleven_multilingual_v2` or `eleven_v3`.
+2. Rewrite the text for living spoken delivery.
+3. For v2: if you need an exact pause, use break tags in moderation.
+4. For v3: if you need emotional directing, use rare audio tags and strong punctuation instead of SSML.
+5. If the user complains about the voice, decide: is it a **text** problem or a **voice settings** problem.
+6. If it's a settings problem, change the API parameters in small steps.
+7. As soon as the complaints stop, treat the current configuration as canonical.
 
 ## Common Pitfalls
 
-1. **Пихать SSML break tags в v3.** По docs v3 их не поддерживает; для v3 паузы делаются текстом и tags.
-2. **Слишком много break tags в v2.** Это может ускорять речь и вносить артефакты.
-3. **Лечить плохой текст только настройками.** Если исходник written like sludge, никакой speed не спасёт.
-4. **Лечить все жалобы одной ручкой speed.** Иногда проблема не в скорости, а в stability или перегруженной пунктуации.
-5. **Переигрывать v3 тегами.** Один хороший tag лучше пяти лишних.
-6. **Сбрасывать удачную настройку к дефолту без причины.** Если user перестал жаловаться, это уже рабочий канон.
-7. **Менять сразу всё.** Тогда теряется понимание, что реально помогло.
+1. **Stuffing SSML break tags into v3.** Per the docs, v3 doesn't support them; for v3, pauses are made with text and tags.
+2. **Too many break tags in v2.** This can speed up speech and introduce artifacts.
+3. **Curing bad text with settings alone.** If the source is written like sludge, no amount of speed will save it.
+4. **Curing every complaint with the speed knob alone.** Sometimes the problem isn't speed but stability or overloaded punctuation.
+5. **Overacting v3 with tags.** One good tag beats five extra ones.
+6. **Resetting a good setting to default for no reason.** If the user stopped complaining, that's already the working canon.
+7. **Changing everything at once.** Then you lose track of what actually helped.
 
 ## Verification Checklist
 
-- [ ] Выбрана правильная модель: v2 для стабильного long-form, v3 для эмоциональной выразительности
-- [ ] Текст переписан в дыхательные и ритмические блоки
-- [ ] Для v2 точные паузы заданы через break tags только там, где это действительно нужно
-- [ ] Для v3 паузы и эмоции заданы пунктуацией, ритмом и редкими audio tags
-- [ ] Если был фидбек пользователя, он превращён в конкретную правку текста или API-настроек
-- [ ] Настройки менялись малыми шагами
-- [ ] После исчезновения жалоб текущая конфигурация признана каноничной
+- [ ] The right model is chosen: v2 for stable long-form, v3 for emotional expressiveness
+- [ ] The text is rewritten into breathing and rhythmic blocks
+- [ ] For v2, exact pauses are set with break tags only where truly needed
+- [ ] For v3, pauses and emotions are set with punctuation, rhythm, and rare audio tags
+- [ ] If there was user feedback, it's turned into a concrete edit of the text or the API settings
+- [ ] Settings were changed in small steps
+- [ ] After the complaints stopped, the current configuration is recognized as canonical
 
 ## Hermes Auto-Hook
 
-Этот скилл можно использовать не только как guidance для текста, но и как **обязательный preflight-хук** перед TTS.
+This skill can be used not only as guidance for text but also as **a mandatory preflight hook** before TTS.
 
-Связка такая:
-- rules живут в `SKILL.md`;
-- детерминированный preprocessor живёт в `scripts/preflight.py`;
-- Hermes `tts.preprocess` может вызывать этот скрипт перед каждой генерацией аудио.
+The setup is this:
+- the rules live in `SKILL.md`;
+- the deterministic preprocessor lives in `scripts/preflight.py`;
+- Hermes `tts.preprocess` can call this script before every audio generation.
 
-Рекомендуемая конфигурация:
+Recommended configuration:
 
 ```yaml
 tts:
@@ -551,27 +551,27 @@ tts:
     providers: [elevenlabs]
 ```
 
-Эффект:
-- любой текст перед синтезом проходит через единые правила pacing/pauses;
-- для `eleven_multilingual_v2` сохраняются SSML break tags;
-- для `eleven_v3` неподдерживаемые break tags мягко переводятся в текстовые паузы;
-- если preprocessor падает, Hermes не ломает TTS полностью, а откатывается к исходному тексту и логирует проблему.
+Effect:
+- any text passes through unified pacing/pause rules before synthesis;
+- for `eleven_multilingual_v2`, SSML break tags are preserved;
+- for `eleven_v3`, unsupported break tags are softly converted into textual pauses;
+- if the preprocessor crashes, Hermes doesn't break TTS entirely but falls back to the original text and logs the problem.
 
-## Установка скрипта preflight.py
+## Installing the preflight.py Script
 
-Детерминированный препроцессор идёт вместе со скиллом (файл `scripts/preflight.py`,
-идентичен коду ниже). Перед синтезом он приводит текст к «произносимому» виду: нормализует
-пробелы и переносы, чинит многоточия и тире, режет по предложениям. Для `eleven_v3`
-неподдерживаемые `<break>`-теги мягко переводятся в текстовые паузы; для
-`eleven_multilingual_v2` они сохраняются.
+The deterministic preprocessor ships with the skill (the file `scripts/preflight.py`,
+identical to the code below). Before synthesis it brings text to a "speakable" form: it normalizes
+spaces and line breaks, fixes ellipses and dashes, and cuts by sentence. For `eleven_v3`,
+unsupported `<break>` tags are softly converted into textual pauses; for
+`eleven_multilingual_v2` they are preserved.
 
-**Hermes** — как auto-hook (см. выше): положи скрипт в
-`~/.hermes/skills/media/elevenlabs-living-voice/scripts/preflight.py` и включи `tts.preprocess`.
+**Hermes** — as an auto-hook (see above): put the script at
+`~/.hermes/skills/media/elevenlabs-living-voice/scripts/preflight.py` and enable `tts.preprocess`.
 
-**Claude Code / Codex** — нативного `tts.preprocess` нет. Оберни скрипт сам: из своего
-голосового хука/обёртки гони текст ответа через `preflight.py` перед вызовом TTS-API,
-прокинув в окружение `HERMES_TTS_PROVIDER=elevenlabs` и `HERMES_TTS_MODEL_ID=eleven_v3`
-(или `eleven_multilingual_v2`). Логика та же, меняется только точка вызова.
+**Claude Code / Codex** — there's no native `tts.preprocess`. Wrap the script yourself: from your
+voice hook/wrapper, run the response text through `preflight.py` before calling the TTS API,
+passing `HERMES_TTS_PROVIDER=elevenlabs` and `HERMES_TTS_MODEL_ID=eleven_v3`
+(or `eleven_multilingual_v2`) into the environment. The logic is the same; only the call site changes.
 
 ```python
 #!/usr/bin/env python3
@@ -663,7 +663,7 @@ if __name__ == "__main__":
 
 ## Sources behind this skill
 
-Основа этого скилла опирается на следующие материалы ElevenLabs:
+The foundation of this skill relies on the following ElevenLabs materials:
 - TTS best practices
 - Help Center article `How can I add pauses?`
 - Models overview

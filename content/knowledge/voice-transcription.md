@@ -1,10 +1,10 @@
 ---
 id: voice-transcription
-name: 'Расшифровка голоса (STT): начни бесплатно с Groq'
+name: 'Voice transcription (STT): start free with Groq'
 summary: >-
-  Голос в текст для агента (Telegram-голосовухи → текст). Старт бесплатный: Groq Whisper,
-  free tier 2000 запросов/день. Апгрейд качества за деньги — gpt-4o-mini-transcribe через
-  Nous (~$0.19/час), без отдельного OpenAI-ключа. Кому что и как включить.
+  Voice to text for your agent (Telegram voice messages → text). Free to start: Groq Whisper,
+  free tier 2000 requests/day. Paid quality upgrade — gpt-4o-mini-transcribe via Nous
+  (~$0.19/hour), without a separate OpenAI key. Who needs what and how to turn it on.
 type: knowledge
 author: kisa
 recommended: false
@@ -13,71 +13,72 @@ tags: [voice, stt, transcription, whisper, groq, openai, hermes, agent]
 source: https://console.groq.com/docs/speech-to-text
 ---
 
-# Расшифровка голоса (STT)
+# Voice transcription (STT)
 
-Обратная сторона голоса: не агент говорит, а агент СЛУШАЕТ. Прислал голосовуху в Telegram —
-агент расшифровал в текст и работает с ним. Это STT (speech-to-text). Знание `agent-voice` —
-про вывод (TTS); это — про вход.
+The flip side of voice: the agent doesn't talk, the agent LISTENS. You send a voice message in
+Telegram — the agent transcribes it to text and works with it. This is STT (speech-to-text). The
+`agent-voice` knowledge is about output (TTS); this one is about input.
 
-## Старт — Groq Whisper, БЕСПЛАТНО
+## Start — Groq Whisper, FREE
 
-Точка входа одна и очевидная: **Groq раздаёт Whisper бесплатно**. Free tier — **2000 запросов
-транскрипции в день**. Для личного голоса и Telegram это НОЛЬ затрат, перерасти лимит руками
-почти нереально.
+There's one obvious entry point: **Groq gives Whisper away for free**. Free tier — **2000
+transcription requests per day**. For personal voice and Telegram that's ZERO cost; outgrowing
+the limit by hand is nearly impossible.
 
-- `whisper-large-v3-turbo` — быстрый (228× реального времени, час аудио за ~15 сек),
-  мультиязычный. Бери его по умолчанию.
-- `whisper-large-v3` — чуть точнее, медленнее (217×), файл до 100 МБ.
-- Биллинг (если вообще выйдешь за free) — минимум 10 сек на запрос.
+- `whisper-large-v3-turbo` — fast (228× realtime, an hour of audio in ~15 sec), multilingual.
+  Take it by default.
+- `whisper-large-v3` — slightly more accurate, slower (217×), files up to 100 MB.
+- Billing (if you ever exceed free) — minimum 10 sec per request.
 
-Groq **совместим с OpenAI API**: тот же клиент, меняешь `base_url` на Groq и ключ
-(`GROQ_API_KEY`) — код транскрипции не переписываешь. Ключ бесплатный на console.groq.com.
+Groq is **compatible with the OpenAI API**: same client, you swap `base_url` to Groq and the key
+(`GROQ_API_KEY`) — you don't rewrite the transcription code. The key is free at console.groq.com.
 
-Минус один: на смешанной техно-ру/en речи качество **слабее**. Для быстрых заметок хватает;
-нужна точность — апгрейд ниже.
+One downside: on mixed technical ru/en speech the quality is **weaker**. Good enough for quick
+notes; if you need accuracy — upgrade below.
 
-## Апгрейд качества — OpenAI STT (когда Groq не тянет)
+## Quality upgrade — OpenAI STT (when Groq can't keep up)
 
-Платишь ТОЛЬКО когда бесплатного Groq мало по качеству. Лучший по цене/качеству —
-**`gpt-4o-mini-transcribe`**: на смешанной ру/en технической речи разборчивее всех, а стоит
-смешные деньги.
+You pay ONLY when free Groq isn't good enough on quality. Best price/quality —
+**`gpt-4o-mini-transcribe`**: on mixed ru/en technical speech it's the most intelligible of all,
+and it costs a laughable amount.
 
-| Модель | Цена | За час | Качество (тест на ру/en речи) |
+| Model | Price | Per hour | Quality (test on ru/en speech) |
 |---|---|---|---|
-| **Groq `whisper-large-v3-turbo`** | **free** (2000/день) | **$0** | ок для заметок, слабее на смеси |
-| Groq `whisper-large-v3` | free / $0.111/час | $0.111 | слабее |
-| **OpenAI `gpt-4o-mini-transcribe`** | $0.003/мин | **~$0.19** | лучший на тесте |
-| OpenAI `gpt-4o-transcribe` | $0.006/мин | ~$0.38 | лучше Groq, хуже mini |
-| OpenAI `whisper-1` | $0.006/мин | $0.36 | слабо |
+| **Groq `whisper-large-v3-turbo`** | **free** (2000/day) | **$0** | ok for notes, weaker on mixed |
+| Groq `whisper-large-v3` | free / $0.111/hour | $0.111 | weaker |
+| **OpenAI `gpt-4o-mini-transcribe`** | $0.003/min | **~$0.19** | best in test |
+| OpenAI `gpt-4o-transcribe` | $0.006/min | ~$0.38 | better than Groq, worse than mini |
+| OpenAI `whisper-1` | $0.006/min | $0.36 | weak |
 
-Даже 100 часов голоса в месяц на `gpt-4o-mini-transcribe` — это ~$18–19. За час аудио —
-меньше 20 центов. Для личного объёма — доли цента за голосовуху.
+Even 100 hours of voice per month on `gpt-4o-mini-transcribe` is ~$18–19. Per hour of audio —
+less than 20 cents. For personal volume — fractions of a cent per voice message.
 
-**Через Nous (для Hermes) — без отдельного OpenAI-биллинга.** Nous-гейтвей гоняет
-OpenAI-аудио через твою Nous-подписку: не заводишь OpenAI API key, всё одним счётом. Наценка
-— **~+5%** поверх официальных цен OpenAI (по замеру KISA; официальная модель гейтвея — «одна
-подписка вместо пяти», отдельной строки STT-прайса Nous публично не выкладывает). +5% — это
-~$0.20 за час вместо $0.19. Не драма.
+**Via Nous (for Hermes) — no separate OpenAI billing.** The Nous gateway runs OpenAI audio
+through your Nous subscription: you don't set up an OpenAI API key, everything on one bill. The
+markup is **~+5%** over OpenAI's official prices (measured by KISA; the gateway's official pitch
+is "one subscription instead of five" — Nous doesn't publicly publish a separate STT price line).
++5% is ~$0.20 per hour instead of $0.19. Not a drama.
 
-## Как включить (по клиентам)
+## How to turn it on (by client)
 
-**Hermes** — провайдер переключается конфигом:
+**Hermes** — the provider is switched via config:
 ```bash
-# бесплатный старт:
-hermes config set stt.provider groq          # GROQ_API_KEY в ~/.hermes/.env
-# апгрейд качества через Nous:
+# free start:
+hermes config set stt.provider groq          # GROQ_API_KEY in ~/.hermes/.env
+# quality upgrade via Nous:
 hermes config set stt.provider openai
 hermes config set stt.openai.model gpt-4o-mini-transcribe
 hermes gateway restart
 ```
 
-**Claude Code / Codex** — нативного STT нет, собирается сам (как и голос в `agent-voice`):
-1. Ключ провайдера в `.env` (`GROQ_API_KEY` или `OPENAI_API_KEY`), не в общий файл.
-2. Скрипт: аудио → transcription-эндпоинт (Groq, OpenAI-совместимый, или OpenAI) → текст.
-3. Вешаешь на **хук**: входящая голосовуха → транскрипт → в контекст агента автоматически.
+**Claude Code / Codex** — no native STT, you build it yourself (like voice in `agent-voice`):
+1. Provider key in `.env` (`GROQ_API_KEY` or `OPENAI_API_KEY`), not in a shared file.
+2. Script: audio → transcription endpoint (Groq, OpenAI-compatible, or OpenAI) → text.
+3. Hang it on a **hook**: incoming voice message → transcript → into the agent's context
+   automatically.
 
-## Вывод
+## Takeaway
 
-Начни с бесплатного Groq turbo — покрывает личный голос без единого рубля. Плати за
-`gpt-4o-mini-transcribe` (через Nous, если ты на Hermes) только тогда, когда качество Groq на
-твоей речи реально мешает. Сначала бесплатно — деньги за качество и только по нужде.
+Start with free Groq turbo — it covers personal voice without spending a dime. Pay for
+`gpt-4o-mini-transcribe` (via Nous if you're on Hermes) only when Groq's quality on your speech
+genuinely gets in the way. Free first — money for quality, and only when you need it.

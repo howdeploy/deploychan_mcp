@@ -1,82 +1,90 @@
 ---
 id: agent-harness
-name: Собрать свой harness
+name: Build Your Own Harness
 summary: >-
-  Прокачка «строишь всё вокруг модели»: хуки (контроль над циклом + кэш + RTK),
-  промпты и правила как стабильный префикс, память как состояние между сессиями.
-  Модель дают готовой и могут урезать — harness ты настраиваешь сам и держишь под контролем.
+  The "build everything around the model" leveling-up run: hooks (control over the loop +
+  cache + RTK), prompts and rules as a stable prefix, memory as state between sessions.
+  The model comes prebuilt and can be cut down — the harness you configure yourself and
+  keep under control.
 type: route
 author: kisa
 recommended: true
 added: 2026-07-04
-tags: [harness, hooks, prompt, memory, cache, прокачка, agent]
+tags: [harness, hooks, prompt, memory, cache, leveling-up, agent]
 steps:
-  - title: Хуки, кэш и harness — рамка и контроль
+  - title: Hooks, cache, and the harness — the frame and control
     action: configure
     ref: hooks
     body: >-
-      Понять рамку (модель ≠ агент) и вернуть контроль над циклом: PreToolUse-защита от
-      опасного, якорь на SessionStart/PreCompact, кэш по префиксу (чтение ~10%), RTK на
-      вывод команд (−60–90%). Это защита и экономика harness.
-  - title: Промпты и правила — стабильный префикс
+      Understand the frame (the model ≠ the agent) and take back control of the loop:
+      PreToolUse protection against dangerous actions, an anchor on SessionStart/PreCompact,
+      prefix caching (reads at ~10%), RTK on command output (−60–90%). This is the
+      harness's protection and economics.
+  - title: Prompts and rules — the stable prefix
     action: read
     ref: agent-personality
     body: >-
-      Роль, правила ответов и стиль в файле инструкций. Это фундамент префикса — держи
-      стабильным ради кэша, ужимай один раз на старте, а не по ходу: тронул начало — сжёг кэш.
-  - title: Память — состояние между сессиями
+      Role, answer rules, and style in the instructions file. This is the foundation of the
+      prefix — keep it stable for the cache's sake, trim it once at the start rather than as
+      you go: touch the beginning and you burn the cache.
+  - title: Memory — state between sessions
     action: configure
     ref: agent-memory
     body: >-
-      Долговременная память живёт в harness, не в модели. Подобрать стек (вики → FTS5 →
-      вектор → Curator → GEPA), чтобы контекст и правила переживали компакт и рестарт сессии.
+      Long-term memory lives in the harness, not in the model. Pick a stack (wiki → FTS5 →
+      vector → Curator → GEPA) so that context and rules survive a compaction and a session
+      restart.
 ---
 
-# Собрать свой harness
+# Build Your Own Harness
 
-Настроить системный промпт — улучшить ОДИН вход модели. Собрать harness — выстроить всё
-вокруг неё: защиту, экономию, память. Модель тебе дают готовой и в любой момент могут урезать
-ей мышление или сменить системные инструкции. Harness ты настраиваешь сам, и он остаётся под
-твоим контролем. Этот маршрут — как собрать его по трём опорам: хуки, промпты, память.
+Tuning the system prompt improves ONE input to the model. Building a harness means
+constructing everything around it: protection, savings, memory. The model comes
+ready-made and at any moment its reasoning can be cut down or its system instructions
+swapped out. The harness you configure yourself, and it stays under your control. This
+route is how to build it on three pillars: hooks, prompts, memory.
 
-**Шаг 0 — пойми, кто ты.** Harness у каждого клиента свой: у Claude Code хуки и кэш из
-коробки, у Codex хуки почти те же, у Hermes — программные хуки на Python. Определи свой
-рантайм и модель через дисциплину базового скилла `tailored-install` — почти каждый шаг ниже
-ветвится от того, в каком клиенте ты запущен.
+**Step 0 — figure out who you are.** Every client has its own harness: Claude Code has
+hooks and caching out of the box, Codex has almost the same hooks, Hermes has
+programmatic hooks in Python. Identify your runtime and model through the discipline of
+the base skill `tailored-install` — almost every step below branches on which client
+you're running in.
 
-## Что такое harness (в двух словах)
+## What a harness is (in a nutshell)
 
-Есть модель — это веса: текст на вход → текст на выход. Не помнит прошлый запрос, не запускает
-команды. Harness — программа вокруг модели, которая крутит цикл (собрал контекст → послал →
-выполнил инструмент → вернул результат → снова), объявляет инструменты, собирает контекст в
-нужном порядке (от него зависит кэш), ставит точки-перехваты (хуки) и держит память. Когда
-говорят «агент» — почти всегда имеют в виду harness, а не модель. Полный разбор — в знании
-`hooks` (шаг 1).
+There's the model — it's weights: text in → text out. It doesn't remember the last
+request and doesn't run commands. The harness is the program around the model that turns
+the loop (assemble context → send → run a tool → return the result → again), declares the
+tools, assembles context in the right order (the cache depends on it), sets interception
+points (hooks), and holds the memory. When people say "agent" they almost always mean the
+harness, not the model. The full breakdown is in the `hooks` knowledge (step 1).
 
-## Три опоры
+## The three pillars
 
-1. **Хуки, кэш и RTK** (`hooks`). Контроль над циклом: `PreToolUse` не пустит `rm -rf`,
-   `SessionStart`/`PreCompact` подкинут якорь и правила, кэш по префиксу читается за ~10%,
-   RTK ужимает вывод команд на 60–90%. Защита плюс экономика.
-2. **Промпты и правила** (`agent-personality`). Роль, правила ответов, стиль — стабильный
-   префикс, который модель читает на каждом старте. Держи его стабильным ради кэша: тронул
-   начало — сжёг кэш. Ужимай один раз на старте, а не посреди сессии.
-3. **Память** (`agent-memory`). Модель не хранит состояние между запросами — память
-   существует только потому, что harness каждый раз кладёт историю заново. Компакт её режет,
-   между сессиями обнуляет. Поэтому долговременное выносят наружу: вики, FTS5, вектор,
-   Curator, GEPA. Подробная прокачка памяти — отдельный маршрут `memory-management`.
+1. **Hooks, cache, and RTK** (`hooks`). Control over the loop: `PreToolUse` won't let
+   `rm -rf` through, `SessionStart`/`PreCompact` slip in an anchor and rules, prefix
+   caching reads at ~10%, RTK trims command output by 60–90%. Protection plus economics.
+2. **Prompts and rules** (`agent-personality`). Role, answer rules, style — the stable
+   prefix the model reads at every start. Keep it stable for the cache's sake: touch the
+   beginning and you burn the cache. Trim it once at the start, not mid-session.
+3. **Memory** (`agent-memory`). The model holds no state between requests — memory exists
+   only because the harness lays the history down again every time. Compaction cuts it;
+   between sessions it zeroes out. So the long-term stuff gets moved outside: wiki, FTS5,
+   vector, Curator, GEPA. The detailed memory leveling-up is a separate route,
+   `memory-management`.
 
-## Дополнительно
+## Extras
 
-Не шаг маршрута, но из той же области — контроль над контекстом:
-- `rlm` — Recursive Language Models: когда контекст пухнет и начинается context rot, RLM
-  держит длинный ввод в Python-REPL и рекурсивно зовёт под-LLM вместо того, чтобы пихать всё
-  в окно. Родня компакту и хукам, не память.
+Not a route step, but from the same area — control over context:
+- `rlm` — Recursive Language Models: when context swells and context rot sets in, RLM
+  keeps the long input in a Python REPL and recursively calls sub-LLMs instead of stuffing
+  everything into the window. Kin to compaction and hooks, not memory.
 
-## Как идти по маршруту
+## How to walk the route
 
-Дёрни `next_step("agent-harness:1")` — получишь материалы первого шага, дальше по
-`next_step_id`. На каждом шаге: прочитай знание, примени под свой клиент, покажи человеку, что
-изменилось (защита, экономия, память). Любая установка — через дисциплину `tailored-install`.
-После маршрута у человека не «настроенный чат», а собранный harness: агент не выполнит
-опасное, не потеряет контекст и работает дешевле до компакта.
+Call `next_step("agent-harness:1")` — you'll get the first step's materials, then follow
+`next_step_id`. At each step: read the knowledge, apply it to your client, show the person
+what changed (protection, savings, memory). Every install goes through the
+`tailored-install` discipline. After the route the person doesn't have a "configured chat"
+but an assembled harness: the agent won't run dangerous actions, won't lose context, and
+runs cheaper up to compaction.

@@ -1,11 +1,11 @@
 ---
 id: nixos-administration
-name: 'NixOS: администрирование системы'
+name: 'NixOS: system administration'
 summary: >-
-  Практический гайд по администрированию NixOS: декларативный config-workflow и
-  rebuild, nix-ld для непропатченных бинарников, LD_LIBRARY_PATH для Python ctypes,
-  desktop-стек (waybar/niri/fuzzel/dunst/swayosd/GTK), EFI, serial, монтаж HDD,
-  скриншоты, fastfetch и NOPASSWD-rebuild для автономного агента.
+  Practical guide to administering NixOS: declarative config-workflow and
+  rebuild, nix-ld for unpatched binaries, LD_LIBRARY_PATH for Python ctypes,
+  desktop stack (waybar/niri/fuzzel/dunst/swayosd/GTK), EFI, serial, HDD
+  mounting, screenshots, fastfetch and NOPASSWD-rebuild for an autonomous agent.
 type: knowledge
 author: kisa
 recommended: false
@@ -14,67 +14,67 @@ tags: [nixos, administration, nix-ld, waybar, niri, desktop]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Администрирование NixOS
+# NixOS administration
 
-Всё декларативно: система собирается из конфига, а не правится «на живую». Ниже —
-рабочий цикл правки, nix-ld, интеграция с рабочим столом и NixOS-специфичные тонкости.
+Everything is declarative: the system is built from config, not patched live. Below —
+the edit workflow, nix-ld, desktop integration, and NixOS-specific gotchas.
 
-> **Обязательное vs вкус.** Для агента ОБЯЗАТЕЛЬНОЕ — цикл правки/rebuild, nix-ld,
-> `LD_LIBRARY_PATH`, права на serial, EFI, монтаж HDD, автономный rebuild. Всё про
-> ОФОРМЛЕНИЕ (Waybar, Niri, Fuzzel, Dunst, SwayOSD, GTK, обои, Fastfetch) — это ЛИЧНЫЙ
-> вкус KISA (Catppuccin Mocha), помечено «вкус · пример». Это НЕ инструкция агенту, а
-> пример «как можно». Агент повторяет вкус СВОЕГО пользователя, а не копирует этот.
+> **Essential vs taste.** For the agent the ESSENTIALS are the edit/rebuild cycle, nix-ld,
+> `LD_LIBRARY_PATH`, serial permissions, EFI, HDD mounting, autonomous rebuild. Everything about
+> STYLING (Waybar, Niri, Fuzzel, Dunst, SwayOSD, GTK, wallpaper, Fastfetch) is KISA's PERSONAL
+> taste (Catppuccin Mocha), marked "taste · example". This is NOT an instruction to the agent, but
+> an example of "what's possible". The agent replicates ITS OWN user's taste, not a copy of this one.
 
-## Базовый цикл: правка системного конфига
+## Basic cycle: editing the system config
 
-> **Про `cat`/`ls`/`cp` ниже.** В интерактивной оболочке пользователя coreutils обычно есть.
-> Но у агента в неинтерактивном контексте их может не быть в PATH (см. `nixos-agent-environment`):
-> тогда бери полный путь (`/run/current-system/sw/bin/cat`) или Python-фолбэк. Голые
-> `cat`/`ls` вслепую не предполагай — примеры ниже даны для наглядности.
+> **About the `cat`/`ls`/`cp` below.** In the user's interactive shell, coreutils are usually present.
+> But an agent in a non-interactive context may not have them in PATH (see `nixos-agent-environment`):
+> in that case use the full path (`/run/current-system/sw/bin/cat`) or a Python fallback. Don't blindly
+> assume bare `cat`/`ls` — the examples below are for illustration.
 
-### 1. Прочитать текущий конфиг
+### 1. Read the current config
 ```bash
 cat /etc/nixos/configuration.nix
 ```
 
-### 2. Применить изменения (точечная правка)
+### 2. Apply changes (targeted edit)
 ```bash
-# Скопировать во temp (patch-инструмент может отказать на /etc/nixos/*)
+# Copy to temp (a patch tool may refuse on /etc/nixos/*)
 sudo cp /etc/nixos/configuration.nix /tmp/configuration.nix
 sudo chmod 666 /tmp/configuration.nix
-# ... правишь /tmp/configuration.nix ...
+# ... edit /tmp/configuration.nix ...
 sudo cp /tmp/configuration.nix /etc/nixos/configuration.nix
 ```
 
-### 3. Проверить и пересобрать
+### 3. Verify and rebuild
 ```bash
-sudo nixos-rebuild dry-build   # собрать конфиг БЕЗ применения — ловит ошибки заранее
-sudo nixos-rebuild switch      # применить
+sudo nixos-rebuild dry-build   # build the config WITHOUT applying — catches errors early
+sudo nixos-rebuild switch      # apply
 ```
-После switch убедись, что нужные сервисы поднялись:
+After switch, make sure the needed services came up:
 ```bash
-systemctl status <service>            # системный сервис
-systemctl --user status <service>     # пользовательский (напр. waybar, hermes-gateway)
+systemctl status <service>            # system service
+systemctl --user status <service>     # user service (e.g. waybar, hermes-gateway)
 ```
 
-### Альтернатива: flake-система
+### Alternative: flake-based system
 ```bash
 cd /etc/nixos
 sudo nix flake update
 sudo nixos-rebuild switch --flake .#YOUR_HOSTNAME
 ```
 
-## nix-ld: разделяемые библиотеки для непропатченных бинарников
+## nix-ld: shared libraries for unpatched binaries
 
-NixOS не кладёт библиотеки в `/usr/lib/`. Непропатченные бинарники (Electron-приложения,
-готовые CLI-тулзы, проприетарный софт) падают с `cannot open shared object file`.
+NixOS doesn't put libraries in `/usr/lib/`. Unpatched binaries (Electron apps,
+prebuilt CLI tools, proprietary software) crash with `cannot open shared object file`.
 
-### Включить
+### Enable
 ```nix
 programs.nix-ld.enable = true;
 ```
 
-### Добавить недостающие библиотеки
+### Add missing libraries
 ```nix
 programs.nix-ld.libraries = with pkgs; [
     glib gtk3 nspr nss cups dbus at-spi2-core
@@ -85,38 +85,38 @@ programs.nix-ld.libraries = with pkgs; [
 ];
 ```
 
-### Найти путь к библиотеке пакета
+### Find the path to a package's library
 ```bash
 nix eval --raw nixpkgs#glib.outPath
-# Избегай пакетов на '-bin' — у них нет /lib
+# Avoid '-bin' packages — they have no /lib
 ```
 
-## Разделяемые библиотеки для Python ctypes
+## Shared libraries for Python ctypes
 
-Python-пакеты, использующие `ctypes.util.find_library` (например `sounddevice`), не
-находят библиотеки на NixOS — даже когда те установлены.
+Python packages that use `ctypes.util.find_library` (e.g. `sounddevice`) fail to find
+libraries on NixOS — even when they're installed.
 
-### Фикс: добавить LD_LIBRARY_PATH
+### Fix: add LD_LIBRARY_PATH
 ```nix
 environment.sessionVariables.LD_LIBRARY_PATH = "/run/current-system/sw/lib";
 ```
 
-## Рабочий стол — личный вкус (пример, не инструкция)
+## Desktop — personal taste (example, not instruction)
 
-Разделы отсюда и до «Порядок загрузки EFI» (Waybar, Niri, Fuzzel, Dunst, SwayOSD, GTK,
-обои), а также Fastfetch ниже — это ОФОРМЛЕНИЕ под вкус KISA (Catppuccin Mocha). Пример
-«как можно», НЕ требование к агенту. Агент повторяет вкус СВОЕГО пользователя.
+The sections from here down to "EFI boot order" (Waybar, Niri, Fuzzel, Dunst, SwayOSD, GTK,
+wallpaper), plus Fastfetch below, are STYLING to KISA's taste (Catppuccin Mocha). An example
+of "what's possible", NOT a requirement for the agent. The agent replicates ITS OWN user's taste.
 
-## Waybar на NixOS (вкус · пример)
+## Waybar on NixOS (taste · example)
 
-### Включить
+### Enable
 ```nix
 programs.waybar.enable = true;
 ```
 
-Файлы конфига:
-- `~/.config/waybar/config` — JSONC, раскладка модулей
-- `~/.config/waybar/style.css` — CSS-стилизация
+Config files:
+- `~/.config/waybar/config` — JSONC, module layout
+- `~/.config/waybar/style.css` — CSS styling
 
 ### Nerd Fonts
 ```nix
@@ -125,8 +125,8 @@ fonts.packages = with pkgs; [
 ];
 ```
 
-### Pill-раскладка (Catppuccin Mocha)
-Прозрачный бар, каждый модуль — отдельная «пилюля» с рамкой:
+### Pill layout (Catppuccin Mocha)
+Transparent bar, each module its own "pill" with a border:
 
 ```css
 window#waybar { background: transparent; }
@@ -154,21 +154,21 @@ window#waybar { background: transparent; }
 }
 ```
 
-### Формат часов (зависит от версии!)
-| Версия Waybar | Формат |
+### Clock format (version-dependent!)
+| Waybar version | Format |
 |---|---|
 | ≤ 0.9.x | `"%H:%M"` |
-| ≥ 0.11 | `"{0:%H:%M}"` — обязателен позиционный `0:` |
+| ≥ 0.11 | `"{0:%H:%M}"` — the positional `0:` is mandatory |
 
-### Иконка памяти
-Используй `` (nf-oct-memory, U+E266) — Octicons, самая стабильная между версиями Nerd Fonts.
+### Memory icon
+Use `` (nf-oct-memory, U+E266) — Octicons, the most stable across Nerd Fonts versions.
 
-### wpctl volume — ВСЕГДА ограничивай
+### wpctl volume — ALWAYS cap it
 ```bash
 wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+
 ```
 
-### Hover-эффекты (тонкие, без 3D/инверсии)
+### Hover effects (subtle, no 3D/inversion)
 ```css
 #workspaces button { transition: none; }
 #workspaces button:not(.active):hover {
@@ -179,7 +179,7 @@ wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+
 }
 ```
 
-### Стилизация тултипа
+### Tooltip styling
 ```css
 tooltip {
     background: rgba(30, 30, 46, 0.94);
@@ -189,7 +189,7 @@ tooltip {
 }
 ```
 
-## Focus ring в Niri
+## Focus ring in Niri
 
 ```kdl
 layout {
@@ -201,12 +201,12 @@ layout {
 }
 ```
 
-**Используй `layout { focus-ring { ... } }`, а НЕ `borders { ... }`** — старый синтаксис
-приводит к тихому отклонению конфига.
+**Use `layout { focus-ring { ... } }`, NOT `borders { ... }`** — the old syntax
+leads to the config being silently rejected.
 
-## Лаунчер Fuzzel
+## Fuzzel launcher
 
-Конфиг: `~/.config/fuzzel/fuzzel.ini`
+Config: `~/.config/fuzzel/fuzzel.ini`
 
 ```ini
 [main]
@@ -225,9 +225,9 @@ selection-text=1E1E2Eff
 border=CBA6F7ff
 ```
 
-**ЛОВУШКА:** `launch-prefix=app` тихо ломает запуск приложений. Убери его.
+**PITFALL:** `launch-prefix=app` silently breaks app launching. Remove it.
 
-## Демон уведомлений Dunst
+## Dunst notification daemon
 
 ```ini
 [global]
@@ -239,17 +239,17 @@ border=CBA6F7ff
     mouse_left_click = close_current
 ```
 
-Установка: `nix profile install nixpkgs#dunst` или добавить в `environment.systemPackages`.
+Install: `nix profile install nixpkgs#dunst` or add to `environment.systemPackages`.
 
-## SwayOSD — OSD громкости/яркости
+## SwayOSD — volume/brightness OSD
 
 ```nix
 environment.systemPackages = with pkgs; [ swayosd ];
 ```
 
-Автозапуск в niri: `spawn-at-startup "swayosd-server"`
+Autostart in niri: `spawn-at-startup "swayosd-server"`
 
-Интеграция в waybar (вместо сырого wpctl):
+Integration in waybar (instead of raw wpctl):
 ```json
 "pulseaudio": {
     "on-click": "swayosd-client --output-volume mute-toggle",
@@ -258,9 +258,9 @@ environment.systemPackages = with pkgs; [ swayosd ];
 }
 ```
 
-**ЛОВУШКА:** `swayosd-client` недоступен до `nixos-rebuild switch`.
+**PITFALL:** `swayosd-client` is unavailable until `nixos-rebuild switch`.
 
-## GTK-темизация (без home-manager)
+## GTK theming (without home-manager)
 
 ```nix
 environment.systemPackages = with pkgs; [
@@ -273,33 +273,33 @@ environment.systemPackages = with pkgs; [
 environment.sessionVariables.GTK_THEME = "catppuccin-mocha-mauve-standard";
 ```
 
-**ВАЖНО:** голый `catppuccin-gtk` дефолтится на frappe/blue. Используй `.override`.
+**IMPORTANT:** bare `catppuccin-gtk` defaults to frappe/blue. Use `.override`.
 
-## Swaybg — обои для niri
+## Swaybg — wallpaper for niri
 
 ```bash
 nix profile install nixpkgs#swaybg
 ```
 
-В конфиге niri:
+In the niri config:
 ```kdl
 spawn-at-startup "swaybg" "-i" "/path/to/wallpaper.png" "-m" "fill"
 ```
 
-## Порядок загрузки EFI
+## EFI boot order
 
 ```bash
-sudo efibootmgr                           # список
-sudo efibootmgr --bootorder 0001,0000     # переставить (NixOS первым)
+sudo efibootmgr                           # list
+sudo efibootmgr --bootorder 0001,0000     # reorder (NixOS first)
 ```
 
-## Права на serial-устройства
+## Serial device permissions
 
 ```nix
 users.users.YOUR_USER.extraGroups = [ "dialout" ];
 ```
 
-Или через udev (без перезапуска сессии):
+Or via udev (no session restart needed):
 ```nix
 services.udev.extraRules = ''
   SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE:="0666"
@@ -307,19 +307,19 @@ services.udev.extraRules = ''
 '';
 ```
 
-**Используй `:=`, а не `=`** — системные правила перекрывают простое `=`.
-(VID `0483` / PID `5740` — это USB-CDC serial STMicroelectronics; так же определяется, например, FlipperZero.)
+**Use `:=`, not `=`** — system rules override a plain `=`.
+(VID `0483` / PID `5740` is an STMicroelectronics USB-CDC serial; a FlipperZero, for example, identifies the same way.)
 
-Проверить права и VID/PID воткнутого устройства:
+Check permissions and the VID/PID of a plugged-in device:
 ```bash
-ls -la /dev/ttyACM0                                          # ожидаем crw-rw-rw-
+ls -la /dev/ttyACM0                                          # expect crw-rw-rw-
 udevadm info -a -n /dev/ttyACM0 | grep -E 'idVendor|idProduct' | head -2
 ```
 
-## Автомонтаж HDD (NTFS)
+## HDD auto-mount (NTFS)
 
 ```bash
-sudo blkid /dev/sda2    # узнать UUID
+sudo blkid /dev/sda2    # get the UUID
 ```
 
 ```nix
@@ -330,14 +330,14 @@ fileSystems."/mnt/data" = {
 };
 ```
 
-## Скриншоты: Grim + Slurp + Satty
+## Screenshots: Grim + Slurp + Satty
 
 ```kdl
 Print        { screenshot; }
 Mod+Shift+S  { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty -f -"; }
 ```
 
-## Fastfetch (вкус · пример)
+## Fastfetch (taste · example)
 
 ```jsonc
 {
@@ -356,9 +356,9 @@ Mod+Shift+S  { spawn "sh" "-c" "grim -g \"$(slurp)\" - | satty -f -"; }
 }
 ```
 
-## Rebuild руками агента (полная автономность, осознанный риск)
+## Rebuild by the agent's own hand (full autonomy, deliberate risk)
 
-Чтобы агент сам делал `nixos-rebuild switch` без пароля:
+To let the agent run `nixos-rebuild switch` itself without a password:
 ```nix
 security.sudo.extraRules = [{
     users = ["YOUR_USER"];
@@ -366,18 +366,18 @@ security.sudo.extraRules = [{
 }];
 ```
 
-**Это осознанный выбор, а не недосмотр.** `command = "ALL"` + NOPASSWD даёт агенту
-беспарольный `sudo` на ВСЁ. Так и задумано — ради ПОЛНОЙ автономности агента на СВОЕЙ
-личной машине, с принятием рисков: ошибающийся или скомпрометированный агент получает
-root целиком. Это НЕ для рабочих, общих или продовых машин.
+**This is a deliberate choice, not an oversight.** `command = "ALL"` + NOPASSWD gives the agent
+passwordless `sudo` over EVERYTHING. That's by design — for the sake of FULL agent autonomy on
+YOUR OWN personal machine, with the risks accepted: a mistaken or compromised agent gets root
+in full. This is NOT for work, shared, or production machines.
 
-Хочешь меньше рисков — сузь до одной команды (агент сможет только пересобирать систему):
+Want less risk — narrow it to a single command (the agent will only be able to rebuild the system):
 ```nix
 commands = [{ command = "/run/current-system/sw/bin/nixos-rebuild"; options = ["NOPASSWD"]; }];
 ```
 
-## См. также
-- `nixos-agent-environment` — окружение и рабочие паттерны агента на NixOS
-- `nixos-nix-ld-electron` — Electron-приложения и зависимости
+## See also
+- `nixos-agent-environment` — the agent's environment and working patterns on NixOS
+- `nixos-nix-ld-electron` — Electron apps and dependencies
 - `nixos-streaming` — Sunshine/Moonlight
-- `niri-hotkeys` — горячие клавиши niri
+- `niri-hotkeys` — niri hotkeys

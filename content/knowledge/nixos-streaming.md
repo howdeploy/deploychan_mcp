@@ -1,10 +1,10 @@
 ---
 id: nixos-streaming
-name: 'NixOS: стриминг рабочего стола (Sunshine/Moonlight)'
+name: 'NixOS: desktop streaming (Sunshine/Moonlight)'
 summary: >-
-  Реально настроенный стриминг рабочего стола на NixOS: Sunshine как хост, Moonlight
-  как клиент. PC↔PC, второй монитор, и сайдлоад Moonlight на Samsung TV (Tizen) через
-  Docker + sdb. Плюс почему Sunshine+Moonlight лучше RDP/VNC.
+  A real, working desktop-streaming setup on NixOS: Sunshine as host, Moonlight
+  as client. PC↔PC, second monitor, and sideloading Moonlight onto a Samsung TV
+  (Tizen) via Docker + sdb. Plus why Sunshine+Moonlight beats RDP/VNC.
 type: knowledge
 author: kisa
 recommended: false
@@ -13,72 +13,72 @@ tags: [nixos, streaming, sunshine, moonlight, samsung, tizen]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Sunshine + Moonlight — стриминг рабочего стола на NixOS
+# Sunshine + Moonlight — desktop streaming on NixOS
 
-Рабочий кейс: транслировать десктоп NixOS на другой ПК или на телевизор с низкой
-задержкой. Хост — **Sunshine**, клиент — **Moonlight**. Ниже — как это поднять,
-включая сайдлоад на Samsung TV.
+Working use case: stream a NixOS desktop to another PC or a TV with low latency.
+Host — **Sunshine**, client — **Moonlight**. Below — how to stand it up,
+including sideloading onto a Samsung TV.
 
-## Включить Sunshine
+## Enable Sunshine
 
 ```nix
 services.sunshine = {
   enable = true;
   autoStart = true;
   capSysAdmin = true;
-  openFirewall = true;   # порты 47984-48010
+  openFirewall = true;   # ports 47984-48010
 };
 users.users.YOUR_USER.extraGroups = [ "uinput" "input" ];
 boot.kernelModules = [ "uinput" ];
 ```
 
-После `nixos-rebuild switch` — это systemd user-сервис. Веб-интерфейс на
+After `nixos-rebuild switch` it's a systemd user service. The web UI is at
 `https://localhost:47990`.
 
-## Moonlight — клиент PC ↔ PC
+## Moonlight — PC ↔ PC client
 
-- Скачай Moonlight: https://moonlight-stream.org
-- Автообнаружение Sunshine в LAN, либо добавь вручную: `<NIXOS_IP>:47989`
-- Пара: Moonlight показывает PIN → открой `https://<NIXOS_IP>:47990` → вкладка PIN → введи
-- Запусти «Desktop» для полного Wayland-стрима
+- Download Moonlight: https://moonlight-stream.org
+- Auto-discovers Sunshine on the LAN, or add it manually: `<NIXOS_IP>:47989`
+- Pairing: Moonlight shows a PIN → open `https://<NIXOS_IP>:47990` → PIN tab → enter it
+- Launch "Desktop" for a full Wayland stream
 
-### Второй монитор
-Запусти Moonlight в фуллскрине на втором мониторе. Мышь/клавиатура с клиентского ПК
-управляют десктопом NixOS.
+### Second monitor
+Launch Moonlight fullscreen on the second monitor. The mouse/keyboard from the client PC
+control the NixOS desktop.
 
-### Хоткеи Moonlight
-| Клавиши | Действие |
+### Moonlight hotkeys
+| Keys | Action |
 |---|---|
-| Ctrl+Alt+Shift+X | Тумблер фуллскрина |
-| Ctrl+Alt+Shift+Z | Тумблер захвата ввода |
-| Ctrl+Alt+Shift+Q | Выйти из сессии |
-| Ctrl+Alt+Shift+S | Оверлей статистики |
+| Ctrl+Alt+Shift+X | Toggle fullscreen |
+| Ctrl+Alt+Shift+Z | Toggle input capture |
+| Ctrl+Alt+Shift+Q | Quit the session |
+| Ctrl+Alt+Shift+S | Stats overlay |
 
-### Подводные камни
-- Эксклюзивный фуллскрин захватывает оба монитора → Moonlight Settings → Display → целевой монитор
-- Win-комбинации перехватывает ОС клиента → включи «Capture system keyboard shortcuts»
+### Pitfalls
+- Exclusive fullscreen grabs both monitors → Moonlight Settings → Display → target monitor
+- Win combos get intercepted by the client OS → enable "Capture system keyboard shortcuts"
 
-## Moonlight на Samsung TV (Tizen)
+## Moonlight on a Samsung TV (Tizen)
 
-Официального приложения в Samsung Store нет — ставится сайдлоадом WGT-пакета.
+There's no official app in the Samsung Store — install it by sideloading a WGT package.
 
-### Способ A: Docker (проще всего)
+### Method A: Docker (easiest)
 ```bash
 docker run -it --rm ghcr.io/oneliberty/moonlight-chrome-tizen:samsung_wasm
 sdb connect <TV_IP>
 tizen install -n Moonlight.wgt
 ```
 
-### Предусловия
-1. Developer Mode на телевизоре: Apps → нажми `12345` → включи → задай Host PC IP
-2. TV должен разрешать удалённую установку
-3. Порт SDB: `26101`
+### Prerequisites
+1. Developer Mode on the TV: Apps → press `12345` → enable → set Host PC IP
+2. The TV must allow remote installation
+3. SDB port: `26101`
 
-### Готовые сборки
+### Prebuilt builds
 - OneLiberty/moonlight-chrome-tizen (Tizen 5.5+)
 - brightcraft/moonlight-tizen (HDR, 4K, 120/144fps)
 
-## Почему Sunshine+Moonlight, а не альтернативы
-- RDP/VNC: хуже задержка, нет поддержки Wayland
-- Barrier/Input Leap: делят ввод, но не видео
-- <5ms энкод + <2ms сеть + <5ms декод на 60fps
+## Why Sunshine+Moonlight over the alternatives
+- RDP/VNC: worse latency, no Wayland support
+- Barrier/Input Leap: share input, but not video
+- <5ms encode + <2ms network + <5ms decode at 60fps

@@ -1,85 +1,84 @@
 ---
 id: tavily
-name: Tavily — ресерч-API для агентов
+name: Tavily — a research API for agents
 summary: >-
-  Личная рекомендация KISA: Tavily как основной research-API для агента. Что это,
-  эндпоинты, свой MCP-сервер, актуальные цены и лимиты (кредитная модель), как
-  подключить и на чём экономить.
+  KISA's personal pick: Tavily as the main research API for your agent. What it is,
+  the endpoints, its own MCP server, current prices and limits (credit model), how to
+  connect, and where to save.
 type: tool
 author: third_party
 recommended: true
 added: 2026-07-04
-tags: [research, tavily, api, search, tool, интернет]
+tags: [research, tavily, api, search, tool, internet]
 source: https://docs.tavily.com/documentation/api-credits
 ---
 
-# Tavily — ресерч-API для агентов
+# Tavily — a research API for agents
 
-Личная рекомендация: если агенту нужен один основной канал в интернет — бери **Tavily**.
-Это search-API, заточенный под LLM: отдаёт не сырой HTML, а чистые структурированные
-источники и вытяжки, которые сразу ложатся в контекст. Родная интеграция с LangChain,
-LlamaIndex, function calling — и свой MCP-сервер, так что подключается к Claude Code,
-Cursor, Windsurf почти без кода.
+Personal recommendation: if your agent needs one main channel to the internet — take
+**Tavily**. It's a search API tuned for LLMs: it returns not raw HTML but clean, structured
+sources and extracts that drop straight into context. Native integration with LangChain,
+LlamaIndex, function calling — and its own MCP server, so it connects to Claude Code, Cursor,
+Windsurf with almost no code.
 
-> Цены и лимиты ниже — по официальной странице `docs.tavily.com/documentation/api-credits`
-> на момент написания (2026-07). Тарифы меняются — перед оплатой сверься с их сайтом.
+> The prices and limits below are from the official page `docs.tavily.com/documentation/api-credits`
+> at the time of writing (2026-07). Pricing changes — check their site before paying.
 
-## Что умеет (эндпоинты)
+## What it can do (endpoints)
 
-- **Search** — поиск по вебу, чистый JSON под LLM. Основной инструмент.
-- **Extract** — вытащить контент с конкретных URL.
-- **Crawl** — обойти сайт по инструкции и собрать страницы.
-- **Map** — построить карту сайта (структуру ссылок).
-- **Research** — готовая исследовательская задача (глубокий проход).
+- **Search** — web search, clean JSON for LLMs. The primary tool.
+- **Extract** — pull content from specific URLs.
+- **Crawl** — traverse a site per instructions and gather pages.
+- **Map** — build a site map (the link structure).
+- **Research** — a ready-made research task (a deep pass).
 
-SDK: Python (`pip install tavily-python`, `from tavily import TavilyClient`) и
-JavaScript (`npm i @tavily/core`). Ключ формата `tvly-...` кладётся в `.env`
-(`TAVILY_API_KEY`), не в общий коммитимый файл.
+SDKs: Python (`pip install tavily-python`, `from tavily import TavilyClient`) and
+JavaScript (`npm i @tavily/core`). A key of the form `tvly-...` goes in `.env`
+(`TAVILY_API_KEY`), not in a shared committed file.
 
-## Кредитная модель
+## Credit model
 
-Оплата не за запросы, а за **кредиты**. Стоимость запроса зависит от эндпоинта и глубины:
+You pay not per request but per **credit**. The cost of a request depends on the endpoint and the depth:
 
-- **Search:** basic — 1 кредит, advanced — 2 кредита.
-- **Extract:** ~1 кредит на 5 URL (basic), ~2 кредита на 5 URL (advanced).
-- **Crawl:** mapping + extraction (напр. 10 страниц basic ≈ 3 кредита).
-- **Research:** динамически — `model=mini` 4–110 кредитов, `model=pro` 15–250 за запрос.
+- **Search:** basic — 1 credit, advanced — 2 credits.
+- **Extract:** ~1 credit per 5 URLs (basic), ~2 credits per 5 URLs (advanced).
+- **Crawl:** mapping + extraction (e.g. 10 pages basic ≈ 3 credits).
+- **Research:** dynamic — `model=mini` 4–110 credits, `model=pro` 15–250 per request.
 
-## Тарифы
+## Pricing
 
-| План | Кредитов/мес | Цена | За кредит |
+| Plan | Credits/mo | Price | Per credit |
 |---|---|---|---|
-| Researcher | 1 000 | Бесплатно | — |
+| Researcher | 1 000 | Free | — |
 | Project | 4 000 | $30 | $0.0075 |
 | Bootstrap | 15 000 | $100 | $0.0067 |
 | Startup | 38 000 | $220 | $0.0058 |
 | Growth | 100 000 | $500 | $0.005 |
-| Pay-as-you-go | по факту | $0.008 / кредит | $0.008 |
-| Enterprise | кастом | кастом | кастом |
+| Pay-as-you-go | as used | $0.008 / credit | $0.008 |
+| Enterprise | custom | custom | custom |
 
-## Лимиты
+## Limits
 
-- **Бесплатно:** 1 000 кредитов в месяц, **без карты**. Сброс — 1-го числа каждого месяца.
-  Для личного агента и разработки этого обычно хватает.
-- **Rate limit:** есть по-минутный лимит запросов (429 при превышении) — добавь ретраи с
-  экспоненциальной паузой. Точный RPM зависит от того, dev- или prod-ключ; сверься со
-  страницей Rate Limits в их доках.
-- Чем дороже план — тем ниже цена за кредит и выше лимиты.
+- **Free:** 1 000 credits per month, **no card**. Resets on the 1st of each month.
+  For a personal agent and development this is usually enough.
+- **Rate limit:** there's a per-minute request limit (429 when exceeded) — add retries with
+  exponential backoff. The exact RPM depends on whether it's a dev or prod key; check the
+  Rate Limits page in their docs.
+- The pricier the plan, the lower the per-credit price and the higher the limits.
 
-## Как подключить
+## How to connect
 
-1. Зарегистрируйся на `tavily.com`, возьми ключ `tvly-...` (карта не нужна).
-2. Положи `TAVILY_API_KEY` в `.env`.
-3. Либо ставь SDK (`pip install tavily-python`), либо подключай **Tavily MCP-сервер** к
-   своему клиенту (Claude Code / Cursor / Windsurf) — тогда поиск становится нативным
-   инструментом агента.
-4. Проверь живым запросом: один и тот же вопрос — ответ с реальными источниками.
+1. Sign up at `tavily.com`, grab a `tvly-...` key (no card needed).
+2. Put `TAVILY_API_KEY` in `.env`.
+3. Either install the SDK (`pip install tavily-python`) or connect the **Tavily MCP server** to
+   your client (Claude Code / Cursor / Windsurf) — then search becomes a native tool for the agent.
+4. Verify with a live request: the same question — an answer with real sources.
 
-## Как экономить
+## How to save
 
-- Держи `search` на `basic` (1 кредит), поднимай до `advanced` (2) только когда мелко.
-- `Research` дорогой (до 250 кредитов) — дёргай осознанно, не на каждый чих.
-- Кэшируй ответы на повторяющиеся запросы, чтобы не жечь кредиты впустую.
+- Keep `search` on `basic` (1 credit), bump to `advanced` (2) only when basic falls short.
+- `Research` is expensive (up to 250 credits) — call it deliberately, not for every little thing.
+- Cache responses to repeated queries so you don't burn credits for nothing.
 
-Tavily — основной канал ресерча из гайда «Выход в интернет». Браузер (gbrowser / computer
-use / MCP) остаётся подстраховкой для JS-сайтов и закрытых страниц.
+Tavily is the main research channel from the "Getting online" guide. The browser (gbrowser /
+computer use / MCP) stays as a backup for JS sites and gated pages.

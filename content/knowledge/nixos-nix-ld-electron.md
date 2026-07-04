@@ -1,10 +1,10 @@
 ---
 id: nixos-nix-ld-electron
-name: 'NixOS: nix-ld и Electron-приложения'
+name: 'NixOS: nix-ld and Electron apps'
 summary: >-
-  Как заставить Electron/Chromium-приложения работать на NixOS через nix-ld: полный
-  список рантайм-зависимостей, NIXOS_OZONE_WL для Wayland, запуск Hermes Desktop с
-  голосом, и SOCKS5-прокси по каждому инструменту (включая Zen Browser).
+  How to get Electron/Chromium apps running on NixOS via nix-ld: the full list
+  of runtime dependencies, NIXOS_OZONE_WL for Wayland, launching Hermes Desktop
+  with voice, and per-tool SOCKS5 proxying (including Zen Browser).
 type: knowledge
 author: kisa
 recommended: false
@@ -13,12 +13,12 @@ tags: [nixos, nix-ld, electron, hermes, proxy]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Electron-приложения на NixOS (nix-ld)
+# Electron apps on NixOS (nix-ld)
 
-Electron/Chromium-приложения — непропатченные бинарники: они ищут библиотеки в
-`/usr/lib/`, которого на NixOS нет. Решение — `nix-ld` с полным набором рантайм-депсов.
+Electron/Chromium apps are unpatched binaries: they look for libraries in
+`/usr/lib/`, which doesn't exist on NixOS. The fix — `nix-ld` with a full set of runtime deps.
 
-## Полный набор рантайм-зависимостей Electron/Chromium
+## Full set of Electron/Chromium runtime dependencies
 
 ```nix
 programs.nix-ld.libraries = with pkgs; [
@@ -30,26 +30,26 @@ programs.nix-ld.libraries = with pkgs; [
 ];
 ```
 
-(Сначала `programs.nix-ld.enable = true;` — см. гайд `nixos-administration`.)
+(First `programs.nix-ld.enable = true;` — see the `nixos-administration` guide.)
 
-## Интеграция с Wayland
+## Wayland integration
 ```nix
 environment.sessionVariables.NIXOS_OZONE_WL = "1";
 ```
 
-Для niri:
+For niri:
 ```kdl
 environment { NIXOS_OZONE_WL "1" }
 ```
 
-## Hermes Desktop на NixOS
+## Hermes Desktop on NixOS
 
-### Предусловия
-1. Electron-депсы через nix-ld (выше)
+### Prerequisites
+1. Electron deps via nix-ld (above)
 2. `NIXOS_OZONE_WL=1`
-3. Голос: `portaudio` + `ffmpeg` в systemPackages, `LD_LIBRARY_PATH=/run/current-system/sw/lib`
+3. Voice: `portaudio` + `ffmpeg` in systemPackages, `LD_LIBRARY_PATH=/run/current-system/sw/lib`
 
-### Автозапуск в niri
+### Autostart in niri
 ```kdl
 spawn-at-startup "hermes" "desktop"
 window-rule {
@@ -58,27 +58,27 @@ window-rule {
 }
 ```
 
-### Поддержка голоса
+### Voice support
 ```bash
-# В venv Hermes
+# In the Hermes venv
 uv pip install -e ".[voice]"
 ```
-Конфиг:
+Config:
 ```yaml
 stt:
   enabled: true
-  provider: groq   # или local
+  provider: groq   # or local
 ```
-Env: `GROQ_API_KEY=<key>` в `~/.hermes/.env`
+Env: `GROQ_API_KEY=<key>` in `~/.hermes/.env`
 
-## SOCKS5-прокси по инструментам
+## Per-tool SOCKS5 proxy
 
-Системный прокси на `127.0.0.1:10808` задаётся по каждому инструменту отдельно:
+The system proxy at `127.0.0.1:10808` is set per tool individually:
 ```bash
 ALL_PROXY=socks5://127.0.0.1:10808 <command>
 ```
 
-Zen Browser: пишем в `prefs.js`:
+Zen Browser: write to `prefs.js`:
 ```
 user_pref("network.proxy.type", 1);
 user_pref("network.proxy.socks", "127.0.0.1");
@@ -87,4 +87,4 @@ user_pref("network.proxy.socks_version", 5);
 user_pref("network.proxy.socks_remote_dns", true);
 ```
 
-Python-инструменты: ставь `httpx[socks]` в venv.
+Python tools: install `httpx[socks]` in the venv.

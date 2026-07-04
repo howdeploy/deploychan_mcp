@@ -1,9 +1,9 @@
 ---
 id: agent-personality
-name: Личность, правила и стиль ответов агента
+name: The agent's personality, rules, and answer style
 summary: >-
-  С чего начинается настройка агента: роль, правила ответов и манера текста.
-  Куда это писать в Claude Code, Hermes и Codex, и как агент задаёт себе лицо.
+  Where tuning an agent starts: the role, the answer rules, and the writing manner.
+  Where to write it in Claude Code, Hermes, and Codex, and how the agent gives itself a face.
 type: knowledge
 author: kisa
 recommended: false
@@ -12,44 +12,42 @@ tags: [personality, prompt, rules, setup, agent]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Личность, правила и стиль ответов
+# Personality, rules, and answer style
 
-Личность превращает «безликий чат-бот» в напарника. Кто агент, как он отвечает, как
-пишет текст. Всё это задаётся **системными инструкциями** и живёт в файле, который агент
-читает при каждом старте.
+Personality turns a "faceless chatbot" into a partner. Who the agent is, how it answers, how it
+writes. All of that is set by **system instructions** and lives in a file the agent reads at every
+startup.
 
-**Что должен сделать агент:** спросить человека, каким он хочет видеть агента (роль,
-тон, правила, стиль текста), записать это в правильный файл инструкций и показать
-результат на примере. Не по шаблону — под конкретного человека.
+**What the agent should do:** ask the person how they want to see the agent (role, tone, rules,
+writing style), write it into the right instructions file, and show the result with an example.
+Not from a template — for the specific person.
 
-## Три слоя настройки
+## Three layers of tuning
 
-1. **Роль и задача.** Плохо: «отредактируй текст». Хорошо: «Ты опытный редактор, 3 года
-   в медиа. Задача — сделать текст человечным под широкую аудиторию». Роль + подробная
-   задача поднимают качество и снимают лишние уточнения.
-2. **Правила ответов.** Что делать всегда, что запрещено, когда переспрашивать, как
-   структурировать вывод. Формат под задачу: обычный текст, Markdown, JSON, XML-теги,
-   YAML или таблицы.
-3. **Стиль текста (манера речи).** Форма подачи — отдельная фишка. Пример живого стиля —
-   overlay вроде MTGA (Make Text Great Again): агент сохраняет факты, но говорит в
-   заданной манере. Вкус к подаче: писать так, чтобы дочитывали, а не бросали на второй
-   строке.
+1. **Role and task.** Bad: "edit the text". Good: "You're an experienced editor with 3 years in
+   media. Your task is to make the text human for a broad audience". A role + a detailed task raise
+   quality and cut needless clarifying questions.
+2. **Answer rules.** What to always do, what's forbidden, when to ask again, how to structure the
+   output. Format to fit the task: plain text, Markdown, JSON, XML tags, YAML, or tables.
+3. **Writing style (manner of speech).** Delivery is a feature of its own. An example of a lively
+   style is an overlay like MTGA (Make Text Great Again): the agent keeps the facts but speaks in a
+   set manner. Taste in delivery: write so people read to the end instead of bailing on the second line.
 
-## Куда это писать (по клиентам)
+## Where to write it (by client)
 
-- **Claude Code:** `~/.claude/CLAUDE.md` (глобально) и `CLAUDE.md` в корне проекта.
-  Роль/правила/стиль — сюда. Повторяющиеся задачи выноси в слэш-команды
-  `~/.claude/commands/<name>.md` или `.claude/commands/`.
-- **Hermes:** `SOUL.md` в `$HERMES_HOME` — идентичность агента. Плюс **система профилей**
-  из коробки: разные личности/окружения без костылей. Правила проекта — `.hermes.md` или
+- **Claude Code:** `~/.claude/CLAUDE.md` (globally) and `CLAUDE.md` in the project root.
+  Role/rules/style go here. Move repeating tasks into slash-commands
+  `~/.claude/commands/<name>.md` or `.claude/commands/`.
+- **Hermes:** `SOUL.md` in `$HERMES_HOME` — the agent's identity. Plus a **profile system**
+  out of the box: different personalities/environments without hacks. Project rules — `.hermes.md` or
   `AGENTS.md`.
-- **Codex:** `~/.codex/instructions.md` (глобально), `AGENTS.md` или `CODEX.md` в проекте.
+- **Codex:** `~/.codex/instructions.md` (globally), `AGENTS.md` or `CODEX.md` in the project.
 
-## Порядок действий
+## Steps
 
-1. Спроси человека: роль агента, тон, 3–5 главных правил, манера текста.
-2. Детектируй окружение и правильный файл (через дисциплину `tailored-install`).
-3. Не перезаписывай вслепую — покажи диф, слей с существующим, подтверди.
-4. Продемонстрируй: дай ответ в новой личности, чтобы человек почувствовал разницу.
+1. Ask the person: the agent's role, tone, 3–5 main rules, the writing manner.
+2. Detect the environment and the right file (via the `tailored-install` discipline).
+3. Don't overwrite blindly — show the diff, merge with what exists, confirm.
+4. Demonstrate: give an answer in the new personality so the person feels the difference.
 
-Личность — характер агента. Дальше — голос, чтобы он не только думал, но и звучал.
+Personality is the agent's character. Next comes the voice, so it doesn't just think but sounds.

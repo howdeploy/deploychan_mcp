@@ -1,11 +1,11 @@
 ---
 id: flipper-zero
-name: 'FlipperZero: управление агентом'
+name: 'FlipperZero: agent-driven control'
 summary: >-
-  Как агент управляет FlipperZero с компьютера: через UART Bridge — WiFi-плата,
-  модули и самодельные устройства по UART; с выключенным Bridge — нативный CLI
-  (ставить/удалять апки, смотреть файлы). Три метода (native 230400 / Marauder
-  115200 / pyflipper 9600), подводные камни и доступ к serial на NixOS.
+  How an agent drives FlipperZero from a computer: via the UART Bridge — WiFi board,
+  modules, and DIY devices over UART; with the Bridge off — the native CLI
+  (install/remove apps, browse files). Three methods (native 230400 / Marauder
+  115200 / pyflipper 9600), pitfalls, and serial access on NixOS.
 type: tool
 author: third_party
 recommended: false
@@ -14,103 +14,103 @@ tags: [flipper, hardware, uart, cli, agent, nixos]
 source: https://docs.flipper.net/zero/development/cli
 ---
 
-# FlipperZero: управление агентом
+# FlipperZero: agent-driven control
 
-## Что это
+## What it is
 
-FlipperZero — компактный хакерский мультитул для взаимодействия с электронными
-системами: контроль доступа, радиопротоколы, NFC, RFID, инфракрасные устройства.
-Внутри — STM32WB55 (Cortex-M4 + радио-M0+), монохромный экран 128×64. Аппаратно умеет:
+FlipperZero is a compact hacker multitool for interacting with electronic systems: access
+control, radio protocols, NFC, RFID, infrared devices. Inside — an STM32WB55
+(Cortex-M4 + radio M0+), a 128×64 monochrome screen. In hardware it can do:
 
-- **Sub-GHz** (CC1101, 315/433/868/915 МГц) — брелоки, шлагбаумы, IoT-датчики.
-- **NFC** 13.56 МГц (ISO14443A/B, Mifare) и **125 кГц RFID** (EM4100, HID, Indala…).
-- **Инфракрасный** приёмник/передатчик — универсальный пульт.
-- **GPIO** (13 пинов, 3.3V) — UART/SPI/I2C/1-Wire для внешних модулей.
-- **iButton** (1-Wire), **Bluetooth LE**, **BadUSB** (эмуляция HID).
+- **Sub-GHz** (CC1101, 315/433/868/915 MHz) — key fobs, barrier gates, IoT sensors.
+- **NFC** 13.56 MHz (ISO14443A/B, Mifare) and **125 kHz RFID** (EM4100, HID, Indala…).
+- **Infrared** receiver/transmitter — a universal remote.
+- **GPIO** (13 pins, 3.3V) — UART/SPI/I2C/1-Wire for external modules.
+- **iButton** (1-Wire), **Bluetooth LE**, **BadUSB** (HID emulation).
 
-Из коробки — малая дальность и нет WiFi. Дальше расширяется модулями: **WiFi-девборд
-на ESP32-S2** (по UART), GPS, радио и самоделки. Нужна SD-карта (16–32 ГБ хватит;
-Kingston/Samsung/SanDisk).
+Out of the box — short range and no WiFi. From there it expands with modules: a **WiFi dev
+board on ESP32-S2** (over UART), GPS, radio, and DIY builds. You need an SD card (16–32 GB is
+enough; Kingston/Samsung/SanDisk).
 
-## Как агент им управляет — два режима
+## How an agent controls it — two modes
 
-Ключевая идея: агент цепляется к Flipper по serial и работает в одном из двух режимов.
+The key idea: the agent hooks into the Flipper over serial and works in one of two modes.
 
-- **UART Bridge включён** → агент говорит НЕ с самим Flipper, а с модулем на GPIO:
-  WiFi-платой (ESP32), любым вставленным модулем или самодельным устройством. Всё, что
-  висит на UART, становится доступно агенту через Flipper как мост.
-- **UART Bridge выключен** → агент работает с нативным CLI самого Flipper: управляет
-  приложениями (ставит/удаляет `.fap`), смотрит файловую систему, дёргает подсистемы
+- **UART Bridge on** → the agent talks NOT to the Flipper itself, but to the module on the
+  GPIO: the WiFi board (ESP32), any inserted module, or a DIY device. Everything hanging on
+  the UART becomes available to the agent through the Flipper as a bridge.
+- **UART Bridge off** → the agent works with the Flipper's own native CLI: manages apps
+  (installs/removes `.fap`), browses the filesystem, pokes subsystems
   (Sub-GHz, NFC, GPIO, storage).
 
-Bridge блокирует нативный CLI — это взаимоисключающие режимы (см. подводные камни).
+The Bridge blocks the native CLI — these are mutually exclusive modes (see pitfalls).
 
-## Serial-подключение
+## Serial connection
 
-Flipper появляется как `/dev/ttyACM0`. Стабильный путь — симлинк
+The Flipper shows up as `/dev/ttyACM0`. The stable path is the symlink
 `/dev/serial/by-id/usb-Flipper_Devices_Inc._*_flip_*-if00`.
 
-| Метод | Baud | Для чего |
+| Method | Baud | Purpose |
 |---|---|---|
-| Нативный CLI | `230400` | Полный контроль: Sub-GHz, NFC, RFID, IR, GPIO, Storage |
-| Marauder UART Bridge | `115200` | WiFi-атаки на ESP32-девборде через USB-UART Bridge |
-| pyflipper (Python) | `9600` | Скриптовая автоматизация |
+| Native CLI | `230400` | Full control: Sub-GHz, NFC, RFID, IR, GPIO, Storage |
+| Marauder UART Bridge | `115200` | WiFi attacks on the ESP32 dev board via USB-UART Bridge |
+| pyflipper (Python) | `9600` | Scripted automation |
 
-## Метод 1 — нативный CLI (230400)
+## Method 1 — native CLI (230400)
 
 ```bash
 screen /dev/ttyACM0 230400
-# или
+# or
 picocom -b 230400 /dev/ttyACM0
 ```
 
-| Команда | Описание |
+| Command | Description |
 |---|---|
-| `help` | Список всех команд |
-| `info device` | Инфо об устройстве (прошивка, железо, радио-стек) |
-| `subghz` | Sub-GHz радио (приём/передача) |
-| `nfc` | Чтение/эмуляция NFC |
+| `help` | List all commands |
+| `info device` | Device info (firmware, hardware, radio stack) |
+| `subghz` | Sub-GHz radio (receive/transmit) |
+| `nfc` | Read/emulate NFC |
 | `rfid` | LF RFID |
-| `ir` | Инфракрасный порт |
-| `gpio` | Управление пинами GPIO |
-| `storage` | Операции с файловой системой |
-| `loader list` | Список установленных `.fap` |
-| `log` | Системный лог |
-| `power reboot` | Ребут Flipper |
+| `ir` | Infrared port |
+| `gpio` | GPIO pin control |
+| `storage` | Filesystem operations |
+| `loader list` | List installed `.fap` |
+| `log` | System log |
+| `power reboot` | Reboot the Flipper |
 
-Выход из screen: `Ctrl+A`, затем `K`, затем `Y`.
+Exit screen: `Ctrl+A`, then `K`, then `Y`.
 
-## Метод 2 — Marauder CLI (115200)
+## Method 2 — Marauder CLI (115200)
 
-Управление ESP32 WiFi-девбордом с прошивкой Marauder:
+Controlling the ESP32 WiFi dev board with Marauder firmware:
 
-> **⚠️ Только законно.** `attack deauth`/`beacon`/`probe` и снифинг — активные атаки на WiFi.
-> Применяй ТОЛЬКО к сетям, которыми владеешь сам, или на тест которых есть письменное
-> разрешение (своя лаборатория, авторизованный пентест). Атака по чужим сетям незаконна.
+> **⚠️ Lawful use only.** `attack deauth`/`beacon`/`probe` and sniffing are active attacks on WiFi.
+> Use them ONLY on networks you own yourself, or that you have written authorization to test
+> (your own lab, an authorized pentest). Attacking networks that aren't yours is illegal.
 
-1. На Flipper: запусти **USB-UART Bridge** (`GPIO` → `USB-UART Bridge`).
-2. Подключись на скорости ESP32:
+1. On the Flipper: launch the **USB-UART Bridge** (`GPIO` → `USB-UART Bridge`).
+2. Connect at the ESP32's baud rate:
 
 ```bash
 screen /dev/ttyACM0 115200
 ```
 
-| Команда | Описание |
+| Command | Description |
 |---|---|
-| `help` | Список команд Marauder |
-| `scanap` | Скан точек доступа WiFi |
-| `listap` | Показать найденные AP |
-| `select <N>` | Выбрать AP по индексу |
-| `attack deauth` | Deauth-атака на выбранную AP |
+| `help` | List Marauder commands |
+| `scanap` | Scan WiFi access points |
+| `listap` | Show discovered APs |
+| `select <N>` | Select an AP by index |
+| `attack deauth` | Deauth attack on the selected AP |
 | `attack beacon` | Beacon spam |
-| `attack probe` | Probe-request атака |
-| `sniff` | Снифинг трафика |
-| `stop` | Остановить атаку |
-| `status` | Статус устройства |
+| `attack probe` | Probe-request attack |
+| `sniff` | Traffic sniffing |
+| `stop` | Stop the attack |
+| `status` | Device status |
 
-## Метод 3 — pyflipper (Python, 9600)
+## Method 3 — pyflipper (Python, 9600)
 
-Библиотека для программного контроля Flipper.
+A library for programmatic control of the Flipper.
 
 ```bash
 nix-shell -p python313Packages.pyflipper --run python3
@@ -120,44 +120,44 @@ nix-shell -p python313Packages.pyflipper --run python3
 from pyflipper import PyFlipper
 f = PyFlipper(com="/dev/ttyACM0")
 
-print(f.device_info.info())              # инфо
+print(f.device_info.info())              # info
 f.subghz.tx("AB12CD", frequency=433920000, count=10)  # Sub-GHz TX
 f.nfc.detect()                            # NFC
 f.gpio.set("PA7", 1)                      # GPIO
-f.storage.list("/ext")                    # файлы
+f.storage.list("/ext")                    # files
 f.led.set("blue", 255)                    # LED
 ```
 
-Модули: `device_info`, `subghz`, `nfc`, `rfid`, `ir`, `gpio`, `storage`, `led`,
+Modules: `device_info`, `subghz`, `nfc`, `rfid`, `ir`, `gpio`, `storage`, `led`,
 `vibro`, `bt`, `loader`, `power`, `update`, `log`, `date`, `music_player`, `ikey`,
 `onewire`, `i2c`, `input`, `free`, `ps`, `debug`.
 
-## Подводные камни
+## Pitfalls
 
-- **Не путай baud:** CLI = 230400, Marauder = 115200, pyflipper = 9600.
-- **UART Bridge блокирует нативный CLI** — при активном Bridge прямой CLI недоступен.
-- **qFlipper занимает порт** — закрой qFlipper перед `screen`/`picocom`/`pyflipper`.
-- **Перед serial-работой убей фоновые процессы на порту:**
+- **Don't mix up the baud rates:** CLI = 230400, Marauder = 115200, pyflipper = 9600.
+- **The UART Bridge blocks the native CLI** — with the Bridge active, the direct CLI is unavailable.
+- **qFlipper holds the port** — close qFlipper before `screen`/`picocom`/`pyflipper`.
+- **Before serial work, kill background processes on the port:**
   ```bash
   for pid in $(lsof -t /dev/ttyACM0 2>/dev/null); do kill -9 $pid 2>/dev/null; done
   ```
-- **pyflipper хардкодит 9600** — с некоторыми кастом-прошивками не работает; откатывайся на нативный CLI (screen 230400).
-- **CHIP_TUNE (Momentum firmware)** — изолированный формат образа, НЕ реальный Mass Storage; записанные туда файлы невидимы приложениям. Для реального переноса — CLI `storage write`, не монтирование CHIP_TUNE.
-- **`storage write` может портить бинарники** — для прошивок и бинарного переноса используй файловый менеджер qFlipper.
-- **`.fzt` (Flizzer Tracker) — НЕ использовать:** приложение `flizzer_tracker` мгновенно крашит Flipper при воспроизведении.
-- **Управление приложениями:** никогда не удаляй апки без явной команды человека. Даже если апка выглядит «очевидным мусором» — сначала опиши её, потом спрашивай подтверждение.
+- **pyflipper hardcodes 9600** — it doesn't work with some custom firmwares; fall back to the native CLI (screen 230400).
+- **CHIP_TUNE (Momentum firmware)** — an isolated image format, NOT real Mass Storage; files written there are invisible to apps. For actual file transfer use the CLI `storage write`, not mounting CHIP_TUNE.
+- **`storage write` can corrupt binaries** — for firmware and binary transfer use the qFlipper file manager.
+- **`.fzt` (Flizzer Tracker) — do NOT use:** the `flizzer_tracker` app instantly crashes the Flipper on playback.
+- **Managing apps:** never remove apps without an explicit command from a human. Even if an app looks like "obvious junk" — describe it first, then ask for confirmation.
 
-## Доступ к serial на NixOS
+## Serial access on NixOS
 
-Flipper — это USB VID:PID `0483:5740`, `MODE="0660"` + `GROUP="dialout"` по умолчанию.
+The Flipper is USB VID:PID `0483:5740`, `MODE="0660"` + `GROUP="dialout"` by default.
 
-**Вариант A — пользователь в группе dialout (проще всего):**
+**Option A — user in the dialout group (simplest):**
 ```nix
 users.users.YOUR_USER.extraGroups = [ "dialout" ];
 ```
-Нужен релогин (группы назначаются при входе).
+Requires re-login (groups are assigned at login).
 
-**Вариант B — udev-правило (без перезапуска сессии):**
+**Option B — udev rule (no session restart):**
 ```nix
 services.udev.extraRules = ''
   SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE:="0666"
@@ -165,21 +165,20 @@ services.udev.extraRules = ''
 '';
 ```
 
-Зачем ДВА правила: **tty** — для serial-CLI (`screen`/`picocom`/`pyflipper` через
-`/dev/ttyACM0`); **usb** — для GUI-тулз вроде **qFlipper**, которые открывают USB напрямую
-через libusb. Без usb-правила qFlipper зациклится на `Access denied`.
+Why TWO rules: **tty** — for the serial CLI (`screen`/`picocom`/`pyflipper` via
+`/dev/ttyACM0`); **usb** — for GUI tools like **qFlipper** that open USB directly through
+libusb. Without the usb rule, qFlipper will loop on `Access denied`.
 
-**КРИТИЧНО: используй `:=`, а не `=`.** Системные правила ставят `MODE="0660"`; простое
-`MODE="0666"` перекрывается дефолтными правилами. `:=` — финальное присваивание, его уже
-никто не переопределит.
+**CRITICAL: use `:=`, not `=`.** System rules set `MODE="0660"`; a plain `MODE="0666"` gets
+overridden by the default rules. `:=` is a final assignment — nothing can override it after that.
 
-Применить к уже воткнутому устройству:
+Apply to an already plugged-in device:
 ```bash
 sudo chmod 666 /dev/ttyACM0
 sudo udevadm trigger --action=add --attr-match=idVendor=0483 --attr-match=idProduct=5740
-ls -la /dev/ttyACM0   # должно быть crw-rw-rw- (0666)
+ls -la /dev/ttyACM0   # should be crw-rw-rw- (0666)
 ```
-Подводный камень: `udevadm trigger` БЕЗ `--action=add` не пересоздаёт узел — старые права остаются.
+Pitfall: `udevadm trigger` WITHOUT `--action=add` doesn't recreate the node — the old permissions stay.
 
-Инструменты в systemPackages: `screen`, `picocom`, `qflipper` (pyflipper — через
+Tools in systemPackages: `screen`, `picocom`, `qflipper` (pyflipper — via
 `nix-shell -p python313Packages.pyflipper`).

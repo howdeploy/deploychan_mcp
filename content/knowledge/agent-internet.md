@@ -1,10 +1,10 @@
 ---
 id: agent-internet
-name: Выход в интернет — ресерч и браузер
+name: Internet access — research and a browser
 summary: >-
-  Агент обязан выходить в сеть — и в первую очередь. Research API (Tavily, Brave)
-  как основной канал + браузер для подстраховки и скрапинга: gbrowser, chrome с
-  computer use или browser-MCP. Плюс машинное зрение и обход блокировок.
+  The agent must get online — and first of all. A research API (Tavily, Brave) as the
+  primary channel + a browser for backup and scraping: gbrowser, chrome with computer
+  use, or browser-MCP. Plus machine vision and getting around blocks.
 type: knowledge
 author: kisa
 recommended: false
@@ -13,62 +13,59 @@ tags: [internet, research, browser, scraping, agent]
 source: https://mcp.deploychan.webcam/docs
 ---
 
-# Выход в интернет: ресерч и браузер
+# Internet access: research and a browser
 
-Агент без интернета слеп. Он опирается на замороженные знания и галлюцинирует по
-свежим темам. Поэтому выход в сеть — обязателен, и строится он на двух каналах.
+An agent without the internet is blind. It leans on frozen knowledge and hallucinates on fresh
+topics. So getting online is mandatory, and it's built on two channels.
 
-**Что должен сделать агент:** подключить себе research API как основной канал и
-браузер как подстраховку, проверить оба на живом запросе и объяснить человеку, откуда
-теперь берутся факты.
+**What the agent should do:** wire up a research API as its primary channel and a browser as
+backup, test both on a live query, and explain to the person where the facts now come from.
 
-**Почему это первый шаг.** Без живого интернета всё остальное — особенно выбор системы
-памяти — агент решает вслепую, по замороженным знаниям модели. Сначала глаза, потом
-осознанные решения на реальных данных. Инструменты (провайдеры памяти, фреймворки)
-меняются быстро — проверяются ресерчем, а не памятью.
+**Why this is the first step.** Without a live internet everything else — especially the choice
+of memory system — the agent decides blindly, from the model's frozen knowledge. Eyes first, then
+informed decisions on real data. Tools (memory providers, frameworks) change fast — they're checked
+by research, not from memory.
 
-## Канал 1 — Research API (основной)
+## Channel 1 — Research API (primary)
 
-Быстрый структурированный поиск + извлечение контента, заточенные под агентов. Провайдеры:
+Fast structured search + content extraction, sharpened for agents. Providers:
 
-- **Tavily** — личная рекомендация: чистый JSON под LLM, эндпоинты search/extract/crawl/map,
-  свой MCP-сервер и бесплатный тариф на старте. Детали, цены и лимиты — в отдельном
-  гайде-рекомендации по Tavily (`tavily`).
-- **Brave Search API** — независимый поисковый индекс, приватность, свой бесплатный тариф.
-  Хорош, когда нужен источник, не завязанный на чужую агрегацию.
-- **Perplexity Sonar** и подобные — ответы с цитатами.
+- **Tavily** — a personal recommendation: clean JSON for an LLM, search/extract/crawl/map endpoints,
+  its own MCP server, and a free tier to start. Details, prices, and limits — in the separate Tavily
+  recommendation guide (`tavily`).
+- **Brave Search API** — an independent search index, privacy, its own free tier. Good when you need
+  a source not tied to someone else's aggregation.
+- **Perplexity Sonar** and the like — answers with citations.
 
-Агент формулирует запрос, получает источники и вытяжки, вставляет в контекст. Дёшево и
-надёжно. Ключ провайдера — в `.env`.
+The agent forms a query, gets sources and extracts, inserts them into context. Cheap and reliable.
+The provider key goes in `.env`.
 
-## Канал 2 — Браузер (подстраховка и скрапинг)
+## Channel 2 — Browser (backup and scraping)
 
-Research API не берёт JS-сайты, закрытые страницы и анти-бот защиту. Тут нужен живой
-браузер. Три рабочих варианта:
+A research API doesn't handle JS sites, gated pages, and anti-bot protection. Here you need a live
+browser. Three working options:
 
-- **gbrowser из gstack** — headless-браузер под управлением агента: навигация, клики,
-  снапшоты, скрапинг. Основной инструмент под задачу «дорендерить и вытащить».
-- **Chrome с computer use** — агент управляет реальным браузером (Anthropic computer
-  use): когда нужно кликать как человек и проходить сложные флоу.
-- **Browser-MCP** — браузер, подключённый как MCP-сервер: универсально для любого
-  MCP-клиента.
+- **gbrowser from gstack** — a headless browser under the agent's control: navigation, clicks,
+  snapshots, scraping. The main tool for the "render it and pull it out" job.
+- **Chrome with computer use** — the agent drives a real browser (Anthropic computer use): when you
+  need to click like a human and get through complex flows.
+- **Browser-MCP** — a browser connected as an MCP server: universal for any MCP client.
 
-Правило: research API — первым, браузер — когда API не смог (JS/закрытое/скрапинг).
+The rule: research API first, the browser when the API couldn't (JS/gated/scraping).
 
-## Машинное зрение и обход блокировок
+## Machine vision and getting around blocks
 
-- **Зрение.** Чтобы читать скриншоты и картинки со страниц — подключи vision-модель
-  (например, DeepSeek умеет видеть изображения). Агент не только парсит текст, но и
-  понимает, что на экране.
-- **Блокировки.** Часть сервисов недоступна из региона или палит публичные VPN. Подними
-  свой VPN на VPS (скрипт Xrayebator) и ходи ресерчем/браузером через него.
+- **Vision.** To read screenshots and images off pages — wire up a vision model (DeepSeek, for
+  example, can see images). The agent doesn't just parse text but understands what's on the screen.
+- **Blocks.** Some services are unavailable in your region or bust public VPNs. Stand up your own
+  VPN on a VPS (the Xrayebator script) and go through it with research/the browser.
 
-## Порядок действий
+## Steps
 
-1. Подключи research API (ключ в `.env`), проверь тестовым запросом.
-2. Подними браузер-инструмент (gbrowser / computer use / MCP), открой любую JS-страницу.
-3. При нужде добавь vision и свой VPN.
-4. Покажи человеку: один и тот же вопрос — ответ с реальными источниками, а не из головы.
+1. Wire up a research API (key in `.env`), test it with a query.
+2. Stand up a browser tool (gbrowser / computer use / MCP), open any JS page.
+3. If needed, add vision and your own VPN.
+4. Show the person: the same question — an answer with real sources, not off the top of the head.
 
-Теперь агент видит реальный мир и опирается на живые данные. Дальше — дать ему лицо:
-личность, правила и манера речи.
+Now the agent sees the real world and leans on live data. Next — give it a face: personality, rules,
+and manner of speech.

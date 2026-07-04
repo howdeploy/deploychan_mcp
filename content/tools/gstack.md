@@ -1,10 +1,11 @@
 ---
 id: gstack
-name: 'gstack: рабочий контур для Claude Code (+ gbrowser)'
+name: 'gstack: a working loop for Claude Code (+ gbrowser)'
 summary: >-
-  gstack — опенсорс-набор Гарри Тана: скиллы-режимы для Claude Code (планирование,
-  ревью, QA, шип) поверх персистентного headless-браузера gbrowser (/browse). Что это,
-  как ставится, ключевые команды. Честно: это Claude-Code-набор, не мультиагент.
+  gstack — Garry Tan's open-source kit: mode-skills for Claude Code (planning,
+  review, QA, ship) on top of the persistent headless browser gbrowser (/browse). What it
+  is, how to install it, the key commands. Honestly: it's a Claude Code kit, not a
+  multi-agent system.
 type: tool
 author: third_party
 recommended: false
@@ -13,55 +14,55 @@ tags: [gstack, gbrowser, claude-code, workflow, qa, browser]
 source: https://github.com/garrytan/gstack
 ---
 
-# gstack: рабочий контур для Claude Code (+ gbrowser)
+# gstack: a working loop for Claude Code (+ gbrowser)
 
-gstack (`garrytan/gstack`, MIT) — не новая модель и не фреймворк агента, а **workflow-слой
-для Claude Code**. Пакует доставку софта в набор скиллов-режимов: планирование, ревью, QA,
-шип, браузер, ретро. Идея — дать Claude Code явные роли (CEO / дизайнер / eng-manager /
-release-manager / QA) вместо одного размытого системного промпта.
+gstack (`garrytan/gstack`, MIT) isn't a new model or an agent framework — it's a **workflow
+layer for Claude Code**. It packages software delivery into a set of mode-skills: planning,
+review, QA, ship, browser, retro. The idea — give Claude Code explicit roles
+(CEO / designer / eng-manager / release-manager / QA) instead of one blurry system prompt.
 
-**Честная оговорка про мультиагентность.** gstack — Claude-Code-нативный: ставится в
-`~/.claude/skills/`, читает `CLAUDE.md`, команды идут как слэш-скиллы Claude Code. Это НЕ
-мультиагентный инструмент. Внутри есть `/codex` (делегировать задачу Codex) и gbrain
-(кросс-машинная память), но сам контур заточен под Claude Code. Подаю как есть, без
-искусственного «мультиагентим».
+**An honest caveat about multi-agent.** gstack is Claude-Code-native: it installs into
+`~/.claude/skills/`, reads `CLAUDE.md`, and its commands run as Claude Code slash-skills. It
+is NOT a multi-agent tool. Inside there's `/codex` (delegate a task to Codex) and gbrain
+(cross-machine memory), but the loop itself is built for Claude Code. I'm presenting it
+as-is, without artificially "making it multi-agent".
 
-## gbrowser — персистентный браузер (`/browse`)
+## gbrowser — the persistent browser (`/browse`)
 
-Главный технический компонент. gstack держит **долгоживущий headless-Chromium** поверх
-localhost HTTP: cookies, вкладки, `localStorage`, состояние логина переживают между командами.
-Агент логинится, кликает по приложению, снимает скриншоты, инспектит поломки. Это тот самый
-браузер, которым удобно дорендеривать JS-страницы и скрапить (канал 2 из гайда `agent-internet`).
+The main technical component. gstack keeps a **long-lived headless Chromium** over localhost
+HTTP: cookies, tabs, `localStorage`, and login state survive between commands. The agent logs
+in, clicks around the app, takes screenshots, inspects breakages. This is the very browser
+that's handy for rendering out JS pages and scraping (channel 2 from the `agent-internet` guide).
 
-`/qa` строится поверх: анализирует дифф ветки → находит затронутые роуты → тестит именно их
-против локального приложения. Не отдельный ручной прогон, а привязка QA к изменениям в коде.
+`/qa` is built on top: it analyzes the branch diff → finds the affected routes → tests
+exactly those against the local app. Not a separate manual run, but QA tied to the changes in the code.
 
-## Установка
+## Install
 
 ```bash
 git clone --single-branch --depth 1 https://github.com/garrytan/gstack ~/.claude/skills/gstack
 cd ~/.claude/skills/gstack && ./setup
 ```
 
-Затем добавь секцию `## gstack` в `CLAUDE.md` (использовать `/browse` для веба + список
-скиллов). Без этой секции Claude может «не видеть» скиллы.
+Then add a `## gstack` section to `CLAUDE.md` (use `/browse` for the web + the list of
+skills). Without this section, Claude may "not see" the skills.
 
-## Ключевые скиллы
+## Key skills
 
-- **Планирование/стратегия:** `/office-hours` (продуктовые идеи), `/plan-ceo-review` (скоуп),
-  `/plan-eng-review` (архитектура), `/plan-design-review`, `/autoplan` (весь пайплайн ревью).
-- **Код/баги:** `/review` (дифф перед мержем), `/investigate` (баги, «почему сломалось»).
-- **QA/браузер:** `/browse` (открыть/тестить сайт), `/qa` (тест по диффу), `/qa-only` (только
-  репорт), `/design-review` (визуальный аудит живого сайта).
-- **Шип:** `/ship` (PR/деплой), `/land-and-deploy` (мерж + деплой + проверка), `/canary`.
-- **Прочее:** `/codex` (делегировать Codex), `/learn`, `/retro`, `/document-*`.
+- **Planning/strategy:** `/office-hours` (product ideas), `/plan-ceo-review` (scope),
+  `/plan-eng-review` (architecture), `/plan-design-review`, `/autoplan` (the whole review pipeline).
+- **Code/bugs:** `/review` (diff before merge), `/investigate` (bugs, "why it broke").
+- **QA/browser:** `/browse` (open/test a site), `/qa` (test by diff), `/qa-only` (report
+  only), `/design-review` (visual audit of a live site).
+- **Ship:** `/ship` (PR/deploy), `/land-and-deploy` (merge + deploy + verify), `/canary`.
+- **Misc:** `/codex` (delegate to Codex), `/learn`, `/retro`, `/document-*`.
 
-Роутинг живёт в `CLAUDE.md`: запрос матчится на скилл (баг → `/investigate`, «does this work»
-→ `/qa`, ревью → `/review`, шип → `/ship`).
+Routing lives in `CLAUDE.md`: a request matches to a skill (bug → `/investigate`, "does this work"
+→ `/qa`, review → `/review`, ship → `/ship`).
 
-## Зачем это в deploychan
+## Why this is in deploychan
 
-Для агента-потребителя главное из gstack — **gbrowser**: персистентный браузер под QA и
-скрапинг JS-страниц (тот самый «канал 2» из гайда `agent-internet`). Остальные скиллы —
-методология рабочего контура под Claude Code: явные роли вместо одного промпта, QA привязан
-к диффу, шип одной командой.
+For the consumer agent, the main thing from gstack is **gbrowser**: a persistent browser for
+QA and scraping JS pages (that same "channel 2" from the `agent-internet` guide). The rest of
+the skills are a working-loop methodology for Claude Code: explicit roles instead of one
+prompt, QA tied to the diff, ship in one command.

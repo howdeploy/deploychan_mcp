@@ -1,11 +1,11 @@
 ---
 id: agentation
-name: 'Agentation: визуальный фидбэк агенту'
+name: 'Agentation: visual feedback for your agent'
 summary: >-
-  Agentation — agent-agnostic инструмент визуального фидбэка: кликаешь элемент на
-  странице, пишешь замечание, получаешь точный селектор/позицию/дерево компонентов и
-  отдаёшь любому агенту (Claude Code, Codex, Cursor…) или через MCP. Требует только
-  React ≥ 18. Убивает игру «угадай, о каком элементе речь».
+  Agentation is an agent-agnostic visual feedback tool: click an element on the
+  page, write a note, get the exact selector/position/component tree, and hand it to
+  any agent (Claude Code, Codex, Cursor…) or via MCP. Requires only React ≥ 18. Kills
+  the guess-which-element game.
 type: tool
 author: third_party
 recommended: true
@@ -14,82 +14,82 @@ tags: [agentation, visual-feedback, react, agent, design]
 source: https://www.agentation.com
 ---
 
-# Agentation: визуальный фидбэк агенту
+# Agentation: visual feedback for your agent
 
-Правка дизайна вслепую — это русская рулетка: «синяя кнопка в сайдбаре» — и агент гадает.
-Agentation превращает клик по элементу в **структурированный контекст**, который агент
-понимает точно. Ты кликаешь элемент на своей запущенной странице, пишешь замечание — и
-агент получает:
+Editing design blind is Russian roulette: "the blue button in the sidebar" — and the agent
+guesses. Agentation turns a click on an element into **structured context** the agent
+understands precisely. You click an element on your running page, write a note — and the
+agent gets:
 
-- **CSS-селектор**, по которому можно `grep`-нуть кодовую базу;
-- **путь к исходному файлу** — агент прыгает сразу в нужную строку;
-- **дерево React-компонентов** — понимает иерархию;
-- **вычисленные стили** — понимает текущий вид;
-- **твоё замечание** с намерением и приоритетом.
+- the **CSS selector** you can `grep` the codebase with;
+- the **source file path** — the agent jumps straight to the right line;
+- the **React component tree** — it understands the hierarchy;
+- the **computed styles** — it understands the current look;
+- **your note** with intent and priority.
 
-Вместо «синяя кнопка в сайдбаре» ты даёшь `.sidebar > button.primary` — и агент бьёт точно.
+Instead of "the blue button in the sidebar" you give `.sidebar > button.primary` — and the agent hits the mark.
 
-## Agent-agnostic — это не про Claude Code
+## Agent-agnostic — this isn't a Claude Code thing
 
-Дословно с репозитория: Agentation — **agent-agnostic visual feedback tool**. Вывод
-вставляется в **Claude Code, Codex, Cursor или любой AI-инструмент** с доступом к твоей
-кодовой базе. Два способа доставки:
+Straight from the repo: Agentation is an **agent-agnostic visual feedback tool**. The output
+pastes into **Claude Code, Codex, Cursor, or any AI tool** with access to your codebase. Two
+delivery methods:
 
-1. **Копипаст** — жмёшь «скопировать», структурированный markdown летит в буфер, вставляешь
-   в чат своего агента.
-2. **MCP** — подключаешь MCP-сервер Agentation, и копипаст не нужен: агент сам видит, на что
-   ты указываешь. Говоришь «поправь замечание 3» — и он берёт в работу.
+1. **Copy-paste** — hit "copy", the structured markdown flies to your clipboard, paste it
+   into your agent's chat.
+2. **MCP** — connect the Agentation MCP server and no copy-paste needed: the agent sees what
+   you're pointing at itself. Say "fix note 3" and it picks it up.
 
-## Требование — только React ≥ 18
+## Requirement — React ≥ 18 only
 
-Единственное жёсткое требование — приложение должно быть на **React ≥ 18**. Любой
-React-стек подходит: no-build (UMD), Vite, Next.js. Формулировка «работает только с Next.js»
-— неверна, это лишь один из вариантов. Инструмент desktop-only.
+The only hard requirement — the app must be on **React ≥ 18**. Any React stack works:
+no-build (UMD), Vite, Next.js. The claim "works only with Next.js" is wrong — that's just one
+option. The tool is desktop-only.
 
-## Установка (под своего агента)
+## Install (for your agent)
 
 ```bash
 npx skills add benjitaylor/agentation
 ```
-`skills` (`vercel-labs/skills`) ставит скилл в **любой из 70+ поддерживаемых агентов** —
-при установке выбираешь СВОЙ (Claude Code / Codex / Cursor / Windsurf…), затем рекомендованные
-опции и Yes. Скилл сам подтянет и настроит утилиту. Запуск скилла в агенте инициирует
-установку самого инструмента, с которым дальше работаешь.
+`skills` (`vercel-labs/skills`) installs the skill into **any of 70+ supported agents** — at
+install time you pick YOURS (Claude Code / Codex / Cursor / Windsurf…), then the recommended
+options and Yes. The skill pulls in and configures the utility itself. Running the skill in
+your agent kicks off the install of the actual tool you'll be working with.
 
-Совет: ставь скилл ДО того, как собираешь свой пайплайн агентов — иначе привязка может
-потеряться, и придётся отдельно просить агента починить.
+Tip: install the skill BEFORE you assemble your agent pipeline — otherwise the binding can
+get lost, and you'll have to ask the agent to fix it separately.
 
-## Как пользоваться
+## How to use
 
-1. Запусти свой веб-проект (агент может сделать это сам, либо руками).
-2. В правом нижнем углу — иконка меню правок. Кликни, чтобы активировать.
-3. Наводишь на элемент — видишь подсвеченную область объекта.
-4. Кликаешь элемент → пишешь замечание → **Add**.
-5. Жмёшь «скопировать» → вставляешь в агента (либо, с MCP, просто «поправь замечание N»).
+1. Start your web project (the agent can do it itself, or by hand).
+2. In the bottom-right corner — the edit menu icon. Click to activate.
+3. Hover over an element — you see the object's highlighted area.
+4. Click the element → write a note → **Add**.
+5. Hit "copy" → paste into the agent (or, with MCP, just "fix note N").
 
-Все изменения на сайте видны в реалтайме — можно накидывать замечания и полировать каждый
-пиксель и каждую букву, сколько нужно. Шестерёнка открывает настройки (вебхуки, цвет
-пометок) — дефолтов обычно достаточно.
+All changes on the site are visible in real time — you can pile up notes and polish every
+pixel and every letter as much as you need. The gear opens settings (webhooks, note color) —
+the defaults are usually enough.
 
-## Пример пайплайна
+## Example pipeline
 
-Agentation хорошо ложится в мультиагентную оркестрацию. Пример разделения ролей (агенты
-любые — важно, что у «дизайнера» стоит скилл agentation):
+Agentation fits well into multi-agent orchestration. An example role split (any agents — what
+matters is that the "designer" has the agentation skill installed):
 
-- **Агент-архитектор** — изучает ТЗ, задаёт вопросы, пишет архитектуру с комментариями.
-- **Агент-разработчик (фулстек)** — пишет весь код.
-- **Агент-дизайнер/QA** — отлаживает функции, ищет баги и правит дизайн через Agentation,
-  получая точные селекторы и позиции.
+- **Architect agent** — studies the spec, asks questions, writes the architecture with comments.
+- **Developer agent (full-stack)** — writes all the code.
+- **Designer/QA agent** — debugs features, hunts bugs, and fixes the design through Agentation,
+  getting exact selectors and positions.
 
-Так каждый элемент дорабатывается прицельно, а не «на угад».
+This way every element is refined with precision, not by guesswork.
 
-## Подводные камни
+## Pitfalls
 
-- **MCP не подхватывается до перезапуска агента.** Агент честно предупредит, что не сможет
-  автоматически получать правки, пока его не перезапустить.
-- **Иногда нужно повторно указать применить правку** — иначе, например, текст может «улететь»
-  слишком далеко. Послеживай за изменениями и сверяйся с агентом, чтобы не было конфликтов.
-- Скилл ставь заранее (см. выше), чтобы функция не «потерялась» при сборке пайплайна.
+- **MCP isn't picked up until the agent restarts.** The agent will honestly warn you that it
+  can't receive edits automatically until it's restarted.
+- **Sometimes you need to tell it to apply an edit again** — otherwise, for example, text can
+  "fly off" too far. Keep an eye on changes and check with the agent so there are no conflicts.
+- Install the skill ahead of time (see above) so the feature doesn't "get lost" when assembling the pipeline.
 
-Связка «прямые запросы агенту + точные указания через Agentation» позволяет отполировать
-каждый элемент интерфейса.
+The combo of "direct requests to the agent + precise pointers through Agentation" lets you
+polish every element of the interface.

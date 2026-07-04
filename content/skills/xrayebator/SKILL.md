@@ -1,11 +1,11 @@
 ---
 id: xrayebator
-name: 'Xrayebator: свой VPN на VPS (Xray Reality)'
+name: 'Xrayebator: your own VPN on a VPS (Xray Reality)'
 summary: >-
-  Скилл KISA: интерактивный менеджер Xray Reality VPN на своём VPS. VLESS + REALITY —
-  трафик неотличим от обычного HTTPS, без домена и сертификата, обходит DPI. Профили
-  транспорта, добавление клиентов, HAPP-подписка. Чтобы агент ходил ресерчем и браузером
-  через свой чистый выход мимо блокировок.
+  KISA's skill: an interactive manager for an Xray Reality VPN on your own VPS. VLESS +
+  REALITY — traffic indistinguishable from ordinary HTTPS, no domain or certificate, bypasses
+  DPI. Transport profiles, adding clients, HAPP subscription. So the agent runs research and
+  the browser through its own clean exit, past the blocks.
 type: skill
 author: kisa
 recommended: false
@@ -19,28 +19,29 @@ description: >-
 license: MIT
 ---
 
-# Xrayebator — свой VPN на VPS (Xray Reality)
+# Xrayebator — your own VPN on a VPS (Xray Reality)
 
-Один скрипт поднимает и рулит **Xray Reality VPN** на твоём VPS. Технология — **VLESS +
-REALITY**: трафик неотличим от обычного HTTPS-соединения к реальному сайту, без своего домена
-и сертификата. Обычные протоколы (OpenVPN, WireGuard, Shadowsocks) DPI ловит по сигнатуре;
-REALITY маскируется под легитимный TLS к чужому сайту — и потому не палится инспекцией пакетов.
-Публичный: `howdeploy/Xrayebator` (v2.0), MIT.
+A single script spins up and manages an **Xray Reality VPN** on your VPS. The tech is **VLESS +
+REALITY**: traffic is indistinguishable from an ordinary HTTPS connection to a real site, with no
+domain or certificate of your own. Ordinary protocols (OpenVPN, WireGuard, Shadowsocks) get
+caught by DPI on their signature; REALITY masquerades as legitimate TLS to someone else's site —
+and so it doesn't get flagged by packet inspection. Public: `howdeploy/Xrayebator` (v2.0), MIT.
 
-> **Законность.** Свой VPN для приватности и доступа к своим сервисам легитимен во многих
-> странах, но не везде. Это для личного доступа и research, а не для обхода закона. Проверь
-> местные правила; ответственность за использование — на пользователе.
+> **Legality.** Your own VPN for privacy and access to your own services is legitimate in many
+> countries, but not everywhere. This is for personal access and research, not for breaking the
+> law. Check your local rules; responsibility for use is on the user.
 
-## Зачем это в deploychan
+## Why this is in deploychan
 
-Часть сервисов недоступна из региона или палит публичные VPN. Гайды `agent-internet` и
-`agent-voice` прямо на это ссылаются: research API, браузер, ElevenLabs, Stripe могут не
-работать из-под региона. Xrayebator даёт **свой чистый выход** — агент ходит ресерчем и
-браузером через твой VPS, а не через палёный публичный VPN. Свой VPN = свой контроль.
+Some services are unavailable from your region or flag public VPNs. The `agent-internet` and
+`agent-voice` guides point right at this: research APIs, the browser, ElevenLabs, Stripe may not
+work from within your region. Xrayebator gives you **your own clean exit** — the agent runs
+research and the browser through your VPS, not through a flagged public VPN. Your own VPN = your
+own control.
 
-## Установка и управление
+## Install and management
 
-Скрипт интерактивный — запускается на чистом VPS от root:
+The script is interactive — run it on a clean VPS as root:
 
 ```bash
 git clone https://github.com/howdeploy/Xrayebator.git
@@ -48,45 +49,46 @@ cd Xrayebator
 sudo bash xrayebator
 ```
 
-Первый запуск — установка (ставит Xray-core, генерит ключи Reality, поднимает ноду). Каждый
-следующий запуск — меню управления:
+First run — installation (installs Xray-core, generates Reality keys, brings up the node). Every
+subsequent run — a management menu:
 
-- **Установить** — развернуть Xray Reality на этом VPS.
-- **Добавить клиента** — сгенерить нового клиента (VLESS-ссылка + QR).
-- **Удалить** — убрать клиента или снести Xray.
+- **Install** — deploy Xray Reality on this VPS.
+- **Add client** — generate a new client (VLESS link + QR).
+- **Remove** — remove a client or tear down Xray.
 
-Ключи и конфиг живут в `/usr/local/etc/xray/`. Маскировка настраивается через список SNI
-(под какой реальный сайт мимикрирует соединение).
+Keys and config live in `/usr/local/etc/xray/`. Masking is configured via the SNI list (which
+real site the connection mimics).
 
-## Профили транспорта
+## Transport profiles
 
-v2.0 умеет несколько связок под разные условия сети и DPI:
+v2.0 supports several combinations for different network and DPI conditions:
 
-- **VLESS + TCP + Reality + Vision** — базовая, самая стабильная.
-- **+ Mux / + uTLS** — мультиплексирование и подмена TLS-отпечатка.
-- **VLESS + XHTTP + Reality** — HTTP-обёртка, живучее там, где режут TCP.
-- **VLESS + gRPC + Reality** — gRPC-транспорт (осторожно, медленнее).
-- **VLESS PQ encryption** (`mlkem768x25519plus`) — пост-квантовое шифрование.
+- **VLESS + TCP + Reality + Vision** — the baseline, the most stable.
+- **+ Mux / + uTLS** — multiplexing and TLS-fingerprint spoofing.
+- **VLESS + XHTTP + Reality** — an HTTP wrapper, more resilient where TCP gets cut.
+- **VLESS + gRPC + Reality** — gRPC transport (careful, slower).
+- **VLESS PQ encryption** (`mlkem768x25519plus`) — post-quantum encryption.
 
-Плюс **HAPP-подписка** и мульти-роут профили: клиент получает подписку, а не одну ссылку.
+Plus a **HAPP subscription** and multi-route profiles: the client gets a subscription rather than
+a single link.
 
-## Клиенты
+## Clients
 
-Импортируй сгенерированную VLESS-ссылку или скан QR:
+Import the generated VLESS link or scan the QR:
 
-| Платформа | Приложение |
+| Platform | App |
 |---|---|
 | Android | v2rayNG, NekoBox, Hiddify, HAPP |
 | iOS/macOS | Shadowrocket, V2BOX, Streisand, HAPP |
 | Windows | v2rayN, Hiddify |
 | Linux | v2rayA, Nekoray, Hiddify |
 
-## Практика
+## In practice
 
-- Бери VPS в чистом датацентре, вне заблокированного региона.
-- Не ставь на тот же VPS палящиеся протоколы (OpenVPN/WireGuard) — некоторые провайдеры
-  банят VPS, засветившийся на них. REALITY этого не требует.
-- SNI-маскировку выбирай под доступный из твоего региона сайт: заблокировали текущий —
-  меняешь SNI на другой, и соединение снова выглядит легитимным.
-- Свой VPN нужен связке «агент + ресерч/браузер»: настроил выход — и `ALL_PROXY` /
-  системный прокси направляют трафик агента через чистый экзит.
+- Take a VPS in a clean datacenter, outside the blocked region.
+- Don't put detectable protocols (OpenVPN/WireGuard) on the same VPS — some providers ban a VPS
+  that's been spotted using them. REALITY doesn't require that.
+- Pick your SNI masking to match a site reachable from your region: if the current one gets
+  blocked, you switch the SNI to another and the connection looks legitimate again.
+- Your own VPN is what the "agent + research/browser" combo needs: set up the exit, and
+  `ALL_PROXY` / the system proxy route the agent's traffic through the clean exit.
