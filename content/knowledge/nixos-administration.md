@@ -27,6 +27,11 @@ source: https://mcp.deploychan.webcam/docs
 
 ## Базовый цикл: правка системного конфига
 
+> **Про `cat`/`ls`/`cp` ниже.** В интерактивной оболочке пользователя coreutils обычно есть.
+> Но у агента в неинтерактивном контексте их может не быть в PATH (см. `nixos-agent-environment`):
+> тогда бери полный путь (`/run/current-system/sw/bin/cat`) или Python-фолбэк. Голые
+> `cat`/`ls` вслепую не предполагай — примеры ниже даны для наглядности.
+
 ### 1. Прочитать текущий конфиг
 ```bash
 cat /etc/nixos/configuration.nix
