@@ -30,9 +30,15 @@
   section{scroll-margin-top:74px;display:flex;flex-direction:column;gap:16px}
   .lead{font:500 16px/1.6 'Space Grotesk';margin:0;max-width:640px}
   .ex{font:500 12.5px/1.7 'Space Mono',monospace;background:var(--fg);color:var(--bg);padding:14px 16px;border:2px solid var(--fg);max-width:640px}
+  h1,h2,.kicker,.btn,button,.dbrand,#sidebar a{-webkit-user-select:none;user-select:none}
   @media(max-width:900px){
     .grid{grid-template-columns:1fr!important}
     aside{display:none!important}
+    .site{padding:12px 10px 34px!important;overflow-x:hidden}
+    #main{padding:26px 18px 46px!important}
+    .dhead{flex-wrap:wrap!important;gap:10px!important;padding:10px 14px!important}
+    .dbrand{min-width:0!important}
+    .dsearch{order:3;flex:1 1 100%!important;max-width:none!important}
   }
 </style>
 </head>
@@ -41,12 +47,12 @@
   <div class="wrap">
 
     <!-- header -->
-    <div style="position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:11px 20px;border-bottom:2px solid var(--fg);background:var(--bg)">
-      <div style="display:flex;align-items:baseline;gap:9px;min-width:190px">
+    <div class="dhead" style="position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:11px 20px;border-bottom:2px solid var(--fg);background:var(--bg)">
+      <div class="dbrand" style="display:flex;align-items:baseline;gap:9px;min-width:190px">
         <div style="font:700 19px 'Space Grotesk';letter-spacing:-.03em">mcp<span style="background:var(--accent);color:var(--bg);padding:0 5px;margin:0 2px">.</span>deploychan</div>
         <span class="mono" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">/ docs</span>
       </div>
-      <div style="flex:1;display:flex;align-items:center;gap:8px;border:2px solid var(--fg);background:var(--card);padding:7px 11px;max-width:340px">
+      <div class="dsearch" style="flex:1;display:flex;align-items:center;gap:8px;border:2px solid var(--fg);background:var(--card);padding:7px 11px;max-width:340px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
         <input id="search" placeholder="Поиск по документации" class="mono" style="border:0;outline:none;background:transparent;flex:1;font-weight:500;font-size:13px;color:var(--fg)">
       </div>

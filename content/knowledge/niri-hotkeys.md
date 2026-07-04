@@ -2,20 +2,31 @@
 id: niri-hotkeys
 name: 'Niri: горячие клавиши и конфиг'
 summary: >-
-  Референс горячих клавиш niri — скроллируемого тайлингового Wayland-композитора:
-  фокус, перемещение, ресайз, воркспейсы, запуск, система. Плюс расположение конфига,
-  перезагрузка и подводные камни KDL.
+  Референс горячих клавиш niri + практика: встроенный overlay всех биндов (Mod+Shift+/),
+  как агенту менять бинды в config.kdl с live-reload, и критичный конфликт Super/WIN при
+  стриминге на ПК (Wayland не отдаёт Win клиенту) с фиксом через Sunshine.
 type: knowledge
 author: kisa
 recommended: false
 added: 2026-07-04
-tags: [nixos, niri, wayland, hotkeys, compositor]
-source: https://mcp.deploychan.webcam/docs
+tags: [nixos, niri, wayland, hotkeys, compositor, streaming, config]
+source: https://github.com/niri-wm/niri/wiki/Configuration:-Key-Bindings
 ---
 
 # Горячие клавиши Niri
 
 Niri — скроллируемый тайлинговый Wayland-композитор. `Mod` = Super.
+
+## Шпаргалка: overlay со всеми хоткеями
+
+Не помнишь бинд — не гадай. У niri встроенный **Important Hotkeys**: жми **`Mod+Shift+/`**
+(Super+Shift+Slash) — всплывёт список важных биндов. Он же показывается при старте сессии.
+
+- Спавн-бинды в overlay безымянные, если не задать заголовок. Дай им имя свойством
+  `hotkey-overlay-title="..."` (niri v25.02+); скрыть бинд из списка — `hotkey-overlay-title=null`.
+  Заголовки поддерживают Pango-разметку.
+- Нужен ПОИСК по биндам, а не статичный список — поставь fuzzel-меню из community-скриптов
+  `heyoeyo/niri_tweaks`: парсит `config.kdl` и даёт fuzzy-поиск по всем хоткеям.
 
 ## Фокус
 | Хоткей | Действие |
@@ -70,6 +81,42 @@ Niri — скроллируемый тайлинговый Wayland-композ�
 - `~/.config/niri/config.kdl`
 - Перезагрузка: `niri msg action load-config-file`
 - Focus ring: `layout { focus-ring { width 2 active-color "#CBA6F7" inactive-color "#313244" } }`
+
+## Как менять хоткеи (инструкция агенту)
+
+Бинды живут в секции `binds { }` файла `~/.config/niri/config.kdl`. Каждый — хоткей, за ним
+ОДНО действие в фигурных скобках:
+
+```kdl
+binds {
+    Mod+Return hotkey-overlay-title="Терминал" { spawn "alacritty"; }
+    Mod+D { spawn "fuzzel"; }
+    Mod+Shift+E { quit; }
+}
+```
+
+- Хоткей = модификаторы через `+` и XKB-имя клавиши в конце. Модификаторы: `Ctrl`/`Control`,
+  `Shift`, `Alt`, `Super`/`Win`, `Mod`. `Mod` = Super (перенастраивается).
+- **Применить:** niri перечитывает конфиг на сохранение (авто-reload) либо руками
+  `niri msg action load-config-file`. Парсинг в отдельном потоке, без фриза.
+- **ГОТЧА:** секция `binds { }` НЕ подтягивает дефолты, если её опустить — правь
+  существующую, не заменяй пустой, иначе потеряешь все бинды.
+- Новым спавн-биндам сразу давай `hotkey-overlay-title`, иначе в overlay они безымянные.
+
+## Стриминг: конфликт Super/WIN (важно)
+
+Стримишь рабочий стол niri на ПК через Sunshine/Moonlight — хоткеи не срабатывают. Причина
+техническая, не баг конфига: **Wayland не отдаёт клиенту клавишу Win** (дословно из доков
+Sunshine). Super, нажатый на ПК-клиенте, перехватывает САМ клиент (открывает меню Пуск
+Windows) и до хоста он не доходит. А все бинды niri висят на `Mod`=Super → с ПК их не ввести.
+
+Что делать:
+- **Sunshine `key_rightalt_to_key_win`** — хост считает правый Alt Windows-клавишей. Жмёшь на
+  клиенте Right Alt → niri видит Super, бинды работают.
+- Либо **продублируй ключевые бинды на не-Super модификатор** (Alt/Ctrl) специально под стрим.
+- Moonlight умеет тоглить захват системных комбо (`Ctrl+Alt+Shift+Z`), но Win — особый случай.
+
+Подробнее про сам стриминг рабочего стола — знание `nixos-streaming`.
 
 ## Подводные камни
 - Парсинг KDL строгий — невалидные блоки приводят к тихому отклонению конфига
