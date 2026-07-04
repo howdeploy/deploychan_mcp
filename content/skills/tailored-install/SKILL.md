@@ -40,7 +40,8 @@ this discipline first. It is the implicit **step 0 of every leveling-up route**:
 "install X" always means "install X tailored to THIS user's machine" — not into a
 template, not into assumed paths.
 
-This skill is agent-agnostic; a Claude Code appendix at the end gives concrete paths.
+This skill is agent-agnostic; the appendices at the end give concrete paths for Claude
+Code, Hermes and Codex.
 
 ## Always keep in mind
 
@@ -127,3 +128,49 @@ Concrete locations when the host is Claude Code:
 
 Confirm user-vs-project scope before writing. For hooks/permissions, show the exact
 JSON change and confirm before applying.
+
+## Hermes appendix
+
+Concrete locations when the host is Hermes Agent:
+
+- **Skills:** `~/.hermes/skills/<name>/SKILL.md` (user scope). Project-scope skills are
+  loaded from the repo's `.hermes/skills/` directory.
+- **Memory / instructions:** `SOUL.md` in `$HERMES_HOME` for agent identity; project rules
+  in `.hermes.md` or `AGENTS.md` at the project root.
+- **Hooks & permissions:** `~/.hermes/config.yaml` (approvals, `command_allowlist`). No
+  separate `settings.json` — approvals and allowlists live in `config.yaml`.
+- **Environment secrets:** `~/.hermes/.env` (API keys).
+
+Confirm user-vs-project scope before writing. For `config.yaml` changes, show the exact
+YAML change and confirm before applying. After writing skills to `~/.hermes/skills/`, tell
+the user to run `/reload-skills` or restart Hermes.
+
+## Codex appendix
+
+Concrete locations when the host is Codex CLI:
+
+- **Skills:** Codex has no native skill directory. Use `~/.codex/skills/<name>/SKILL.md` as
+  a convention. Codex reads instructions from `AGENTS.md` or `CODEX.md` at the project root.
+- **Memory / instructions:** `~/.codex/instructions.md` for global instructions;
+  project-level `CODEX.md` or `AGENTS.md`.
+- **Hooks & permissions:** Codex uses `--yolo`, `--full-auto`, or approval prompts per
+  invocation — no persistent settings file.
+- **MCP servers:** configured via `codex mcp add` or `~/.codex/mcp.json`.
+
+Codex has no concept of user-scope skills natively. Prefer project-scope `AGENTS.md` or
+`CODEX.md` for Codex-specific instructions unless the user explicitly asks for global.
+
+## Tool names across agents
+
+The `allowed-tools` in this skill's frontmatter uses **Claude Code** tool names. For other
+agents, map them to the equivalents:
+
+| Claude Code | Hermes / Codex |
+|---|---|
+| Read | read_file |
+| Glob | search_files |
+| Grep | search_files |
+| Bash | terminal |
+| Edit | patch |
+| Write | write_file |
+| AskUserQuestion | clarify |
