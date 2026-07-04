@@ -55,8 +55,12 @@ Code, Hermes and Codex.
 
 Gather facts before touching anything. Read-only only:
 
-- **Host agent:** Claude Code, Cursor, Cline, Continue, or generic? Look for tell-tale
-  config dirs/files (e.g. a `.claude/` dir, a `.cursor/` dir, an `AGENTS.md`).
+- **Host agent:** Claude Code, Cursor, Cline, Continue, Codex, Hermes, or generic? Look for
+  tell-tale config dirs/files (e.g. a `.claude/` dir, a `.cursor/` dir, an `AGENTS.md`).
+- **Which runtime and model you are.** This is step 0 of everything: downstream capability
+  choices branch on it. Hermes ships many things out of the box (memory providers, voice);
+  Claude Code / Codex usually vibe-code the equivalent. Pick the wrong branch and you install
+  a Hermes-only command into Claude Code, or hand-build what the host already has.
 - **OS and home directory.**
 - **Where each surface lives for this agent:** skill directory, memory/instruction
   file(s), hooks/permissions/settings file(s).
