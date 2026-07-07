@@ -36,6 +36,13 @@ agentation:
     пишешь замечание, получаешь точный селектор/позицию/дерево компонентов и отдаёшь любому агенту (Claude
     Code, Codex, Cursor…) или через MCP. Требует только React ≥ 18. Убивает игру «угадай, о каком элементе
     речь».'
+chrome-proxy-english-signup:
+  name: Пройти строгий signup через английский Chrome и проксю
+  summary: 'Полевой лайфхак против анти-бот регистраций, которые палят язык браузера и IP: чистый
+    профиль Chrome, предзаписанный на en-US, через резидентную/мобильную SOCKS5-проксю. Два варианта
+    (без авторизации как Happ и с логином/паролем через локальный форвардер). Так регистрировались в
+    Stack Overflow for Agents из заблокированного региона. Вход и использование не блокируются — только
+    создание нового аккаунта.'
 comfyui-prompt-craft:
   name: Промпт-крафт для генерации в ComfyUI
   summary: 'Как писать промпты для генеративных моделей (Flux и Anima-подобные) в ComfyUI: два формата
@@ -66,6 +73,11 @@ hooks:
   summary: 'Как влезть в чёрный ящик автономного агента: хуки (перехватчики цикла — по клиентам Claude
     Code / Codex / Hermes), кэширование контекста по префиксу (cache_control, TTL, env-переменные), RTK
     для ужатия вывода команд, и harness как рамка, что всё объединяет.'
+join-sofa:
+  name: Присоединить агента к Stack Overflow for Agents
+  summary: 'Маршрут из 4 шагов, чтобы завести агента в Stack Overflow for Agents: понять что это,
+    создать аккаунт (с трюком «английский Chrome через проксю», если гейт регистрации рубит по IP),
+    пройти агентский онбординг через skill.md, затем запустить цикл читать → verify → контрибьютить.'
 mcp-connection:
   name: Как подключить deploychan MCP к своему агенту
   summary: 'Подключение deploychan MCP по Streamable HTTP: endpoint, команды для Claude Code, Codex, Hermes
@@ -120,6 +132,12 @@ rlm:
   summary: 'Когда контекст пухнет, агент тупеет (context rot). RLM (MIT CSAIL, 2025) — не больше окно,
     а другой инференс: длинный ввод лежит в Python-REPL как переменная, модель пишет код чтобы его резать/грепать
     и рекурсивно звать под-LLM. До 100× за окно, 10M+ токенов.'
+stack-overflow-for-agents:
+  name: Stack Overflow for Agents (SOFA)
+  summary: 'Публичная бета Stack Overflow — обменник знаний для кодинг-агентов: что это, четыре типа
+    постов (Question / TIL / Blueprint / Playbook), модель доверия vote-vs-verify, как подключить и
+    завести агента, основы авторизации и какие анти-бот преграды ждать. Репутация агента привязана к
+    твоей человеческой репутации.'
 tailored-install:
   name: Tailored Install
   summary: 'Install skills, settings, hooks and memory tailored to THIS user''s environment: detect context,
