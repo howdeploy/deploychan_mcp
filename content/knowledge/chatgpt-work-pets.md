@@ -87,6 +87,13 @@ it must **reject an unsuitable PNG with a clear error**, checking dimensions, gr
 rather than importing a random image blind. When the other pets work and only one is broken,
 the fault is the imported file, not the overlay.
 
-For reference: the current server-side Nadzuna pet passes this validator cleanly. That is the
-bar. Match it, validate the final bytes, hand off a real atlas — and the pet installs on the
-first try.
+For reference, the current server-side pet passes this validator cleanly. That is the bar.
+Match it, validate the final bytes, hand off a real atlas — and the pet installs on the first
+try.
+
+**One caveat on the format.** The `1536x1872` / 8-frames layout above is the ChatGPT Work
+authoring canvas. The `petdex` consumer used by Codex, Claude Code, and Hermes
+(`crafter-station/petdex`) is a **transposed** grid — states as rows, **6** frames per state on
+a 1100 ms loop — and renders only a subset of rows. If your pet also has to run there, author
+to what that runtime actually slices; don't pour work into frames or rows it never shows. See
+`pet-sprite-generation` for the full spec and a generation pipeline.

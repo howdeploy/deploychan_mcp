@@ -96,8 +96,8 @@ rollouts — those stay controlled by OpenAI per account.
 
 ## Importing a pet (a lesson learned)
 
-When a locally-imported pet (Nadzuna) failed while every other pet worked, the fault was the
-**imported file**, not the Linux overlay. Two client-side mistakes: it couldn't handle a
+When a locally-imported pet failed while every other pet worked, the fault was the **imported
+file**, not the Linux overlay. Two client-side mistakes: it couldn't handle a
 temporary signed link to the original, and it accepted a plain single PNG as a finished sprite
 sheet without checking dimensions, grid, or alpha. Before installing, the client should reject
 an unsuitable PNG with a clear error. (Sprite-sheet format: see the `chatgpt-work-pets` note.)

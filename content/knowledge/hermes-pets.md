@@ -71,9 +71,14 @@ profile's `pets/` directory but stays inactive. Verify with `hermes pets doctor`
 two-step flow (this two-step shape is field-tested, not spelled out in the public docs):
 
 1. **Base drafts** — several cheap, prompt-only variants are generated; you pick one.
-2. **Hatch** — the chosen draft becomes a *reference image*, and one frame per state (idle,
-   thinking, run, wave, failed, jump) is generated from it, then sliced into an `8 x 9` sprite
-   sheet.
+2. **Hatch** — the chosen draft becomes a *reference image*, and the states are generated from
+   it, then assembled into a **petdex atlas**.
+
+The atlas is the `crafter-station/petdex` format: 72 frames of `192x208`, where the **rows are
+the states** — `idle, wave, run, failed, review, jump, extra1, extra2` — at **6 frames per
+state** on a **1100 ms** loop. Hermes drives a subset of these rows (idle, wave, run, failed,
+review). Don't over-produce frames or rows the runtime never shows — and if you generate your
+own, keep the drawing separate from the grid (see `pet-sprite-generation`).
 
 This needs an image provider with **reference-image** support. Nous Portal and OpenRouter are
 the documented backends; OpenAI-compatible endpoints work via a custom provider. The result is
@@ -102,19 +107,19 @@ Hermes profiles have an asymmetric layout, and this is where pets get lost:
   `~/.hermes/profiles/helper/pets/` and `~/.hermes/profiles/helper/config.yaml`.
 
 Pets are profile-aware, and a **locally generated** pet exists only in the profile that hatched
-it — it is not in the public petdex manifest. So `hermes --profile default pets install ella`
+it — it is not in the public petdex manifest. So `hermes --profile default pets install mypet`
 **fails** for a pet you made yourself. To move it across profiles, copy the directory and set
 the config by hand:
 
 ```bash
-# Ella was hatched in the helper profile:
-ls ~/.hermes/profiles/helper/pets/ella/
+# a pet you hatched locally lives in the helper profile:
+ls ~/.hermes/profiles/helper/pets/mypet/
 
 # The default profile uses ~/.hermes/ directly:
 mkdir -p ~/.hermes/pets
-cp -r ~/.hermes/profiles/helper/pets/ella ~/.hermes/pets/ella
+cp -r ~/.hermes/profiles/helper/pets/mypet ~/.hermes/pets/mypet
 
-hermes --profile default config set display.pet.slug ella
+hermes --profile default config set display.pet.slug mypet
 hermes --profile default config set display.pet.enabled true
 hermes --profile default config set display.pet.scale 1.0
 ```
