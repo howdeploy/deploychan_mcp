@@ -2,7 +2,7 @@
 id: agent-memory
 name: The agent's memory system and evolution
 summary: >-
-  The memory ladder: LLM Wiki → FTS5 → RAG → Holographic → Curator → GEPA. What to
+  The memory ladder: markdown wiki → FTS5 → RAG → Holographic → Curator → GEPA. What to
   pick for the person, who installs it how (Hermes out of the box vs Claude Code / Codex
   build it themselves), where it eats resources. Plus hooks against hallucinations.
 type: knowledge
@@ -31,11 +31,16 @@ vector store into a place where a wiki is enough.
 
 ## The memory ladder
 
-**1. LLM Wiki — notes in .md.** The agent writes notes in markdown, reads them through Obsidian,
-and knows from its system instructions where to go. The rules for keeping the wiki live in the
-wiki itself and in skills (example — ObsidianDataWeave; graphify builds the links). Note-taking
-is Karpathy-style. Simple, transparent, no resource cost. Works with any client. Downside: no
-good for fast search over a huge corpus or precise citation.
+**1. A markdown wiki — notes in .md.** The agent writes notes in markdown, reads them through
+Obsidian, and knows from its system instructions where to go. The rules for keeping the wiki live
+in the wiki itself and in skills. Note-taking is Karpathy-style. Simple, transparent, no resource
+cost. Works with any client. Downside: no good for fast search over a huge corpus or precise citation.
+
+The step up from a plain folder of notes is a **compiled wiki**: a layer that accumulates through an
+explicit merge instead of being recomputed per query, with `[[wikilinks]]` preserved on every
+rebuild. That is what the `obsidian-dataweave` skill calls its **LLM Wiki** layer — the reference
+implementation of this rung, and the same skill also ships rungs 1 and 2 (its FTS5 vault index).
+`graphify` is the neighbouring approach: it builds the link graph instead of compiling pages.
 
 **2. FTS5 — SQL by keywords.** The same notes, but in a database with a full-text index (FTS5).
 It doesn't search semantics, but in seconds it pulls whole months-old chats by keyword. That's
@@ -106,7 +111,7 @@ has the shortest path.
 **Claude Code / Codex — build the base themselves.** There's no built-in memory manager, the stack
 is assembled by hand — but it's not hard:
 
-1. **LLM Wiki** — works immediately, nothing to install. Markdown + a "where to go" rule in the
+1. **A markdown wiki** — works immediately, nothing to install. Markdown + a "where to go" rule in the
    instructions. The base for everyone.
 2. **FTS5** — gets vibe-coded: SQLite + a full-text index over notes/logs + a search command.
    Exactly what this MCP runs on. A day's work, covers 90%.
@@ -128,13 +133,13 @@ the best versions. That's what "evolution" is for a non-Hermes client.
 ## Hooks against hallucinations
 
 A separately underrated story is the **hook system**: scripted agent events. With a hook you can
-pull an anchor from the LLM Wiki at session start, and check facts after a response. It's a cheap,
+pull an anchor from the wiki at session start, and check facts after a response. It's a cheap,
 powerful crutch against hallucinations and a playground for experiments. Claude Code has hooks out
 of the box; where there are none, wrap the session in a script.
 
 ## How to choose for the person
 
-- Transparent and cheap, everything under control → **LLM Wiki**.
+- Transparent and cheap, everything under control → **a markdown wiki** (compiled: `obsidian-dataweave`).
 - The default, 90% of tasks, memory "out of the box" → **FTS5** (Hermes / this MCP).
 - Precise citation of huge docs, resources available → **RAG** (vectors).
 - Privacy, weak hardware, zero dependencies → **Holographic** (Hermes) or a vibe-coded analog.

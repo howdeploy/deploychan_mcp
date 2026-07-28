@@ -56,7 +56,7 @@ goes into memory. Then the matrix:
 | Data | Where | Why |
 |---|---|---|
 | Live: prices, versions, "today" | nowhere → research on the spot | memory will go stale and lie |
-| Rules, role, style | LLM Wiki / instructions file | transparent, under control, read at startup |
+| Rules, role, style | a markdown wiki / instructions file | transparent, under control, read at startup |
 | Chat history, logs | FTS5 | keyword recall in seconds, cheap |
 | Big docs, books, policy | vector (RAG) | semantics plus exact citation |
 | Facts about the person and projects | Curator (a distillation) | curated, not a dump |

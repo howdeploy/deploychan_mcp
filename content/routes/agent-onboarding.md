@@ -26,7 +26,7 @@ steps:
   - title: Memory system and evolution
     action: configure
     ref: agent-memory
-    body: Pick a memory stack tailored to the person — from LLM Wiki to Holographic / Curator / GEPA. The choice runs on live data from step 1.
+    body: Pick a memory stack tailored to the person — from a markdown wiki to Holographic / Curator / GEPA. The choice runs on live data from step 1.
 ---
 
 # Onboard Your Agent Right

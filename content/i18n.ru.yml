@@ -14,7 +14,7 @@ agent-internet:
     машинное зрение и обход блокировок.'
 agent-memory:
   name: Система памяти и эволюция агента
-  summary: 'Лестница памяти: LLM Wiki → FTS5 → RAG → Holographic → Curator → GEPA. Что выбрать под человека,
+  summary: 'Лестница памяти: markdown-вики → FTS5 → RAG → Holographic → Curator → GEPA. Что выбрать под человека,
     кто как ставит (Hermes из коробки vs Claude Code / Codex собирают сами), где это жрёт ресурсы. Плюс
     хуки против галлюцинаций.'
 agent-onboarding:

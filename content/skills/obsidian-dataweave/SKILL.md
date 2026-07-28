@@ -27,7 +27,8 @@ atomizes them into Zettelkasten notes with a MOC, tags, and wikilinks. On top �
 **LLM Wiki** layer (a compiled base in the Karpathy style), and **FTS5 memory** — a full-text
 index of the entire vault without a single external dependency. Public: `howdeploy/ObsidianDataWeave`, MIT.
 
-Both clients are supported: Claude Code (skill) and Codex (`AGENTS.md`).
+Both clients are supported natively: Claude Code (a global skill) and Codex Desktop / CLI / IDE
+(a native global skill of its own).
 
 ## Four Layers
 
@@ -48,12 +49,22 @@ cd ObsidianDataWeave
 bash install.sh --vault-path "/path/to/your/vault"
 ```
 
-The installer checks for Python 3.10+, installs the dependencies (`python-docx`, `pyyaml`), creates
-a `config.toml` with the vault path, registers the skill globally in `~/.claude/skills/obsidian-dataweave/`,
-and appends a block to `~/.claude/CLAUDE.md`. After installation the skill works from any directory.
+Or hand the agent this one line and it does the rest: *"clone
+https://github.com/howdeploy/ObsidianDataWeave.git and run `bash install.sh --vault-path
+"/path/to/vault"` in the cloned directory"*.
 
-Modes: `--mode claude` (default), `--mode codex` (checks `AGENTS.md`), `--mode local`
-(dependencies + config only). Updating is idempotent: `git pull && bash install.sh`.
+The installer checks for Python 3.10+, installs the dependencies (`python-docx`, `pyyaml`), and
+creates a `config.toml` with the vault path. After installation the skill works from any directory.
+
+| Mode | Flag | What it registers |
+|---|---|---|
+| **claude** (default) | `--mode claude` | A global skill in `~/.claude/skills/obsidian-dataweave/` plus a block appended to `~/.claude/CLAUDE.md` |
+| **codex** | `--mode codex` | A native global skill in `~/.agents/skills/obsidian-dataweave/` for Codex Desktop / CLI / IDE |
+| **local** | `--mode local` | Dependencies and config only |
+
+Updating is idempotent — `git pull && bash install.sh`. Skill symlinks refresh themselves,
+`migrate.py` appends new config sections (`[memory]`, for instance) and rolls out the FTS5 memory
+index. Your `config.toml` and your vault are never overwritten.
 
 ## How to Use
 
@@ -68,7 +79,9 @@ After installation, just tell the agent in natural language:
 | `clean duplicates in notebook "<id>"` | Dedup sources in the notebook |
 | `create wiki "<slug>"` | Skeleton of a new LLM Wiki space (project/corpus, RU/EN) |
 | `build wiki "<slug>"` | Compile the raw material into pages (guard on `[[wikilinks]]`) |
-| `search notes "<query>"` | FTS5 search across the whole vault (bm25 + snippets) |
+| `search notes "<query>"` | FTS5 search across the whole vault, notes + wiki (bm25 + snippets) |
+| `rebuild the memory index` | Full FTS5 rebuild (`memory_index.py build`) |
+| `dedup --dry-run` | Show vault duplicates without touching anything |
 
 Processing modes: **Enrich** (short note → tags/links/expansion, 1→1), **Atomize**
 (long → atomic notes + MOC, 1→N), **Contacts** (contacts → cards + Networking MOC).
@@ -100,6 +113,11 @@ python3 -m venv .venv
 # in a SEPARATE terminal window (needs a real TTY):
 .venv/bin/notebooklm login   # log in to Google in Chromium → come back → ENTER
 ```
+
+Two traps worth naming to the person up front. The venv is **mandatory** on Arch / Manjaro /
+Debian — the system `pip` is blocked by PEP 668, and installing onto the system Python fails.
+And `notebooklm login` must not be run through the `!` prefix inside Claude Code or Codex: that
+session has no interactive stdin, so it dies with `Aborted!` while waiting for ENTER.
 Then: `process_notebook.py <notebook_id>` (id is the last segment of the notebook URL),
 `research_notebook.py run "<id>" "<query>" --mode deep`.
 
