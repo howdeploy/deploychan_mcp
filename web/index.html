@@ -2,15 +2,16 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>deploychan MCP — прокачай своего агента опытом KISA</title>
 <meta name="description" content="Публичный remote-MCP сервер: знания, скиллы, маршруты прокачки и рекомендации KISA — одним URL для твоего кодинг-агента.">
+<script src="device-profile.js?v=1" data-compact-breakpoint="820"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
+  html,body{margin:0;height:100%;max-width:100%;overflow-x:hidden}
   .site{--page:#efe6db;--bg:#faf4ed;--fg:#575279;--accent:#b4637a;--accent2:#907aa9;--card:#fffaf3;--cardd:#f2e9e1;--muted:#797593;--ok:#56949f}
   .site[data-theme=mocha]{--page:#11111b;--bg:#1e1e2e;--fg:#cdd6f4;--accent:#cba6f7;--accent2:#f5c2e7;--card:#181825;--cardd:#313244;--muted:#a6adc8;--ok:#a6e3a1}
   .site{background:var(--page);font-family:'Space Grotesk',system-ui,sans-serif;color:var(--fg);min-height:100vh;min-height:100dvh;display:flex;padding:18px;transition:background .3s ease}
@@ -48,13 +49,64 @@
 
   .footer{flex:0 0 auto;padding:12px 28px;background:var(--fg);color:var(--bg);display:flex;justify-content:space-between;font:500 12px 'Space Mono',monospace;letter-spacing:.04em}
 
-  @media(max-width:820px){
-    .site{padding:8px}
-    .wrap{height:calc(100dvh - 16px);max-height:calc(100dvh - 16px);box-shadow:5px 5px 0 var(--fg)}
-    .panel{padding:22px 16px}
+  @media(max-width:820px), (hover:none) and (pointer:coarse) and (max-width:1024px){
+    .site{width:100%;min-height:var(--app-height,100dvh);padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+    .wrap{height:calc(var(--app-height,100dvh) - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:calc(var(--app-height,100dvh) - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));box-shadow:5px 5px 0 var(--fg)}
+    .topbar{flex-wrap:wrap;gap:8px;padding:9px 10px}
+    .brand{font-size:18px;flex:1 1 auto;min-width:0}
+    .controls{gap:5px}
+    .controls>.btn{width:48px;padding:6px 5px!important;font-size:0;overflow:hidden}
+    .controls>.btn::after{content:'DOCS';font:700 10px 'Space Mono',monospace}
+    .langtog button{height:32px;padding:0 7px}
+    .themebtn{width:32px;height:32px}
+    .tabnav{order:3;flex:1 1 100%;width:100%}
+    .tabnav button{padding:6px 9px;font-size:10px}
+    .panel{padding:18px 12px;overflow-x:hidden}
+    .panel-inner{justify-content:flex-start;min-width:0}
     .hero{grid-template-columns:1fr!important}
-    .facets,.faq-grid,.profile{grid-template-columns:1fr!important}
-    .h1{font-size:38px!important}
+    .hero>div{min-width:0}
+    .hero>div:last-child{width:min(calc(100% - 12px),340px);margin:0 auto}
+    .facets,.faq-grid,.profile,.agent-grid{grid-template-columns:1fr!important}
+    .h1{font-size:36px!important;overflow-wrap:anywhere}
+    .h2{font-size:28px}
+    .card{max-width:100%;min-width:0}
+    .endpoint-card{overflow:hidden}
+    .catalog-card{border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+    .catalog-head{display:none!important}
+    .catalog-row{display:block!important;position:relative;margin-bottom:12px;padding:15px 14px 12px;border:2px solid var(--fg)!important;background:var(--card);box-shadow:4px 4px 0 var(--fg);overflow:visible!important}
+    .catalog-row:last-child{margin-bottom:0}
+    .catalog-row>*{min-width:0;overflow:visible!important}
+    .catalog-row .cat-rec{position:absolute;right:11px;top:10px;width:28px;height:28px;padding:0!important;display:grid;place-items:center;background:var(--accent);color:var(--bg)!important;border:2px solid var(--fg);font-size:14px!important;transform:rotate(4deg)}
+    .catalog-row .cat-rec:empty{display:none}
+    .catalog-row .cat-main{padding:0 32px 11px 0!important;border:0!important;overflow-wrap:anywhere}
+    .catalog-row .cat-name{font-size:17px!important;line-height:1.2!important}
+    .catalog-row .cat-summary{margin-top:7px!important;font-size:14px!important;line-height:1.45!important;-webkit-line-clamp:3!important}
+    .catalog-row .cat-meta{padding:10px 0 8px!important;border:0!important;border-top:1px dashed var(--fg)!important;gap:6px!important}
+    .catalog-row .cat-date{padding:9px 0 0!important;border:0!important;border-top:1px solid var(--cardd)!important;display:flex;justify-content:space-between;align-items:center;text-align:left!important;font-size:11px!important}
+    .catalog-row .cat-date::before{content:'добавлено';text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-size:9px}
+    html[lang="en"] .catalog-row .cat-date::before{content:'added'}
+    .catalog-pager{display:grid!important;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;width:100%;gap:8px!important}
+    .catalog-pager::before{content:attr(data-page-label);grid-column:2;grid-row:1;text-align:center;font:700 11px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .catalog-pager [data-page]:not([data-page="prev"]):not([data-page="next"]){display:none}
+    .catalog-pager [data-page="prev"]{grid-column:1;grid-row:1;width:44px!important;height:44px!important}
+    .catalog-pager [data-page="next"]{grid-column:3;grid-row:1;width:44px!important;height:44px!important}
+    .profile{width:calc(100% - 12px);margin-inline:auto}
+    .footer{padding:9px 12px;gap:6px 12px;flex-wrap:wrap;font-size:10px}
+  }
+  @media(max-width:420px){
+    .site{padding:max(5px,env(safe-area-inset-top)) max(5px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left))}
+    .wrap{height:calc(var(--app-height,100dvh) - 10px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-height:calc(var(--app-height,100dvh) - 10px - env(safe-area-inset-top) - env(safe-area-inset-bottom));box-shadow:3px 3px 0 var(--fg)}
+    .h1{font-size:31px!important}
+    .panel{padding:16px 10px}
+    #copyEndpoint{min-width:58px!important;padding:0 10px!important}
+    .footer>:last-child{display:none}
+  }
+  @media(hover:none) and (pointer:coarse){
+    .tabnav button,.controls .btn,.langtog button,.themebtn,#copyEndpoint{min-height:44px;touch-action:manipulation}
+    .themebtn{width:44px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
 </style>
 </head>
@@ -87,7 +139,7 @@
                 <span data-i18n="heroPre">ПРОКАЧАЙ СВОЕГО </span><span style="display:inline-block;background:var(--accent);color:var(--bg);padding:0 9px 4px;transform:rotate(-1.2deg)" data-i18n="heroWord1">АГЕНТА</span><span data-i18n="heroMid"> ОПЫТОМ </span><span style="display:inline-block;background:var(--fg);color:var(--bg);padding:0 9px 4px;transform:rotate(1deg)">KISA</span><span data-i18n="heroSuffix"></span>
               </h1>
               <p style="font:600 16px/1.5 'Space Grotesk';max-width:500px;margin:24px 0 0"><span data-i18n="heroLeadPre">Внутри одного endpoint — курированные знания, готовые скиллы и маршруты прокачки от KISA. </span><b data-i18n="heroLeadBold">Бесплатно, без логина, без ключей.</b></p>
-              <div class="card" style="margin-top:26px;display:flex;align-items:stretch;box-shadow:4px 4px 0 var(--fg);max-width:520px">
+              <div class="card endpoint-card" style="margin-top:26px;display:flex;align-items:stretch;box-shadow:4px 4px 0 var(--fg);max-width:520px">
                 <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:8px 14px;min-width:0">
                   <div class="kicker" style="letter-spacing:.14em">mcp endpoint</div>
                   <div class="mono" id="endpoint" style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">https://mcp.deploychan.webcam/mcp</div>
@@ -433,40 +485,40 @@ function renderCatalog(t) {
   const chip = (on, label, attr) => `<button ${attr} style="font:700 12px 'Space Mono',monospace;text-transform:uppercase;letter-spacing:.05em;border:2px solid var(--fg);background:${on ? 'var(--fg)' : 'transparent'};color:${on ? 'var(--bg)' : 'var(--fg)'};padding:6px 11px;cursor:pointer">${esc(label)}</button>`;
 
   body.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+    <div class="catalog-controls" style="display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-bottom:14px">
       <div>
         <div class="mono" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">${e ? 'type' : 'тип'}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${typeChips.map(c => chip(flt === c[0], c[1], `data-flt="${c[0]}"`)).join('')}</div>
+        <div class="catalog-chip-row" style="display:flex;gap:6px;flex-wrap:wrap">${typeChips.map(c => chip(flt === c[0], c[1], `data-flt="${c[0]}"`)).join('')}</div>
       </div>
       <div>
         <div class="mono" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px">${e ? 'sort' : 'сортировка'}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">${sortChips.map(c => chip(s === c[0], c[1], `data-sort="${c[0]}"`)).join('')}</div>
+        <div class="catalog-chip-row" style="display:flex;gap:6px;flex-wrap:wrap">${sortChips.map(c => chip(s === c[0], c[1], `data-sort="${c[0]}"`)).join('')}</div>
       </div>
     </div>
-    <div class="card" style="box-shadow:4px 4px 0 var(--fg)">
-      <div class="mono" style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;background:var(--fg);color:var(--bg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.07em">
+    <div class="card catalog-card" style="box-shadow:4px 4px 0 var(--fg)">
+      <div class="mono catalog-head" style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;background:var(--fg);color:var(--bg);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.07em">
         <div data-sort="rec" title="${e ? 'recommended' : 'рекомендованные'}" style="padding:9px 6px;text-align:center;cursor:pointer">★</div>
         <div data-sort="name" style="padding:9px 12px;border-left:1px solid var(--bg);cursor:pointer">${esc(t.thName)} ↕</div>
         <div style="padding:9px 10px;border-left:1px solid var(--bg)">${esc(t.thType)}</div>
         <div data-sort="new" style="padding:9px 10px;border-left:1px solid var(--bg);text-align:right;cursor:pointer">${esc(t.thAdded)} ↕</div>
       </div>
       ${pageRows.map(r => `
-        <div style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;align-items:center;border-top:1px solid var(--cardd)">
-          <div class="mono" style="padding:8px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
-          <div style="padding:8px 12px;border-left:1px solid var(--cardd)">
-            <div style="font:700 14px 'Space Grotesk'">${esc(nm(r))}</div>
-            <div style="font:500 14px/1.4 'Space Grotesk';color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(sm(r))}</div>
+        <article class="catalog-row" style="display:grid;grid-template-columns:34px 1fr 1.3fr 82px;align-items:center;border-top:1px solid var(--cardd)">
+          <div class="mono cat-rec" style="padding:8px 4px;text-align:center;font-weight:700;font-size:13px;color:var(--accent)">${r.recommended ? '★' : ''}</div>
+          <div class="cat-main" style="padding:8px 12px;border-left:1px solid var(--cardd)">
+            <div class="cat-name" style="font:700 14px 'Space Grotesk'">${esc(nm(r))}</div>
+            <div class="cat-summary" style="font:500 14px/1.4 'Space Grotesk';color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(sm(r))}</div>
           </div>
-          <div style="padding:8px 10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          <div class="cat-meta" style="padding:8px 10px;border-left:1px solid var(--cardd);display:flex;gap:5px;flex-wrap:wrap;align-items:center">
             <span class="tag" style="background:var(--accent);color:var(--bg)">${esc(typeLabel[r.type] || r.type)}</span>
             ${r.author === 'third_party' ? `<span class="tag" style="background:var(--accent2);color:var(--bg)">${esc(t.thirdTag)}</span>` : ''}
             ${(r.tags || []).map(tg => `<span class="tag" style="border:1px solid var(--fg)">${esc(tg)}</span>`).join('')}
           </div>
-          <div class="mono" style="padding:8px 10px;border-left:1px solid var(--cardd);text-align:right;font-weight:700;font-size:12px;color:var(--muted)">${esc(fmtAdded(r.added))}</div>
-        </div>`).join('')}
+          <div class="mono cat-date" style="padding:8px 10px;border-left:1px solid var(--cardd);text-align:right;font-weight:700;font-size:12px;color:var(--muted)">${esc(fmtAdded(r.added))}</div>
+        </article>`).join('')}
     </div>
     ${pageCount > 1 ? `
-    <div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:14px">
+    <div class="catalog-pager" data-page-label="${esc((e ? 'page ' : 'страница ') + page + ' / ' + pageCount)}" style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:14px">
       <button data-page="prev" style="font:700 14px 'Space Mono',monospace;border:2px solid var(--fg);background:var(--card);color:var(--fg);width:32px;height:32px;cursor:pointer">‹</button>
       ${Array.from({ length: pageCount }, (_, i) => { const n = i + 1, on = n === page; return `<button data-page="${n}" style="font:700 12px 'Space Mono',monospace;border:2px solid var(--fg);background:${on ? 'var(--fg)' : 'transparent'};color:${on ? 'var(--bg)' : 'var(--fg)'};width:32px;height:32px;cursor:pointer">${n}</button>`; }).join('')}
       <button data-page="next" style="font:700 14px 'Space Mono',monospace;border:2px solid var(--fg);background:var(--card);color:var(--fg);width:32px;height:32px;cursor:pointer">›</button>
