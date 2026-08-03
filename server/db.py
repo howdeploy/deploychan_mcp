@@ -41,14 +41,14 @@ CREATE TABLE IF NOT EXISTS route_steps (
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
-    name, summary, tags, body, name_ru, summary_ru, body_ru, id UNINDEXED,
+    name, summary, tags, body, name_ru, summary_ru, search_ru, id UNINDEXED,
     tokenize = 'unicode61 remove_diacritics 2'
 );
 """
 
 # Column layout the FTS index must have. The Russian columns sit AFTER ``body`` so the
 # positional ``snippet(items_fts, 3, ...)`` in tools.py keeps pointing at the English body.
-_FTS_COLUMNS = ("name", "summary", "tags", "body", "name_ru", "summary_ru", "body_ru", "id")
+_FTS_COLUMNS = ("name", "summary", "tags", "body", "name_ru", "summary_ru", "search_ru", "id")
 
 
 def connect_rw(path: Path | str = DB_PATH) -> sqlite3.Connection:

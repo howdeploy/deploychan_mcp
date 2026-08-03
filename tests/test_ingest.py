@@ -70,21 +70,28 @@ def test_russian_text_is_searchable_via_fts5(tmp_path: Path, corpus: Path, monke
         "prompt:\n"
         "  name: Анатомия промпта\n"
         "  summary: Как устроены роли и ограничения агента.\n"
+        "  search: Как задать поведение, обязанности и запреты кодинг-агента.\n"
         "route-zero:\n"
         "  name: От нуля до вайбкодинга\n"
         "  summary: Маршрут для прокачки coding-агента.\n",
         encoding="utf-8",
     )
-    ru_body = corpus / "i18n" / "ru" / "knowledge" / "prompt.md"
-    ru_body.parent.mkdir(parents=True)
-    ru_body.write_text("Роли, контекст и системные ограничения агента.", encoding="utf-8")
 
     db_path = tmp_path / "russian.db"
     ingest.run_ingest(content_dir=corpus, db_path=db_path, web_dir=tmp_path / "web")
     monkeypatch.setattr(config, "DB_PATH", db_path)
 
-    assert [hit["id"] for hit in tools.search_knowledge("системные ограничения")] == ["prompt"]
+    assert [hit["id"] for hit in tools.search_knowledge("обязанности и запреты")] == ["prompt"]
     assert tools.onboard("прокачка агента")["route_id"] == "route-zero"
+
+
+def test_production_russian_search_covers_every_item():
+    content_dir = Path(__file__).resolve().parents[1] / "content"
+    item_ids = {item_id for _, item_id, _ in ingest._discover(content_dir)}
+    localized = ingest._load_i18n_ru(content_dir)
+
+    assert set(localized) == item_ids
+    assert all((localized[item_id].get("search") or "").strip() for item_id in item_ids)
 
 
 def test_ingest_migrates_the_legacy_fts_schema(tmp_path: Path, corpus: Path):
@@ -93,7 +100,7 @@ def test_ingest_migrates_the_legacy_fts_schema(tmp_path: Path, corpus: Path):
     try:
         conn.execute(
             "CREATE VIRTUAL TABLE items_fts USING fts5("
-            "name, summary, tags, body, id UNINDEXED, "
+            "name, summary, tags, body, name_ru, summary_ru, body_ru, id UNINDEXED, "
             "tokenize = 'unicode61 remove_diacritics 2')"
         )
     finally:
@@ -109,6 +116,6 @@ def test_ingest_migrates_the_legacy_fts_schema(tmp_path: Path, corpus: Path):
         conn.close()
 
     assert columns == [
-        "name", "summary", "tags", "body", "name_ru", "summary_ru", "body_ru", "id"
+        "name", "summary", "tags", "body", "name_ru", "summary_ru", "search_ru", "id"
     ]
     assert rows == 4
