@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
 
-from server import ingest
+from server import config, db, ingest, tools
 
 
 def test_ingest_counts(seeded):
@@ -62,3 +63,52 @@ def test_missing_required_field_aborts(tmp_path: Path):
     )
     with pytest.raises(SystemExit):
         ingest.run_ingest(content_dir=content, db_path=tmp_path / "d.db", web_dir=tmp_path / "w")
+
+
+def test_russian_text_is_searchable_via_fts5(tmp_path: Path, corpus: Path, monkeypatch):
+    (corpus / "i18n.ru.yml").write_text(
+        "prompt:\n"
+        "  name: Анатомия промпта\n"
+        "  summary: Как устроены роли и ограничения агента.\n"
+        "route-zero:\n"
+        "  name: От нуля до вайбкодинга\n"
+        "  summary: Маршрут для прокачки coding-агента.\n",
+        encoding="utf-8",
+    )
+    ru_body = corpus / "i18n" / "ru" / "knowledge" / "prompt.md"
+    ru_body.parent.mkdir(parents=True)
+    ru_body.write_text("Роли, контекст и системные ограничения агента.", encoding="utf-8")
+
+    db_path = tmp_path / "russian.db"
+    ingest.run_ingest(content_dir=corpus, db_path=db_path, web_dir=tmp_path / "web")
+    monkeypatch.setattr(config, "DB_PATH", db_path)
+
+    assert [hit["id"] for hit in tools.search_knowledge("системные ограничения")] == ["prompt"]
+    assert tools.onboard("прокачка агента")["route_id"] == "route-zero"
+
+
+def test_ingest_migrates_the_legacy_fts_schema(tmp_path: Path, corpus: Path):
+    db_path = tmp_path / "legacy.db"
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.execute(
+            "CREATE VIRTUAL TABLE items_fts USING fts5("
+            "name, summary, tags, body, id UNINDEXED, "
+            "tokenize = 'unicode61 remove_diacritics 2')"
+        )
+    finally:
+        conn.close()
+
+    ingest.run_ingest(content_dir=corpus, db_path=db_path, web_dir=tmp_path / "web")
+
+    conn = db.connect_ro(db_path)
+    try:
+        columns = [row["name"] for row in conn.execute("PRAGMA table_info(items_fts)")]
+        rows = conn.execute("SELECT COUNT(*) AS count FROM items_fts").fetchone()["count"]
+    finally:
+        conn.close()
+
+    assert columns == [
+        "name", "summary", "tags", "body", "name_ru", "summary_ru", "body_ru", "id"
+    ]
+    assert rows == 4

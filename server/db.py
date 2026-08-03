@@ -41,10 +41,14 @@ CREATE TABLE IF NOT EXISTS route_steps (
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS items_fts USING fts5(
-    name, summary, tags, body, id UNINDEXED,
+    name, summary, tags, body, name_ru, summary_ru, body_ru, id UNINDEXED,
     tokenize = 'unicode61 remove_diacritics 2'
 );
 """
+
+# Column layout the FTS index must have. The Russian columns sit AFTER ``body`` so the
+# positional ``snippet(items_fts, 3, ...)`` in tools.py keeps pointing at the English body.
+_FTS_COLUMNS = ("name", "summary", "tags", "body", "name_ru", "summary_ru", "body_ru", "id")
 
 
 def connect_rw(path: Path | str = DB_PATH) -> sqlite3.Connection:
@@ -71,4 +75,23 @@ def connect_ro(path: Path | str = DB_PATH) -> sqlite3.Connection:
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
+    _migrate_fts(conn)
     conn.executescript(SCHEMA)
+
+
+def _migrate_fts(conn: sqlite3.Connection) -> None:
+    """Drop items_fts when its column layout is stale, so the schema below can recreate it.
+
+    ``CREATE VIRTUAL TABLE IF NOT EXISTS`` silently keeps an existing index with the old
+    columns, and ingest only DELETEs rows — so without this a schema change would leave the
+    index permanently missing the new columns. Dropping is safe: ingest rebuilds the whole
+    index from content/ on every run.
+    """
+    row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='items_fts'"
+    ).fetchone()
+    if row is None:
+        return
+    sql = row["sql"] if isinstance(row, sqlite3.Row) else row[0]
+    if any(col not in sql for col in _FTS_COLUMNS):
+        conn.execute("DROP TABLE items_fts")

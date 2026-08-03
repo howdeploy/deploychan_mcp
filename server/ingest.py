@@ -201,9 +201,18 @@ def run_ingest(
             [(s["step_id"], s["route_id"], s["idx"], s["title"], s["action"], s["ref"], s["body"])
              for s in all_steps],
         )
+        # Russian display strings and translated bodies are indexed alongside the English
+        # ones: without them every Russian-language query matches nothing at all.
+        i18n_ru = _load_i18n_ru(content_dir)
+        ru_bodies = _load_ru_bodies(content_dir)
         conn.executemany(
-            "INSERT INTO items_fts (name,summary,tags,body,id) VALUES (?,?,?,?,?)",
-            [(b["row"]["name"], b["row"]["summary"], b["row"]["tags"], b["row"]["body"], b["row"]["id"])
+            "INSERT INTO items_fts (name,summary,tags,body,name_ru,summary_ru,body_ru,id) "
+            "VALUES (?,?,?,?,?,?,?,?)",
+            [(b["row"]["name"], b["row"]["summary"], b["row"]["tags"], b["row"]["body"],
+              (i18n_ru.get(b["row"]["id"]) or {}).get("name", ""),
+              (i18n_ru.get(b["row"]["id"]) or {}).get("summary", ""),
+              ru_bodies.get(b["row"]["id"], ""),
+              b["row"]["id"])
              for b in built],
         )
         conn.commit()
@@ -239,6 +248,24 @@ def _load_i18n_ru(content_dir: Path) -> dict:
     if not f.exists():
         return {}
     return yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+
+
+def _load_ru_bodies(content_dir: Path) -> dict:
+    """Russian translations of item bodies, keyed by item id.
+
+    Lives in ``content/i18n/ru/<type>/<id>.md`` — a separate tree, deliberately outside the
+    type folders that ``_discover`` walks, so a translation is never mistaken for its own
+    catalog item. Frontmatter, if present, is stripped; only the prose is indexed.
+    """
+    base = content_dir / "i18n" / "ru"
+    if not base.exists():
+        return {}
+    out: dict = {}
+    for f in sorted(base.rglob("*.md")):
+        _, body = parse_frontmatter(f.read_text(encoding="utf-8"))
+        if body.strip():
+            out[f.stem] = body.strip()
+    return out
 
 
 def _build_catalog(built: list[dict], content_dir: Path, web_dir: Path) -> dict:
