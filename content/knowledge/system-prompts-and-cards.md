@@ -166,7 +166,8 @@ government institutes.
   minus the logic that assembled it.
 - **A prompt is not a guarantee.** It describes intent, not enforced behaviour. Anything that must
   actually hold — authorisation, spend limits, destructive actions — belongs in a layer the model
-  cannot talk its way around.
+  cannot talk its way around. The same goes for "memory": `choirboy-prompt` shows how a fabricated
+  history in context becomes the model's trust — treat replayed history as untrusted input too.
 
 ## Where to go next
 

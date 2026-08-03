@@ -23,7 +23,8 @@ experience: knowledge, ready-made skills, leveling-up routes and recommendations
 Typical flow:
   1. list_recommended() - where to start when unsure.
   2. onboard(goal) - get an ordered route for a concrete goal, then next_step(step_id) per step.
-  3. search_knowledge(query) - find context on any topic; get_item(id) for the full guide.
+  3. search_knowledge(query) - find context on any topic (notes, tool guides, skills);
+     get_item(id) for the full guide, get_skill(id) when the hit is a skill.
   4. list_skills() then get_skill(id) - install a ready-made pack.
 
 Any install goes through the base skill `tailored-install` (step 0): detect the user's

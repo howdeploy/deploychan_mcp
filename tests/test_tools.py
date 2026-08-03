@@ -17,10 +17,14 @@ def test_search_knowledge_finds_note(seeded):
     assert hit["source"] == "YouTube: KISA"
 
 
-def test_search_covers_tools_not_skills(seeded):
+def test_search_covers_tools_and_skills(seeded):
     assert any(h["id"] == "tavily-setup" for h in tools.search_knowledge("tavily search"))
-    # Skills are not searchable via search_knowledge.
-    assert all(h["type"] in ("knowledge", "tool") for h in tools.search_knowledge("install"))
+    # Skills are searchable too (a hit with type "skill" continues via get_skill).
+    assert any(h["type"] == "skill" for h in tools.search_knowledge("install"))
+    # Routes stay out of search — they are reached via onboard(). Query text that exactly
+    # matches the fixture route's title must still return no routes.
+    hits = tools.search_knowledge("from zero to vibe coding")
+    assert hits and all(h["type"] != "route" for h in hits)
 
 
 def test_search_injection_is_safe(seeded):

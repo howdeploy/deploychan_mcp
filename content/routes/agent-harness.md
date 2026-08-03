@@ -3,9 +3,9 @@ id: agent-harness
 name: Build Your Own Harness
 summary: >-
   The "build everything around the model" leveling-up run: hooks (control over the loop +
-  cache + RTK), prompts and rules as a stable prefix, memory as state between sessions.
-  The model comes prebuilt and can be cut down — the harness you configure yourself and
-  keep under control.
+  cache + RTK), prompts and rules as a stable prefix, memory as state between sessions —
+  plus a recovery net for when the agent loops on a wrong belief. The model comes prebuilt
+  and can be cut down — the harness you configure yourself and keep under control.
 type: route
 author: kisa
 recommended: true
@@ -34,6 +34,13 @@ steps:
       Long-term memory lives in the harness, not in the model. Pick a stack (wiki → FTS5 →
       vector → Curator → GEPA) so that context and rules survive a compaction and a session
       restart.
+  - title: Self-audit — when the agent loops on a wrong belief
+    action: install
+    ref: zaebal
+    body: >-
+      Hooks, prompts and memory don't help when the agent sincerely builds on a wrong
+      belief. Z.A.E.B.A.L. turns user frustration into a structured audit: stop, two
+      independent auditors, FACT/HYPOTHESIS inventory, an external auditor on escalation.
 ---
 
 # Build Your Own Harness
@@ -42,7 +49,8 @@ Tuning the system prompt improves ONE input to the model. Building a harness mea
 constructing everything around it: protection, savings, memory. The model comes
 ready-made and at any moment its reasoning can be cut down or its system instructions
 swapped out. The harness you configure yourself, and it stays under your control. This
-route is how to build it on three pillars: hooks, prompts, memory.
+route is how to build it on three pillars — hooks, prompts, memory — plus one recovery
+net for the day all three work and the agent is still confidently wrong.
 
 **Step 0 — figure out who you are.** Every client has its own harness: Claude Code has
 hooks and caching out of the box, Codex has almost the same hooks, Hermes has
@@ -59,7 +67,7 @@ tools, assembles context in the right order (the cache depends on it), sets inte
 points (hooks), and holds the memory. When people say "agent" they almost always mean the
 harness, not the model. The full breakdown is in the `hooks` knowledge (step 1).
 
-## The three pillars
+## The three pillars — and the recovery net
 
 1. **Hooks, cache, and RTK** (`hooks`). Control over the loop: `PreToolUse` won't let
    `rm -rf` through, `SessionStart`/`PreCompact` slip in an anchor and rules, prefix
@@ -72,6 +80,12 @@ harness, not the model. The full breakdown is in the `hooks` knowledge (step 1).
    between sessions it zeroes out. So the long-term stuff gets moved outside: wiki, FTS5,
    vector, Curator, GEPA. The detailed memory leveling-up is a separate route,
    `memory-management`.
+4. **Recovery net: self-audit** (`zaebal`). Optional and narrow, but worth having: the
+   three pillars assume the agent perceives reality correctly. When it doesn't — one wrong
+   belief treated as fact, the same failing action on repeat — an escalation protocol fires
+   on user frustration: stop, independent auditors, FACT/HYPOTHESIS inventory, an external
+   auditor at the top level. It's a recovery mechanism, not a substitute for systematic
+   verification habits.
 
 ## Extras
 
@@ -79,6 +93,9 @@ Not a route step, but from the same area — control over context:
 - `rlm` — Recursive Language Models: when context swells and context rot sets in, RLM
   keeps the long input in a Python REPL and recursively calls sub-LLMs instead of stuffing
   everything into the window. Kin to compaction and hooks, not memory.
+- `choirboy-prompt` — the flip side of memory: a research harness showing how easily a
+  fabricated "history" in context becomes the model's trust. Read it before you trust
+  anything your memory layer replays.
 
 ## How to walk the route
 

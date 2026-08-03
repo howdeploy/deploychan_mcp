@@ -1,4 +1,4 @@
-"""The four facets / six tools. See docs/CONTRACT.md §4.
+"""The four facets / seven tools. See docs/CONTRACT.md §4.
 
 Every tool is a plain synchronous function doing one parameterized, read-only SQLite
 query — no shell, no eval, no filesystem access from user input. FastMCP runs sync tools
@@ -46,18 +46,19 @@ def _first_line(text: str, limit: int = 160) -> str:
 # --- 01 · Knowledge --------------------------------------------------------------------
 
 def search_knowledge(query: str, limit: int = 5) -> list[dict]:
-    """Search KISA's curated notes and guides by a natural-language query.
+    """Search KISA's curated notes, tool guides and skills by a natural-language query.
 
     Call this whenever you need context on a vibe-coding topic (an agent setup, a tool, a
-    technique, a pattern KISA uses). Returns the most relevant fragments so you can drop
-    them straight into your context.
+    technique, a pattern KISA uses) or when the user wants a skill on a specific topic.
+    Returns the most relevant fragments so you can drop them straight into your context.
 
     Args:
         query: A natural-language search query (any language).
         limit: Max number of fragments (default 5).
 
     Returns a list of {id, title, snippet, source, type, tags}. Empty list if nothing matches.
-    The snippet is only a fragment — call get_item(id) to read the full guide.
+    The snippet is only a fragment — call get_item(id) to read the full guide. A hit with
+    type "skill" is an installable pack: continue with get_skill(id) to install it.
     """
     match = _fts_query(query)
     if not match:
@@ -67,7 +68,7 @@ def search_knowledge(query: str, limit: int = 5) -> list[dict]:
         "SELECT i.id AS id, i.name AS name, i.source AS source, i.type AS type, "
         "i.tags AS tags, snippet(items_fts, 3, '[', ']', '…', 12) AS snippet "
         "FROM items_fts JOIN items i ON i.id = items_fts.id "
-        "WHERE items_fts MATCH ? AND i.type IN ('knowledge','tool') "
+        "WHERE items_fts MATCH ? AND i.type IN ('knowledge','tool','skill') "
         "ORDER BY rank LIMIT ?",
         (match, lim),
     )
