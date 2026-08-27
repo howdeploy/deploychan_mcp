@@ -341,3 +341,31 @@ zaebal:
     Codex, Kimi CLI, OpenCode. Детекция RU/EN/ZH.'
   search: >-
     Остановить агента, который зациклился на ошибке и повторяет одно и то же: самоаудит, эскалация, независимый аудитор, неверное убеждение, протокол ZAEBAL, хуки UserPromptSubmit в Claude Code, Codex, Kimi и OpenCode.
+a2a-protocol-overview:
+  name: 'Agent2Agent (A2A): устройство протокола'
+  summary: 'Самостоятельное объяснение A2A без привязки к агентскому рантайму: Agent Card,
+    JSON-RPC, Message и Task, artifacts, streaming, contextId, аутентификация, границы
+    доверия и отличие от MCP.'
+  search: >-
+    Что такое Agent2Agent A2A, как устроен протокол агентов, Agent Card, обнаружение агента, JSON-RPC SendMessage, SendStreamingMessage, Message, Task, Artifact, contextId, многоходовый диалог, чем A2A отличается от MCP, безопасность и жизненный цикл задачи.
+a2a-bidirectional-setup:
+  name: 'A2A в обе стороны: настройка и проверка'
+  summary: 'Как настроить двух агентов так, чтобы каждый мог инициировать A2A-запрос:
+    два независимых маршрута и токена, inbound-адаптеры, Agent Cards, SendMessage,
+    contextId, таймауты, аудит и доказательная диагностика.'
+  search: >-
+    Настроить двустороннюю связь Agent2Agent A2A между двумя агентами, server client inbound outbound, отдельные bearer token, Agent Card, JSON-RPC SendMessage, проверить оба направления через curl и ss, многоходовый contextId, таймауты, task, streaming, аудит, отладка и защита от рекурсивного цикла агентов.
+a2a-openshell-example:
+  name: 'A2A с Pi в OpenShell: изолированный пример'
+  summary: 'Прикладной пример двустороннего A2A между хостовым агентом и Pi в OpenShell:
+    sandbox-to-host egress, inbound-адаптер Pi, service forward, регистрация extension,
+    вложенный network namespace и диагностика через nsenter.'
+  search: >-
+    Связать по A2A хостового агента с Pi в NVIDIA OpenShell и rootless Podman, host.containers.internal, fail closed network policy, TypeScript extension, пробросить порт из вложенного netns, openshell forward service, nsenter, curl, двусторонняя связь и контекст после рестарта.
+openshell-pi-agent:
+  name: 'OpenShell + Pi: изолированная песочница агента'
+  summary: 'Скилл по установке и эксплуатации Pi внутри OpenShell с rootless Podman: fail-closed политика
+    файлов и сети, скрытые credentials, persistent workspace, закреплённый inference-маршрут, проверяемые
+    extensions и опциональный двусторонний A2A без персональных провайдеров и промптов.'
+  search: >-
+    Установить, настроить, перенести, изолировать или починить Pi coding agent в NVIDIA OpenShell: rootless Podman, sandbox, Landlock, seccomp, deny by default, fail closed, credential broker, inference.local, persistent volume, settings.json, models.json, extensions, Agent2Agent A2A и диагностика network namespace.
