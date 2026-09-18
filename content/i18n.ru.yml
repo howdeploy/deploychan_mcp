@@ -376,3 +376,35 @@ openshell-pi-agent:
     extensions и опциональный двусторонний A2A без персональных провайдеров и промптов.'
   search: >-
     Установить, настроить, перенести, изолировать или починить Pi coding agent в NVIDIA OpenShell: rootless Podman, sandbox, Landlock, seccomp, deny by default, fail closed, credential broker, inference.local, persistent volume, settings.json, models.json, extensions, Agent2Agent A2A и диагностика network namespace.
+jev:
+  name: 'Jev: подключение TypeSafe API'
+  summary: 'Подключение Jev рядом с основной моделью: контракт HTTP API, Choice/Score/Noul,
+    ключи на хосте, официальный skill, версия модели, стоимость и обработка сбоев.
+    Основано на интеграциях KISA с Pi, Hermes и локальными моделями.'
+  search: >-
+    Подключить Jev JEV Джев джев TypeSafe System One API к локальной модели Pi Hermes Codex llama UI:
+    TYPESAFE_API_KEY systemone Choice Score Noul confidence вероятности типизированные решения,
+    установка official typesafe-ai skill, версия модели лимиты токены стоимость ошибки timeout 429 529.
+jev-in-agent-pipelines:
+  name: 'Jev в пайплайнах и агентах: опыт KISA'
+  summary: 'Разбор Jev и реального опыта KISA: независимая оценка Ornith в Pi, контроль research
+    через Exa/Tavily, browser-use, Hermes и llama UI. Разделение ролей, ограниченные исправления,
+    ошибочные блокировки и сохранение обычного ответа при недоступности проверки.'
+  search: >-
+    Что такое Jev Джев TypeSafe System One и как внедрить в проекты пайплайны и агентов:
+    независимый оценщик ответов локальной модели Ornith Bonsai Pi Hermes llama UI LocalForgeLLM,
+    проверка research skill Exa Tavily источники цитаты полнота достоверность,
+    browser use jev-ultrafast Brave guard scope порог confidence noul вероятность,
+    observe correct off два исправления feedback маршрутизация классификация RAG,
+    Jev недоступен не отвечает блокирует сообщения текст не проверен fail open fail closed,
+    гарантии типов не гарантируют правильность отсутствие галлюцинаций ограничения оценка качества.
+jev-integration:
+  name: 'Внедрить Jev в агента или пайплайн'
+  summary: 'Маршрут прокачки из семи шагов: понять System One, выбрать одну проверку,
+    подключить API, отделить оценщика, добавить исправления или маршрутизацию,
+    при необходимости подключить браузер и проверить сбои, пороги и откат.'
+  search: >-
+    Прокачать агента с Jev Джев JEV TypeSafe System One: внедрение настройка интеграция в проект
+    пайплайн workflow pipeline agent Pi Hermes Codex локальная модель Ornith Bonsai llama UI,
+    независимая оценка ответов research Exa Tavily browser use проверка качества feedback
+    маршрут обучение этапы подключения API observe correct обработка сбоев пороги откат.
