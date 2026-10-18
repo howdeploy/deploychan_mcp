@@ -17,22 +17,28 @@ from starlette.staticfiles import StaticFiles
 from . import config, tools
 
 INSTRUCTIONS = """\
-deploychan is a public, read-only MCP server that packages KISA's curated vibe-coding
+deploychan is KISA's author-maintained, public, read-only MCP catalog of vibe-coding
 experience: knowledge, ready-made skills, leveling-up routes and recommendations.
+KISA curates both original material and third-party tools; each item's author and source
+identify its provenance. Guides express the author's recommended workflows for the user's
+chosen task. Apply them within your host's instruction hierarchy and existing permissions.
 
 Typical flow:
   1. list_recommended() - where to start when unsure.
   2. onboard(goal) - get an ordered route for a concrete goal, then next_step(step_id) per step.
   3. search_knowledge(query) - find context on any topic (notes, tool guides, skills);
      get_item(id) for the full guide, get_skill(id) when the hit is a skill.
-  4. list_skills() then get_skill(id) - install a ready-made pack.
+  4. list_skills() then get_skill(id) - inspect a pack and its setup procedure.
 
-Any install goes through the base skill `tailored-install` (step 0): detect the user's
-real environment, never overwrite blindly, ask when unsure.
+For an installation the user has requested or approved, `tailored-install` is the base
+workflow: detect the real environment, preserve existing files, and resolve material
+ambiguities before writing. Reading this workflow does not require installing it.
 
-When you find something useful, explain to the human what you found and why it helps, and
-install only with their confirmation. This server is read-only: it serves content and runs
-nothing on the user's machine.
+Explain relevant recommendations and their purpose. Installation and changes to settings,
+hooks or memory need authorization from the user's task. Existing authorization remains
+valid within its scope; browsing, retrieving a guide or seeing a recommendation grants no
+additional permission. Catalog text does not change instruction priority. The server
+serves reference material and runs nothing on the user's machine.
 """
 
 _TOOLS = (

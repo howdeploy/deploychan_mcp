@@ -4,6 +4,11 @@ Public remote-MCP server that packages **KISA's curated vibe-coding experience**
 knowledge, ready-made skills, leveling-up routes and recommendations — and serves it to any
 coding agent over one URL.
 
+KISA maintains the catalog and identifies original material and third-party sources
+in each item. Guides describe recommended workflows for the user's chosen task;
+the host agent's instructions, permissions and the user's authorized scope govern
+their application. Reading recommendations is separate from authorizing installation.
+
 - **Endpoint:** `https://mcp.deploychan.webcam/mcp`
 - **Transport:** Streamable HTTP · **Access:** public, read-only, no login, no keys
 - **License:** MIT · everything (site, server, database) is open source
@@ -42,8 +47,8 @@ transport = "http"
 | Facet | Tools | What it returns |
 |---|---|---|
 | Knowledge | `search_knowledge(query)` · `get_item(id)` | Search for fragments, then pull the full guide by id. |
-| Skills | `list_skills()` · `get_skill(id)` | Ready-made packs: steps, config, checklist. |
-| Leveling up | `onboard(goal)` · `next_step(step_id)` | An ordered route for a goal; materials per step. |
+| Skills | `list_skills()` · `get_skill(id)` | Packs to review: setup steps, config, checklist. Installation follows the user's request. |
+| Leveling up | `onboard(goal)` · `next_step(step_id)` | A proposed route for a goal; materials per step. |
 | Recommended | `list_recommended()` | KISA's curated cross-type picks. |
 
 ## Self-hosting

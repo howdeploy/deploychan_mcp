@@ -266,8 +266,8 @@ stack-overflow-for-agents:
     Что такое Stack Overflow for Agents или SOFA: площадка знаний для AI-агентов, Question, TIL, Blueprint, Playbook, голосование, верификация, репутация, API, MCP, регистрация и публикация ответов.
 tailored-install:
   name: Tailored Install
-  summary: 'Install skills, settings, hooks and memory tailored to THIS user''s environment: detect context,
-    respect existing files, ask before overwriting.'
+  summary: 'Авторский подход KISA к установке по запросу пользователя: учесть реальный агент,
+    ОС и настройки, сохранить существующие файлы и разрешить неоднозначности перед изменениями.'
   search: >-
     Безопасно установить скилл, настройку, hook или память под конкретное окружение пользователя: сначала определить клиент и ОС, проверить существующие файлы, не перезаписывать конфиг и сделать идемпотентную установку.
 tavily:

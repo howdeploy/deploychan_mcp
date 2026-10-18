@@ -9,6 +9,8 @@ services:
     ports:
       - "127.0.0.1:${DEPLOYCHAN_HOST_PORT:-8080}:8080"
     volumes:
+      - ./server/app.py:/app/server/app.py:ro
+      - ./server/tools.py:/app/server/tools.py:ro
       - ./content:/app/content:ro   # content is read-only to the container; ingest only reads it
       - ./web:/app/web              # catalog.json is written here so the static site can read it
       - dbdata:/app/data            # SQLite lives on a named volume

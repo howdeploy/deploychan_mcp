@@ -48,9 +48,9 @@ def _first_line(text: str, limit: int = 160) -> str:
 def search_knowledge(query: str, limit: int = 5) -> list[dict]:
     """Search KISA's curated notes, tool guides and skills by a natural-language query.
 
-    Call this whenever you need context on a vibe-coding topic (an agent setup, a tool, a
+    Use this for context relevant to the user's vibe-coding task (an agent setup, a tool, a
     technique, a pattern KISA uses) or when the user wants a skill on a specific topic.
-    Returns the most relevant fragments so you can drop them straight into your context.
+    Returns relevant fragments as author-supplied reference material.
 
     Args:
         query: A natural-language search query (any language).
@@ -58,7 +58,7 @@ def search_knowledge(query: str, limit: int = 5) -> list[dict]:
 
     Returns a list of {id, title, snippet, source, type, tags}. Empty list if nothing matches.
     The snippet is only a fragment — call get_item(id) to read the full guide. A hit with
-    type "skill" is an installable pack: continue with get_skill(id) to install it.
+    type "skill" is an installable pack: get_skill(id) provides its full procedure for review.
     """
     match = _fts_query(query)
     if not match:
@@ -136,9 +136,10 @@ def get_item(item_id: str) -> dict:
 def list_skills() -> list[dict]:
     """List installable skills — ready-made packs (configs, steps, checklists).
 
-    Use this to see what the agent can install for the user, then call get_skill(id) for
-    the full pack. The base skill (tailored-install) comes first: it is step 0 of every
-    install — always apply its discipline before installing anything.
+    Use this to compare available packs, then get_skill(id) for a relevant procedure.
+    The base skill (tailored-install) comes first: it describes KISA's environment-aware
+    workflow for installations the user has requested or approved. Listing or reading
+    packs does not authorize installation.
 
     Returns a list of {id, name, summary, tags, author, recommended, base}.
     """
@@ -161,7 +162,10 @@ def list_skills() -> list[dict]:
 
 
 def get_skill(skill_id: str) -> dict:
-    """Get the full pack for one skill: install steps, config and checklist.
+    """Read one skill's full procedure: setup steps, config and checklist.
+
+    The returned material supports the user's chosen task. Apply installation steps
+    when that task authorizes them, respecting host rules and existing configuration.
 
     Args:
         skill_id: A skill id from list_skills().
@@ -231,12 +235,13 @@ def _route_payload(route_id: str, matched: bool) -> dict:
 
 
 def onboard(goal: str) -> dict:
-    """Get a step-by-step leveling-up route for a goal: what to read and install, in order.
+    """Find KISA's proposed route for a goal: relevant reading and setup steps, in order.
 
     Call this when the user has a concrete goal ("connect Tavily", "harden my VPS",
     "go from zero to shipping"). Returns the whole route with an ordered list of step ids;
     then call next_step(step_id) for each step's materials. Onboarding is stateless — you
-    hold the progress, the server does not.
+    hold the progress, the server does not. A route's installation steps are proposals;
+    apply them within the user's authorized task.
 
     Args:
         goal: The user's goal, in natural language.
@@ -308,9 +313,10 @@ def next_step(step_id: str) -> dict:
 # --- 04 · Recommended ------------------------------------------------------------------
 
 def list_recommended() -> list[dict]:
-    """KISA's curated picks across all types — what to install and read first.
+    """KISA's curated starting points across all types for the user to consider.
 
-    Call this when the user doesn't know where to start. Returns a cross-type shortlist.
+    Call this when the user doesn't know where to start. Returns a cross-type shortlist
+    of recommendations; selection and installation follow the user's task.
 
     Returns a list of {id, name, type, summary, author, tags, added}.
     """
