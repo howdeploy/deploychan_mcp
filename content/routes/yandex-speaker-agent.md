@@ -27,11 +27,12 @@ steps:
       DNS and distinguish persistent SSH from a replacement assistant daemon.
   - title: Capture and inspect the processed audio path
     action: read
-    ref: yandex-speaker-access-and-recovery
+    ref: yandex-mini1-reference-stack
     body: >-
-      Establish read-only identity, firmware and backup evidence before deeper edits.
-      Verify the chosen microphone/reference transport and management route without
-      assuming USB host, raw NAND restore or newer-model compatibility.
+      Read the concrete Mini 1 architecture and compare stock-model replacement,
+      a side-by-side detector and full daemon replacement. Our runner subscribes to
+      Quasar :9850 vqe_0; it does not free ALSA. Establish matching runtime/model,
+      host supervision and rollback requirements before training or deeper edits.
   - title: Train activation and a small command vocabulary
     action: configure
     ref: local-voice-command-training

@@ -25,6 +25,12 @@ case matrix retrieve `local-wake-word-and-command-training` from Deploychan MCP;
 upstream [microWakeWord](https://github.com/kahrendt/microWakeWord) covers wake-model
 training, while any multi-command head/router extension must be implemented separately.
 
+For KISA's actual Mini 1 stack also retrieve `yandex-mini1-reference-stack` before
+choosing the runtime or capture method. It specifies the side-by-side ARM TFLite
+Micro runner, Quasar :9850 `vqe_0` subscription, supervisor lifecycle and artifact
+inventory. Do not assume a downloadable runner is included, propose a Kaldi `.nnet`
+as a compatible substitute, or remove native audio services to free ALSA for this path.
+
 ## Diagnose before requesting another recording
 
 Read frontend shape/rate, label order, actual model path, native runtime, supervisor

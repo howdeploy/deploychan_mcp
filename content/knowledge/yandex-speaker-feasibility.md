@@ -20,6 +20,11 @@ firmware. The private installation, credentials, recordings and personal applica
 assets are not distributed here. A receiving agent must implement or select the
 appropriate adapters for its user's machine.
 
+To reproduce the architecture actually used here, retrieve
+`yandex-mini1-reference-stack`: it separates stock-spotter model replacement,
+our side-by-side TFLite Micro detector and full audio/assistant daemon replacement.
+Our implementation retains native capture/VQE and does not require freeing ALSA.
+
 ## Identify the actual starting point
 
 Record the model label, hardware revision if available, firmware/build, power supply,

@@ -15,6 +15,11 @@ source: https://github.com/kahrendt/microWakeWord
 
 # Separate activation from the command body
 
+For the concrete Mini 1 implementation, first retrieve `yandex-mini1-reference-stack`.
+It explains the custom ARM runner, native Quasar/VQE microphone subscription, host
+supervisor and required artifacts. This training guide alone does not provide a
+runner or imply that ALSA must be freed by removing the stock spotter.
+
 [microWakeWord](https://github.com/kahrendt/microWakeWord) is a wake-word training
 framework, not a general command recognizer. This project used a custom derivative
 with shared features and a small multi-output network; that extension is project code,

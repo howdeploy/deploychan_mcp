@@ -55,6 +55,13 @@ boot-time rule restoration and the required LAN management route. Verify that th
 chosen deny rules block external access while retaining that management route.
 Do not stop vendor watchdogs or whole launch groups without understanding their role.
 
+For our exact audio integration retrieve `yandex-mini1-reference-stack`. It uses
+Quasar loopback TCP :9850, processed `vqe_0` PCM and independent subscribers for
+the native detector and host capture. An ALSA `Device or resource busy` error is
+not a reason to remove the stock spotter. Our `launch.json` removal concerned
+`updater_switcher` for OTA, not microphone ownership; detector, WAN and OTA rollback
+are separate operations.
+
 ## Acquire the backup before deeper changes
 
 Keep identity, partition geometry, filesystem archives, firmware version, hashes,

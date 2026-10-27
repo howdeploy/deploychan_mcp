@@ -21,6 +21,19 @@ yandex-speaker-access-and-recovery:
     DNS dnsmasq роутер DHCP bootstrap локальный сервер ADB Dropbear SSH
     отключить обновления интернет IPv6 firewall резервная копия NAND MTD OOB ECC
     BL2 factory identity UART USB device host OTG восстановить кирпич откат.
+yandex-mini1-reference-stack:
+  name: 'Наш стек Мини 1: microWakeWord поверх штатного аудиотракта'
+  summary: >-
+    Как именно настроена YNDX-0004: ARMv7-раннер TFLite Micro, звук Quasar/VQE
+    через IPC вместо захвата ALSA, GigaAM и супервизор на ПК. Разница подходов,
+    зачем сохранён штатный аудиотракт, нужные артефакты и отдельные уровни отката.
+  search: >-
+    наш стек Киса KISA повторить настройку Яндекс Мини 1 YNDX-0004 DeepSeek
+    microWakeWord TensorFlow Lite Micro tflite Kaldi nnet раннер runner бинарник
+    исходник микрофон ALSA Device or resource busy освободить захват звук
+    Quasar IPC 9850 vqe_0 PCM protobuf maind platformd mediad launch.json
+    оригинал вырезал штатный споттер Алиса updater_switcher OTA откат
+    heartbeat супервизор pre-roll GigaAM замена движка BetterYAM.
 local-wake-word-and-command-training:
   name: 'Своё имя и короткие команды без двойного активатора'
   summary: >-
