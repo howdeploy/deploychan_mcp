@@ -585,6 +585,28 @@ openshell-pi-agent:
     extensions и опциональный двусторонний A2A без персональных провайдеров и промптов.'
   search: >-
     Установить, настроить, перенести, изолировать или починить Pi coding agent в NVIDIA OpenShell: rootless Podman, sandbox, Landlock, seccomp, deny by default, fail closed, credential broker, inference.local, persistent volume, settings.json, models.json, extensions, Agent2Agent A2A и диагностика network namespace.
+kisa-linux-desktop:
+  name: 'Мой Linux-десктоп: установка и адаптация dotfiles'
+  summary: 'Гайд KISA по переносу ShojiWM, Quickshell, приложений, виджетов и анимированных обоев на другую машину с учётом зависимостей, железа и сохранения настроек.'
+  search: >-
+    Линукс линукс Linux установить настроить окружение рабочий стол DE KISA киса
+    дотфайлы дотфилес dotfiles kisa-stack ShojiWM шодживм Quickshell квикшелл
+    адаптировать конфиги приложения зависимости память RAM анимированные видео
+    обои wallpaper engine mpv MateEngine локскрин виджеты монитор видеокарта.
+kisa-dotfiles:
+  name: 'Адаптировать dotfiles KISA под пользователя'
+  summary: 'Скилл для агента: довести выбранные компоненты desktop-стека до зависимостей, приложений и локальных настроек, сохранив существующее окружение и честно указав пробелы.'
+  search: >-
+    Скилл настроить Linux линукс KISA киса дотфайлы dotfiles конфиги ShojiWM
+    Quickshell приложения виджеты обои установка адаптация под моё железо
+    отсутствует программа сломанные кнопки не работают анимированные обои.
+kisa-linux-setup:
+  name: 'Развернуть Linux-окружение KISA на своей машине'
+  summary: 'Маршрут установки: изучить машину, сопоставить приложения и зависимости, адаптировать конфиги, подключить выбранные обои и виджеты, передать результат с проверенными и непроверенными частями.'
+  search: >-
+    Установить настроить Linux линукс рабочий стол DE окружение как у KISA киса
+    dotfiles дотфайлы дотфилес kisa-stack ShojiWM шоджи Quickshell квикшелл
+    свой компьютер другой дистрибутив перенос конфигов приложения обои виджеты.
 jev:
   name: 'Jev: подключение TypeSafe API'
   summary: 'Подключение Jev рядом с основной моделью: контракт HTTP API, Choice/Score/Noul,
