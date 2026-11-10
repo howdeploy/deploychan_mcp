@@ -3,13 +3,13 @@ id: yandex-speaker-agent
 name: Turn an owned Yandex speaker into an agent terminal
 summary: >-
   A model-aware route from feasibility and recoverable access to local wake detection,
-  Russian transcription, host commands and reliable spoken replies. Based on Mini 1
-  experience, with explicit limits for other models.
+  Russian transcription, host commands, spoken replies and an optional GPT-Live
+  experiment. Based on Mini 1 experience, with explicit limits for other models.
 type: route
 author: kisa
 recommended: false
 added: 2026-10-27
-tags: [yandex, speaker, mini1, root, voice, agent, leveling-up, recovery]
+tags: [yandex, speaker, mini1, root, voice, agent, leveling-up, recovery, gpt-live, chatgpt, realtime]
 steps:
   - title: Decide whether this exact device and host can support the goal
     action: read
@@ -61,6 +61,14 @@ steps:
       Separate ASR, agent, connection, first PCM, full WAV and audible start. Retain
       failures through a proxy and the limits of user-reported timing. Run paid,
       microphone, playback and reboot checks only within the user's chosen scope.
+  - title: Consider an optional GPT-Live conversation with explicit agent delegation
+    action: read
+    ref: smart-speaker-gpt-live
+    body: >-
+      Evaluate the speaker's full-duplex audio path and choose existing Codex Live
+      or a public API application. Read the Mini experiment, transcript/delegation
+      gate and unresolved audio gaps before implementation. This does not require
+      replacing the buffered speech mode or promise compatibility with another model.
 ---
 
 # Speaker-to-agent route
